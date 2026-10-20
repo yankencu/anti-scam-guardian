@@ -708,6 +708,72 @@ body.senior #combo{font-size:19px}
 .docbox table{width:100%; border-collapse:collapse; font-size:12px; color:#c6d2e8}
 .docbox th,.docbox td{border:1px solid var(--line); padding:7px 9px; text-align:left; line-height:1.6}
 .docbox th{color:#fff; background:rgba(255,255,255,.05)}
+/* ===== 指挥台式首页：中央盾徽全息台 + 左翼关卡 + 右翼模式 ===== */
+.hub{position:relative; height:352px; margin:12px 0 2px}
+.hub::before{content:""; position:absolute; left:50%; top:56%; transform:translate(-50%,-50%);
+  width:300px; height:230px; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(91,140,255,.16), rgba(37,230,196,.05) 55%, transparent 74%); pointer-events:none}
+.hub-l,.hub-r{position:absolute; top:48px; bottom:6px; width:112px; display:flex; flex-direction:column; justify-content:center; gap:8px; z-index:2}
+.hub-l{left:0}
+.hub-r{right:0}
+
+.lv.wlv{display:flex; align-items:center; gap:7px; width:100%; padding:9px 8px 9px 11px; cursor:pointer;
+  clip-path:polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
+  background:linear-gradient(168deg, rgba(255,255,255,.105), rgba(255,255,255,.035) 46%, rgba(0,0,0,.30));
+  border:0; border-top:1px solid rgba(255,255,255,.14);
+  box-shadow:0 10px 20px rgba(0,0,0,.42), inset 0 -9px 18px rgba(0,0,0,.30);
+  transition:transform .16s, box-shadow .16s; font-family:inherit; text-align:left}
+.lv.wlv:hover{transform:translateY(-1.5px); box-shadow:0 14px 26px rgba(0,0,0,.5), inset 0 -9px 18px rgba(0,0,0,.30)}
+.lv.wlv:active{transform:translateY(1.5px) scale(.985); box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.lv.wlv .num{width:26px; height:26px; border-radius:8px; font-size:12.5px; flex:none; display:grid; place-items:center;
+  background:var(--laccentbg); color:var(--laccent); font-weight:800;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 3px 8px rgba(0,0,0,.3)}
+.lv.wlv .txt{flex:1; min-width:0; position:relative}
+.lv.wlv .txt b{font-size:12.5px; display:block; letter-spacing:-.2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lv.wlv .txt span{font-size:9px; color:var(--muted); display:block; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lv.wlv .wmeta{flex:none; font-size:10.5px; font-weight:800; color:var(--laccent); font-variant-numeric:tabular-nums; position:relative}
+.lv.wlv.locked{opacity:.45}
+
+.fbtn.wchip{display:flex; align-items:center; gap:8px; width:100%; padding:9px 10px 9px 12px; cursor:pointer; text-align:left;
+  clip-path:polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+  background:linear-gradient(192deg, rgba(255,255,255,.105), rgba(255,255,255,.035) 46%, rgba(0,0,0,.30));
+  border:0; border-top:1px solid rgba(255,255,255,.14);
+  box-shadow:0 10px 20px rgba(0,0,0,.42), inset 0 -9px 18px rgba(0,0,0,.30);
+  transition:transform .16s, box-shadow .16s; font-family:inherit}
+.fbtn.wchip:hover{transform:translateY(-1.5px)}
+.fbtn.wchip:active{transform:translateY(1.5px) scale(.985); box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.fbtn.wchip .fi{font-size:16px; margin:0; flex:none; position:relative; z-index:1}
+.wchip .wc{flex:1; min-width:0; text-align:left; position:relative; z-index:1}
+.wchip .wc b{display:block; font-size:12px; letter-spacing:-.2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wchip .wc i{display:block; font-style:normal; font-size:8.5px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+.hub-core{position:absolute; left:50%; top:118px; transform:translateX(-50%); width:152px; text-align:center; z-index:3; pointer-events:none}
+.hcore{position:relative; width:152px; height:152px; margin:0 auto}
+.hring{position:absolute; border-radius:50%}
+.hring.r1{inset:0; border:1.5px dashed rgba(120,160,255,.38); animation:hspin 30s linear infinite}
+.hring.r2{inset:10px; border:1px solid rgba(120,160,255,.2); border-top-color:rgba(120,160,255,.6); animation:hspin 12s linear infinite reverse}
+.hring.r3{inset:20px; display:grid; place-items:center;
+  background:radial-gradient(circle at 32% 24%, rgba(120,160,255,.30), rgba(13,19,34,.97) 62%);
+  box-shadow:0 16px 36px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -14px 26px rgba(0,0,0,.5)}
+.hring.r3::after{content:""; position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 210deg, rgba(37,230,196,.26), transparent 24%, transparent 76%, rgba(91,140,255,.22));
+  mix-blend-mode:screen; animation:hspin 9s linear infinite}
+.hring.r3 svg{width:62px; height:70px; position:relative; z-index:1; filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
+@keyframes hspin{to{transform:rotate(360deg)}}
+.hbase{width:118px; height:15px; margin:5px auto 0; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(91,140,255,.42), rgba(37,230,196,.12) 55%, transparent 72%); filter:blur(.5px)}
+.htitle{font-size:24px; margin:7px 0 0; letter-spacing:-.5px}
+
+@media (max-width:389px){
+  .hub{height:330px}
+  .hub-l,.hub-r{width:100px}
+  .hub-core{width:136px; top:128px}
+  .hcore{width:136px; height:136px}
+  .hring.r2{inset:9px}
+  .hring.r3{inset:18px}
+  .hring.r3 svg{width:54px; height:62px}
+  .htitle{font-size:20px}
+}
 </style>
 </head>
 <body>
@@ -758,35 +824,56 @@ body.senior #combo{font-size:19px}
       <span class="ct" id="chalText"></span>
       <button class="cx" onclick="Game.dismissChal()">✕</button>
     </div>
-    <div class="big">🛡️</div>
-    <h1>反诈<em>守门人</em></h1>
-    <p class="tagline">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
-    <p class="minirule">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
-    <div class="levels" id="levelList"></div>
-    <button class="btn" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
-    <div class="bestrow">
+    <div class="bestrow" style="margin-top:14px">
       <div><b id="bestScoreTop">0</b><span>历史最高分</span></div>
       <div><b id="bestStageTop">0</b><span>最远进度</span></div>
       <div><b id="hellStateTop">未解锁</b><span>地狱模式</span></div>
     </div>
-    <div class="sect" style="margin:24px 0 0">换个玩法</div>
-    <div class="feat">
-      <button class="fbtn" style="--faccent:#ffb020" onclick="Game.openDaily()">
-        <span class="fi">🌅</span><b>今日一题</b><span id="dailySub">每天一条，答完看拆解</span></button>
-      <button class="fbtn" style="--faccent:#ff4f60" onclick="Game.startScam()">
-        <span class="fi">🎭</span><b>骗子视角</b><span>反转关：你替骗子挑最有效的话术</span></button>
-      <button class="fbtn" style="--faccent:#7be0a0" onclick="Game.startSenior()">
-        <span class="fi">👴</span><b>长辈版</b><span>大字慢速，适合陪家人一起玩</span></button>
-      <button class="fbtn" style="--faccent:#39d0ff" onclick="Game.openBook()">
-        <span class="fi">📖</span><b>骗局速查</b><span id="bookSub">全部骗术与判据</span></button>
-      <button class="fbtn" style="--faccent:#c99cff" onclick="Game.openPlug()">
-        <span class="fi">🧩</span><b>插件中心</b><span id="plugSub">自定义你的守门体验</span></button>
+    <div class="hub">
+      <div class="hub-l" id="levelList"></div>
+      <div class="hub-core">
+        <div class="hcore">
+          <i class="hring r1"></i>
+          <i class="hring r2"></i>
+          <div class="hring r3">
+            <svg viewBox="0 0 96 108" aria-hidden="true">
+              <defs>
+                <linearGradient id="hsg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#7fb1ff"/>
+                  <stop offset="1" stop-color="#25e6c4"/>
+                </linearGradient>
+              </defs>
+              <path d="M48 4 L88 18 V56 C88 82 70 98 48 104 C26 98 8 82 8 56 V18 Z"
+                fill="#101b30" stroke="url(#hsg)" stroke-width="3.5"/>
+              <path d="M30 55 L44 69 L67 39" fill="none" stroke="url(#hsg)" stroke-width="7"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="hbase"></div>
+        <h1 class="htitle">反诈<em>守门人</em></h1>
+      </div>
+      <div class="hub-r">
+        <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">
+          <span class="fi">🌅</span><span class="wc"><b>今日一题</b><i id="dailySub">每天一条</i></span></button>
+        <button class="fbtn wchip" style="--faccent:#ff4f60" onclick="Game.startScam()">
+          <span class="fi">🎭</span><span class="wc"><b>骗子视角</b><i>替骗子挑话术</i></span></button>
+        <button class="fbtn wchip" style="--faccent:#7be0a0" onclick="Game.startSenior()">
+          <span class="fi">👴</span><span class="wc"><b>长辈版</b><i>大字慢速</i></span></button>
+        <button class="fbtn wchip" style="--faccent:#39d0ff" onclick="Game.openBook()">
+          <span class="fi">📖</span><span class="wc"><b>骗局速查</b><i id="bookSub">全部骗术</i></span></button>
+        <button class="fbtn wchip" style="--faccent:#c99cff" onclick="Game.openPlug()">
+          <span class="fi">🧩</span><span class="wc"><b>插件中心</b><i id="plugSub">自定义体验</i></span></button>
+      </div>
     </div>
-    <div class="setrow">
+    <p class="tagline" style="margin-bottom:12px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
+    <p class="minirule">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
+    <button class="btn" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
+    <div class="setrow" style="margin-top:14px">
       <button id="setCb" onclick="Game.toggleCb()">🎨 色觉友好：关</button>
       <button id="setFam" onclick="Game.openFamTip()">👨‍👩‍👧 给家人的提醒图</button>
     </div>
-    <p class="legalnote">点上方任意关卡可单独练习 · 内容均为虚构改编<br>澳门遇骗：司警局报案 993 · 防诈查询热线 8800 7777<br>内地遇骗：110 · 国家反诈专线 96110</p>
+    <p class="legalnote">点左侧任意关卡可单独练习 · 内容均为虚构改编<br>澳门遇骗：司警局报案 993 · 防诈查询热线 8800 7777<br>内地遇骗：110 · 国家反诈专线 96110</p>
   </div>
 </div>
 
@@ -2382,16 +2469,16 @@ const Game = (function(){
     const sty = c => '--laccent:' + c.accent + ';--laccentbg:' + hexA(c.accent, .18);
     let h = '';
     LEVELS.forEach((l, i) => {
-      h += '<button class="lv" style="' + sty(l) + '" onclick="Game.startPractice(' + i + ')">'
+      h += '<button class="lv wlv" style="' + sty(l) + '" onclick="Game.startPractice(' + i + ')">'
         + '<span class="num">' + (i + 1) + '</span>'
         + '<span class="txt"><b>' + l.name + '</b><span>' + l.sub + '</span></span>'
-        + '<span class="meta"><b>' + (l.perCard / 1000).toFixed(1) + 's</b>' + (l.scams + l.reals) + ' 条</span></button>';
+        + '<span class="wmeta">' + (l.perCard / 1000).toFixed(1) + 's</span></button>';
     });
-    h += '<button class="lv' + (hellOpen ? '' : ' locked') + '" style="' + sty(HELL) + '" '
+    h += '<button class="lv wlv' + (hellOpen ? '' : ' locked') + '" style="' + sty(HELL) + '" '
       + (hellOpen ? 'onclick="Game.startHell()"' : 'onclick="Game.hellLocked()"') + '>'
       + '<span class="num">' + (hellOpen ? '🔥' : '🔒') + '</span>'
-      + '<span class="txt"><b>地狱模式</b><span>' + (hellOpen ? '链接线索隐藏 · 骗术更难分辨' : '通过全部四关后解锁') + '</span></span>'
-      + '<span class="meta"><b>' + (hellOpen ? '2.4s' : '未解锁') + '</b>得分 ×2</span></button>';
+      + '<span class="txt"><b>地狱模式</b><span>' + (hellOpen ? '线索隐藏 · 骗术更难' : '通关四关后解锁') + '</span></span>'
+      + '<span class="wmeta">' + (hellOpen ? '2.4s' : '—') + '</span></button>';
     $('levelList').innerHTML = h;
   }
 

@@ -710,7 +710,7 @@ body.senior #combo{font-size:19px}
 .docbox th{color:#fff; background:rgba(255,255,255,.05)}
 /* ===== 工业指挥台首页：近黑底 + 琥珀强调 + 斜切封装 + 透视立体 ===== */
 #ovHome{background:radial-gradient(720px 520px at 50% -8%, rgba(215,185,39,.10), transparent 62%), rgba(5,4,3,.965)}
-.hub{position:relative; height:536px; margin:12px 0 4px; perspective:1300px; perspective-origin:50% 42%}
+.hub{position:relative; height:596px; margin:12px -6px 6px; perspective:1300px; perspective-origin:50% 46%}
 #ovHome .bestrow{gap:6px; margin:14px 0 0}
 #ovHome .bestrow div{background:linear-gradient(150deg, rgba(215,185,39,.10), rgba(10,8,6,.9));
   border:1px solid rgba(215,185,39,.2);
@@ -742,15 +742,25 @@ body.senior #combo{font-size:19px}
 .wtle.l{left:12px}
 .wtle.r{right:32px}
 
-.hub-l,.hub-r{position:absolute; top:44px; bottom:44px; width:108px; display:flex; flex-direction:column;
-  justify-content:center; gap:8px; z-index:2; transform-style:preserve-3d}
-.hub-l{left:6px; transform:rotateY(16deg)}
-.hub-r{right:6px; transform:rotateY(-16deg)}
+.hub-l,.hub-r{position:absolute; top:40px; bottom:104px; width:104px; display:flex; flex-direction:column;
+  justify-content:center; gap:7px; z-index:4; transform-style:preserve-3d; padding:0 4px}
+.hub-l{left:6px; transform:rotateY(18deg)}
+.hub-r{right:6px; transform:rotateY(-18deg)}
+.hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:4;
+  display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-family:inherit;
+  font-size:15px; font-weight:900; letter-spacing:.6px; color:#1A1204;
+  clip-path:polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  background:linear-gradient(100deg, #F7DC63, #D7B927 46%, #A9761A);
+  box-shadow:0 16px 30px rgba(0,0,0,.6), inset 0 -10px 18px rgba(120,80,10,.35), inset 0 1px 0 rgba(255,255,255,.5)}
+.hub-cta::before{content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:rgba(255,255,255,.55)}
+.hub-cta::after{content:""; position:absolute; right:16px; top:50%; width:14px; height:14px; margin-top:-7px;
+  border-right:3px solid rgba(26,18,4,.8); border-top:3px solid rgba(26,18,4,.8); transform:rotate(45deg)}
+.hub-cta:active{transform:translateY(2px); filter:brightness(.94)}
 
 .wlv,.wchip{position:relative; display:flex; align-items:center; gap:7px; width:100%; padding:9px 9px 9px 11px;
   cursor:pointer; text-align:left; font-family:inherit; color:#CFC7BD; overflow:hidden;
   border:1px solid rgba(215,185,39,.22);
-  clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  clip-path:polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 17px 100%, 0 calc(100% - 17px));
   background:linear-gradient(148deg, rgba(215,185,39,.10), rgba(12,9,6,.92) 58%);
   box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 10px 22px rgba(0,0,0,.5);
   transition:transform .16s, box-shadow .16s, border-color .16s}
@@ -775,17 +785,17 @@ body.senior #combo{font-size:19px}
 .wchip .wc b{display:block; font-size:11.5px; color:#EDE6DC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .wchip .wc i{display:block; font-style:normal; font-size:8px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-.hub-core{position:absolute; left:50%; top:126px; transform:translateX(-50%); width:176px; text-align:center; z-index:3; pointer-events:none}
-.hcore{position:relative; width:176px; height:176px; margin:0 auto; transform-style:preserve-3d}
+.hub-core{position:absolute; left:50%; top:150px; transform:translateX(-50%); width:208px; text-align:center; z-index:3; pointer-events:none}
+.hcore{position:relative; width:208px; height:208px; margin:0 auto; transform-style:preserve-3d}
 .hring{position:absolute; border-radius:50%}
 .hring.r1{inset:0; border:1px dashed rgba(215,185,39,.5); animation:hspin 34s linear infinite}
-.hring.tick{inset:9px; animation:hspin 44s linear infinite reverse;
+.hring.tick{inset:13px; animation:hspin 44s linear infinite reverse;
   background:repeating-conic-gradient(from 0deg, rgba(215,185,39,.6) 0deg .8deg, transparent .8deg 9deg);
   -webkit-mask:radial-gradient(circle at 50% 50%, transparent 0 43%, #000 43% 50%);
   mask:radial-gradient(circle at 50% 50%, transparent 0 43%, #000 43% 50%)}
-.hring.r2{inset:24px; border:1px solid rgba(215,185,39,.28); border-top-color:rgba(215,185,39,.8);
+.hring.r2{inset:30px; border:1px solid rgba(215,185,39,.28); border-top-color:rgba(215,185,39,.8);
   border-bottom-color:rgba(215,185,39,.6); animation:hspin 15s linear infinite}
-.hdisc{position:absolute; inset:32px; border-radius:50%; display:grid; place-items:center; overflow:hidden;
+.hdisc{position:absolute; inset:40px; border-radius:50%; display:grid; place-items:center; overflow:hidden;
   background:radial-gradient(circle at 34% 26%, #2A2015, #0A0806 68%);
   box-shadow:inset 0 0 0 1px rgba(215,185,39,.26), inset 0 -18px 28px rgba(0,0,0,.75), 0 24px 44px rgba(0,0,0,.62)}
 .hdisc::before{content:""; position:absolute; inset:0;
@@ -796,7 +806,7 @@ body.senior #combo{font-size:19px}
   animation:hscanline 3.4s linear infinite}
 @keyframes hscanline{0%{top:-40%}100%{top:100%}}
 @keyframes hspin{to{transform:rotate(360deg)}}
-.hcore svg{width:76px; height:86px; position:relative; z-index:1; filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
+.hcore svg{width:70px; height:80px; position:relative; z-index:1; filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
 .hstrut{position:absolute; top:50%; height:1px; z-index:1;
   background:linear-gradient(90deg, transparent, rgba(215,185,39,.42), transparent)}
 .hstrut.l{left:110px; width:34px}
@@ -808,17 +818,41 @@ body.senior #combo{font-size:19px}
 .hsub{font-size:8px; letter-spacing:2.4px; color:rgba(215,185,39,.6); margin-top:2px; font-family:Consolas,Menlo,monospace}
 
 @media (max-width:389px){
-  .hub{height:500px}
-  .hub-l,.hub-r{width:98px}
-  .hub-core{width:156px; top:140px}
-  .hcore{width:156px; height:156px}
-  .hring.tick{inset:8px}
-  .hring.r2{inset:21px}
-  .hdisc{inset:28px}
-  .hcore svg{width:64px; height:74px}
-  .hstrut.l{left:98px; width:22px}
-  .hstrut.r{right:98px; width:22px}
+  .hub{height:520px}
+  .hub-l,.hub-r{width:96px; bottom:98px}
+  .hub-core{width:172px; top:170px}
+  .hcore{width:172px; height:172px}
+  .hring.tick{inset:11px}
+  .hring.r2{inset:25px}
+  .hdisc{inset:33px}
+  .hcore svg{width:58px; height:66px}
   .htitle{font-size:21px}
+}
+
+/* 宽屏 / 横屏：还原成参考图那种横向控制台比例 */
+@media (min-width:720px){
+  #ovHome .ovin{max-width:840px}
+  .hub{height:520px; margin:14px 0 8px}
+  .hub-l,.hub-r{width:212px; top:34px; bottom:98px; gap:9px}
+  .hub-core{top:52px; width:300px}
+  .hcore{width:300px; height:300px}
+  .hring.tick{inset:19px}
+  .hring.r2{inset:44px}
+  .hdisc{inset:58px}
+  .hcore svg{width:98px; height:110px}
+  .wlv,.wchip{padding:12px 13px 12px 16px; gap:9px}
+  .wlv .num{width:30px; height:30px; font-size:14px}
+  .wlv .txt b{font-size:15px}
+  .wlv .txt span{font-size:10px}
+  .wlv .wmeta{font-size:12px}
+  .wchip .fi{font-size:19px}
+  .wchip .wc b{font-size:14px}
+  .wchip .wc i{font-size:10px}
+  .wcode{font-size:9px; right:14px; bottom:9px}
+  .htitle{font-size:32px}
+  .hsub{font-size:10px; letter-spacing:3px}
+  .hub-cta{left:44px; right:44px; bottom:20px; height:62px; font-size:17px}
+  #ovHome .bestrow div{padding:12px 8px}
 }
 </style>
 </head>
@@ -919,15 +953,15 @@ body.senior #combo{font-size:19px}
           <span class="fi">📖</span><span class="wc"><b>骗局速查</b><i id="bookSub">全部骗术</i></span></button>
         <button class="fbtn wchip" style="--faccent:#c99cff" onclick="Game.openPlug()">
           <span class="fi">🧩</span><span class="wc"><b>插件中心</b><i id="plugSub">自定义体验</i></span></button>
+        <button class="fbtn wchip" id="setCb" style="--faccent:#8A8073" onclick="Game.toggleCb()">
+          <span class="fi">🎨</span><span class="wc"><b>色觉友好</b><i>蓝橙配色</i></span></button>
+        <button class="fbtn wchip" id="setFam" style="--faccent:#8A8073" onclick="Game.openFamTip()">
+          <span class="fi">👨‍👩‍👧</span><span class="wc"><b>家人提醒图</b><i>可保存分享</i></span></button>
       </div>
+      <button class="hub-cta" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
     </div>
-    <p class="tagline" style="margin-bottom:12px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
-    <p class="minirule">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
-    <button class="btn" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
-    <div class="setrow" style="margin-top:14px">
-      <button id="setCb" onclick="Game.toggleCb()">🎨 色觉友好：关</button>
-      <button id="setFam" onclick="Game.openFamTip()">👨‍👩‍👧 给家人的提醒图</button>
-    </div>
+    <p class="tagline" style="margin-bottom:10px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
+    <p class="minirule" style="margin-bottom:16px">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
     <p class="legalnote">点左侧任意关卡可单独练习 · 内容均为虚构改编<br>澳门遇骗：司警局报案 993 · 防诈查询热线 8800 7777<br>内地遇骗：110 · 国家反诈专线 96110</p>
   </div>
 </div>
@@ -2774,7 +2808,10 @@ const Game = (function(){
   function applyCb(){
     document.body.classList.toggle('cb', cbOn);
     const b = $('setCb');
-    if (b){ b.textContent = '🎨 色觉友好：' + (cbOn ? '开' : '关'); b.classList.toggle('on', cbOn); }
+    if (!b) return;
+    b.classList.toggle('on', cbOn);
+    const i = b.querySelector('i');
+    if (i) i.textContent = cbOn ? '已开启 · 蓝橙配色' : '蓝橙配色';
   }
   function toggleCb(){ cbOn = !cbOn; lsSet(K_CB, cbOn); applyCb(); }
 

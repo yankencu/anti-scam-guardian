@@ -750,7 +750,8 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .hub{position:relative; height:600px; margin:12px -6px 6px; perspective:820px; perspective-origin:50% 34%; overflow:hidden}
 .hub-stage{position:absolute; inset:0; transform-style:preserve-3d;
   transform:rotateX(var(--tiltx,15deg)) rotateY(var(--tilty,0deg));
-  transition:transform .28s cubic-bezier(.2,.8,.3,1)}
+  transition:transform .28s cubic-bezier(.2,.8,.3,1);
+  --bgap:60px; --blen:66px}
 .hub-floor{position:absolute; left:-14%; right:-14%; bottom:-6px; height:200px; z-index:0; pointer-events:none;
   transform-origin:bottom center; transform:rotateX(76deg) translateZ(-50px);
   background:
@@ -791,10 +792,11 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wtle.r{right:32px}
 
 .hub-l,.hub-r{position:absolute; top:40px; bottom:104px; width:104px; display:flex; flex-direction:column;
-  justify-content:center; gap:8px; z-index:4; transform-style:preserve-3d; padding:0 4px;
-  filter:brightness(.9)}
-.hub-l{left:2px; transform:translateZ(-92px) rotateY(30deg) scale(.97)}
-.hub-r{right:2px; transform:translateZ(-92px) rotateY(-30deg) scale(.97)}
+  justify-content:center; gap:8px; z-index:4; transform-style:preserve-3d; padding:0 4px}
+/* 注意：这里不能用 filter/opacity/clip-path —— 它们会强制 preserve-3d 退化成 flat，
+   两翼里单条的 translateZ 景深就没了 */
+.hub-l{left:2px; --sgn:-1; transform:translateZ(-92px) rotateY(30deg) scale(.97)}
+.hub-r{right:2px; --sgn:1; transform:translateZ(-92px) rotateY(-30deg) scale(.97)}
 .hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:6;
   transform:translateZ(40px); transform-style:preserve-3d;
   display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-family:inherit;
@@ -822,9 +824,40 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wlv:nth-child(3n)::before,.wchip:nth-child(3n)::before{animation-delay:2.6s}
 @keyframes psweep{0%{left:-40%}55%,100%{left:120%}}
 .wlv{border-left:3px solid var(--laccent)}
-.wlv:hover,.wchip:hover{transform:translateY(-2px); border-color:rgba(215,185,39,.45);
-  box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 16px 28px rgba(0,0,0,.6), 0 0 0 1px rgba(215,185,39,.14)}
-.wlv:active,.wchip:active{transform:translateY(1px) scale(.98)}
+/* 两翼与中央圆盘联动：整翼沿弧线环抱圆盘（--dy 离中心越远越后退外张），
+   悬停时单条向前弹出、接上圆盘射来的光束，并锁定角标 */
+.wlv,.wchip{--dy:0; --hc:var(--laccent, var(--faccent, #D7B927));
+  transform:
+    translateX(calc(var(--dy) * var(--dy) * var(--sgn,0) * 7px))
+    translateZ(calc(var(--dy) * var(--dy) * -30px))
+    rotateY(calc(var(--dy) * var(--sgn,0) * -5deg))
+    scale(calc(1 - var(--dy) * var(--dy) * .05));
+  transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .2s, border-color .2s, filter .2s}
+.wlv:hover,.wchip:hover,.wlv:focus-visible,.wchip:focus-visible{
+  transform:translateX(calc(var(--sgn,0) * 7px)) translateZ(36px) scale(1.07) rotateY(0deg);
+  border-color:var(--hc); filter:brightness(1.16);
+  box-shadow:inset 0 0 20px rgba(0,0,0,.45), 0 0 0 1px var(--hc),
+             0 18px 34px rgba(0,0,0,.62), 0 0 32px -6px var(--hc)}
+.wlv:active,.wchip:active{transform:translateX(calc(var(--sgn,0) * 4px)) translateZ(16px) scale(1.01); filter:brightness(.86)}
+.wlv:hover::before,.wchip:hover::before,.wlv:focus-visible::before,.wchip:focus-visible::before{animation-duration:1.05s}
+.wlv:hover .num,.wchip:hover .fi{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px -3px var(--hc)}
+.wlv:hover .txt b,.wchip:hover .wc b{color:#fff}
+.wlv:hover .wmeta,.wchip:hover .wc i{color:var(--hc)}
+.wlv:hover .wmeta{transform:scale(1.1)}
+.wlv:hover,.wchip:hover{border-left-width:5px}
+.wchip:hover{box-shadow:inset 6px 0 0 -1px var(--hc), inset 0 0 20px rgba(0,0,0,.45),
+             0 0 0 1px var(--hc), 0 18px 34px rgba(0,0,0,.62), 0 0 32px -6px var(--hc)}
+/* 锁定角标：悬停时四角收拢并亮起（只画左上/右下，避开斜切掉的那两个角） */
+.wlock{position:absolute; inset:8px; z-index:3; pointer-events:none; opacity:0;
+  transition:opacity .2s ease, inset .22s cubic-bezier(.2,.9,.3,1);
+  filter:drop-shadow(0 0 6px var(--hc));
+  background:
+    linear-gradient(var(--hc),var(--hc)) left top/13px 2px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) left top/2px 13px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) right bottom/13px 2px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) right bottom/2px 13px no-repeat}
+.wlv:hover .wlock,.wchip:hover .wlock,
+.wlv:focus-visible .wlock,.wchip:focus-visible .wlock{opacity:1; inset:4px}
 .wlv::after,.wchip::after{content:""; position:absolute; right:0; top:0; width:22px; height:22px; pointer-events:none;
   background:linear-gradient(225deg, rgba(215,185,39,.42) 0 1px, transparent 1px)}
 .wcode{position:absolute; right:9px; bottom:6px; font-size:7.5px; letter-spacing:1.2px;
@@ -841,6 +874,31 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wchip .wc{flex:1; min-width:0}
 .wchip .wc b{display:block; font-size:11.5px; color:#EDE6DC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .wchip .wc i{display:block; font-style:normal; font-size:8px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* 光束：从中央圆盘射向正在悬停的那一条（--by 由 JS 按实际位置换算） */
+.hbeam{position:absolute; top:50%; width:var(--blen); height:2px; z-index:4; pointer-events:none;
+  opacity:0; transform:translateZ(-40px); transition:opacity .2s ease;
+  margin-top:calc(var(--by, 0px) - 1px);
+  filter:drop-shadow(0 0 9px var(--bc, #D7B927))}
+.hbeam.l{right:50%; margin-right:var(--bgap);
+  background:linear-gradient(270deg, var(--bc, #D7B927), rgba(215,185,39,0) 94%)}
+.hbeam.r{left:50%; margin-left:var(--bgap);
+  background:linear-gradient(90deg, var(--bc, #D7B927), rgba(215,185,39,0) 94%)}
+.hbeam.on{opacity:1; animation:beamFlow 1.15s ease-in-out infinite}
+@keyframes beamFlow{0%,100%{opacity:.42}50%{opacity:1}}
+.hbeam::before{content:""; position:absolute; top:50%; width:6px; height:6px; margin-top:-3px;
+  border-radius:50%; background:var(--bc, #D7B927); box-shadow:0 0 12px var(--bc, #D7B927)}
+.hbeam.l::before{right:-3px}
+.hbeam.r::before{left:-3px}
+/* 圆盘被"点亮"：换成当前条目的强调色，刻度环提速，外圈呼吸 */
+.hcore{transition:transform .26s cubic-bezier(.2,.9,.3,1)}
+.hcore.linked{transform:scale(1.035)}
+.hcore.linked .hdisc{box-shadow:inset 0 0 0 1px var(--lk, #D7B927), inset 0 -18px 28px rgba(0,0,0,.75),
+  0 10px 0 -3px rgba(0,0,0,.55), 0 26px 46px rgba(0,0,0,.68), 0 0 40px -6px var(--lk, #D7B927)}
+.hcore.linked .hring.r2{border-color:var(--lk, #D7B927); border-top-color:var(--lk, #D7B927);
+  border-bottom-color:var(--lk, #D7B927)}
+.hcore.linked .hring.tick{animation-duration:13s}
+.hcore.linked .hring.r1{border-color:var(--lk, #D7B927)}
 
 .hub-core{position:absolute; left:50%; top:142px; width:208px; text-align:center; z-index:5; pointer-events:none;
   transform:translateX(-50%) translateZ(104px); transform-style:preserve-3d; animation:hfloat 6.5s ease-in-out infinite}
@@ -884,6 +942,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 
 @media (max-width:389px){
   .hub{height:520px}
+  .hub-stage{--bgap:50px; --blen:48px}
   .hub-l,.hub-r{width:96px; bottom:98px}
   .hub-core{width:172px; top:170px}
   .hcore{width:172px; height:172px}
@@ -898,6 +957,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 @media (min-width:720px){
   #ovHome .ovin{max-width:840px}
   .hub{height:520px; margin:14px 0 8px}
+  .hub-stage{--bgap:92px; --blen:104px}
   .hub-l,.hub-r{width:212px; top:34px; bottom:98px; gap:9px}
   .hub-core{top:52px; width:300px}
   .hcore{width:300px; height:300px}
@@ -995,8 +1055,10 @@ body.fh-on .ov.on .ovin{padding-top:40px}
       <div class="hub-l" id="levelList"></div>
       <div class="hstrut l"></div>
       <div class="hstrut r"></div>
+      <i class="hbeam l" id="hBeamL"></i>
+      <i class="hbeam r" id="hBeamR"></i>
       <div class="hub-core">
-        <div class="hcore">
+        <div class="hcore" id="hcore">
           <i class="hring r1"></i>
           <i class="hring tick"></i>
           <i class="hring r2"></i>
@@ -2773,6 +2835,79 @@ const Game = (function(){
       + '<span class="wmeta">' + (hellOpen ? '2.4s' : '—') + '</span>'
       + '<em class="wcode">S-XX</em></button>';
     $('levelList').innerHTML = h;
+    layoutWings();
+  }
+
+  /* ------ 两翼 ↔ 中央圆盘联动 ------ */
+  /* 给每条算出相对中心的纵向位置 --dy（-1 顶 … 0 中 … 1 底），
+     CSS 据此让整条翼沿弧线环抱圆盘；顺便补上悬停用的锁定角标 */
+  function layoutWings(){
+    ['.hub-l', '.hub-r'].forEach(sel => {
+      const box = document.querySelector(sel);
+      if (!box) return;
+      const items = Array.prototype.slice.call(box.children);
+      const n = items.length;
+      if (!n) return;
+      items.forEach((el, i) => {
+        const dy = n === 1 ? 0 : ((i - (n - 1) / 2) / ((n - 1) / 2));
+        el.style.setProperty('--dy', dy.toFixed(3));
+        if (!el.querySelector('.wlock')){
+          const lk = document.createElement('i');
+          lk.className = 'wlock';
+          el.appendChild(lk);
+        }
+      });
+    });
+  }
+
+  /* 悬停某一条时：圆盘转成它的强调色，并射一道光束接到那条上 */
+  function setWingLink(b){
+    const bl = $('hBeamL'), br = $('hBeamR'), core = $('hcore'), stage = $('hubStage');
+    if (!b){
+      if (bl) bl.classList.remove('on');
+      if (br) br.classList.remove('on');
+      if (core){ core.classList.remove('linked'); core.style.removeProperty('--lk'); }
+      return;
+    }
+    const isL = !!(b.closest && b.closest('.hub-l'));
+    const beam = isL ? bl : br, other = isL ? br : bl;
+    if (other) other.classList.remove('on');
+    const col = ((b.style && (b.style.getPropertyValue('--laccent') || b.style.getPropertyValue('--faccent'))) || '').trim() || '#D7B927';
+    if (core){
+      core.classList.add('linked');
+      core.style.setProperty('--lk', col);
+    }
+    if (beam){
+      beam.style.setProperty('--bc', col);
+      if (stage){
+        /* 用「未变换的布局坐标」累加到舞台中线，而不是用屏幕投影坐标 ——
+           舞台整体有 rotateX + 透视，投影值会被压缩约 10%，那样光束对不准按钮 */
+        try{
+          let y = 0, node = b;
+          while (node && node !== stage){ y += node.offsetTop || 0; node = node.offsetParent; }
+          const mid = (stage.offsetHeight || stage.clientHeight || 0) / 2;
+          beam.style.setProperty('--by', (y + (b.offsetHeight || 0) / 2 - mid).toFixed(1) + 'px');
+        }catch(e){ beam.style.setProperty('--by', '0px'); }
+      }
+      beam.classList.add('on');
+    }
+  }
+
+  function bindWingLink(){
+    ['.hub-l', '.hub-r'].forEach(sel => {
+      const box = document.querySelector(sel);
+      if (!box || box.__wingBound) return;
+      box.__wingBound = 1;
+      const hit = e => (e.target && e.target.closest) ? e.target.closest('.wlv,.wchip') : null;
+      box.addEventListener('pointerover', e => { const b = hit(e); if (b) setWingLink(b); });
+      box.addEventListener('pointerout', e => {
+        const b = hit(e);
+        if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) setWingLink(null);
+      });
+      box.addEventListener('focusin', e => { const b = hit(e); if (b) setWingLink(b); });
+      box.addEventListener('focusout', () => setWingLink(null));
+      box.addEventListener('pointerleave', () => setWingLink(null));
+    });
   }
 
   function refreshTop(){
@@ -4056,6 +4191,8 @@ const Game = (function(){
   $('btnBlock').disabled = true;
   $('btnPass').disabled = true;
   updateHUD(false);
+  layoutWings();          // 两翼弧形排布 + 锁定角标
+  bindWingLink();         // 两翼与中央圆盘的光束联动
   syncFloatHome();
   syncPauseBtn();
 

@@ -792,11 +792,12 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wtle.r{right:32px}
 
 .hub-l,.hub-r{position:absolute; top:40px; bottom:104px; width:104px; display:flex; flex-direction:column;
-  justify-content:center; gap:8px; z-index:4; transform-style:preserve-3d; padding:0 4px}
+  justify-content:center; gap:12px; z-index:4; transform-style:preserve-3d; padding:0 4px}
 /* 注意：这里不能用 filter/opacity/clip-path —— 它们会强制 preserve-3d 退化成 flat，
    两翼里单条的 translateZ 景深就没了 */
-.hub-l{left:2px; --sgn:-1; transform:translateZ(-92px) rotateY(30deg) scale(.97)}
-.hub-r{right:2px; --sgn:1; transform:translateZ(-92px) rotateY(-30deg) scale(.97)}
+/* --wshift 由 JS 给出：整条翼上下平移到与圆盘同心，弧才不会歪 */
+.hub-l{left:2px; --sgn:-1; transform:translateY(var(--wshift,0px)) translateZ(-92px) rotateY(30deg) scale(.97)}
+.hub-r{right:2px; --sgn:1; transform:translateY(var(--wshift,0px)) translateZ(-92px) rotateY(-30deg) scale(.97)}
 .hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:6;
   transform:translateZ(40px); transform-style:preserve-3d;
   display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-family:inherit;
@@ -824,21 +825,35 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wlv:nth-child(3n)::before,.wchip:nth-child(3n)::before{animation-delay:2.6s}
 @keyframes psweep{0%{left:-40%}55%,100%{left:120%}}
 .wlv{border-left:3px solid var(--laccent)}
-/* 两翼与中央圆盘联动：整翼沿弧线环抱圆盘（--dy 离中心越远越后退外张），
-   悬停时单条向前弹出、接上圆盘射来的光束，并锁定角标 */
-.wlv,.wchip{--dy:0; --hc:var(--laccent, var(--faccent, #D7B927));
+/* 两翼与中央圆盘联动：整翼沿以圆盘为圆心的圆弧环抱（--px 朝圆心内收、--prz 沿半径张开、
+   --pz 翼尖后退），悬停时单条向前弹出、接上圆盘射来的光束，并锁定角标 */
+.wlv,.wchip{--dy:0; --px:0px; --pz:0px; --prz:0deg; --pry:0deg; --psc:1;
+  --hc:var(--laccent, var(--faccent, #D7B927));
   transform:
-    translateX(calc(var(--dy) * var(--dy) * var(--sgn,0) * 7px))
-    translateZ(calc(var(--dy) * var(--dy) * -30px))
-    rotateY(calc(var(--dy) * var(--sgn,0) * -5deg))
-    scale(calc(1 - var(--dy) * var(--dy) * .05));
+    translateX(var(--px))
+    translateZ(var(--pz))
+    rotateZ(var(--prz))
+    rotateY(var(--pry))
+    scale(var(--psc));
   transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .2s, border-color .2s, filter .2s}
 .wlv:hover,.wchip:hover,.wlv:focus-visible,.wchip:focus-visible{
-  transform:translateX(calc(var(--sgn,0) * 7px)) translateZ(36px) scale(1.07) rotateY(0deg);
+  transform:
+    translateX(calc(var(--px) + var(--sgn,0) * -9px))
+    translateZ(calc(var(--pz) + 52px))
+    rotateZ(var(--prz))
+    rotateY(calc(var(--pry) * .25))
+    scale(calc(var(--psc) * 1.07));
   border-color:var(--hc); filter:brightness(1.16);
   box-shadow:inset 0 0 20px rgba(0,0,0,.45), 0 0 0 1px var(--hc),
              0 18px 34px rgba(0,0,0,.62), 0 0 32px -6px var(--hc)}
-.wlv:active,.wchip:active{transform:translateX(calc(var(--sgn,0) * 4px)) translateZ(16px) scale(1.01); filter:brightness(.86)}
+.wlv:active,.wchip:active{
+  transform:
+    translateX(calc(var(--px) + var(--sgn,0) * -5px))
+    translateZ(calc(var(--pz) + 20px))
+    rotateZ(var(--prz))
+    rotateY(calc(var(--pry) * .4))
+    scale(calc(var(--psc) * 1.01));
+  filter:brightness(.86)}
 .wlv:hover::before,.wchip:hover::before,.wlv:focus-visible::before,.wchip:focus-visible::before{animation-duration:1.05s}
 .wlv:hover .num,.wchip:hover .fi{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px -3px var(--hc)}
 .wlv:hover .txt b,.wchip:hover .wc b{color:#fff}
@@ -958,7 +973,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
   #ovHome .ovin{max-width:840px}
   .hub{height:520px; margin:14px 0 8px}
   .hub-stage{--bgap:92px; --blen:104px}
-  .hub-l,.hub-r{width:212px; top:34px; bottom:98px; gap:9px}
+  .hub-l,.hub-r{width:212px; top:34px; bottom:98px; gap:12px}
   .hub-core{top:52px; width:300px}
   .hcore{width:300px; height:300px}
   .hring.tick{inset:19px}
@@ -2839,18 +2854,79 @@ const Game = (function(){
   }
 
   /* ------ 两翼 ↔ 中央圆盘联动 ------ */
-  /* 给每条算出相对中心的纵向位置 --dy（-1 顶 … 0 中 … 1 底），
-     CSS 据此让整条翼沿弧线环抱圆盘；顺便补上悬停用的锁定角标 */
+
+  /* 两翼「环绕圆盘」的极坐标求解（纯函数，便于单测）
+     原来两翼是竖直排成一条直线的一列。这里把每一条按 d = atan2(y, Rx)
+     折到「以圆盘为圆心、Rx 为半径」的弧上：
+       · --px  朝圆心横向内收 Rx·(1-cos d)  —— 越靠上下两端越贴向圆盘，
+               整条翼因此从直线变成环抱圆盘的弧（左翼成 "("、右翼成 ")"）
+       · --prz 沿半径方向倾斜 d·FAN         —— 每条都像羽毛一样朝圆盘张开
+       · --pz  翼尖后退、--pry 外缘再卷一点、--psc 翼尖略缩小
+     y   该条中心相对圆盘中心的纵向偏移（px，下为正）
+     Rx  该条中心到圆盘中心的横向距离（px）
+     sgn 左翼 -1 / 右翼 +1
+     t   归一化序号（-1 顶 … 0 中 … 1 底） */
+  function wingArc(y, Rx, sgn, t){
+    const FAN = .46, CURL = 12, BACK = 30, SHRINK = .05;
+    const R = (!Rx || !isFinite(Rx)) ? 150 : Rx;
+    const d = Math.atan2(y, R);                 // 该条在弧上的角位置（弧度，下为正）
+    const k = 1 - Math.cos(d);                  // 需要朝圆心内收的比例
+    return {
+      deg: d * 180 / Math.PI,
+      px: (-sgn) * R * k,                       // 横向朝圆心收（左翼向右、右翼向左）
+      pz: -t * t * BACK,                        // 翼尖后退
+      rz: sgn * d * (180 / Math.PI) * FAN,      // 沿半径方向张开
+      ry: (-sgn) * Math.abs(t) * CURL,          // 翼尖外缘再向观察者卷一点
+      sc: 1 - t * t * SHRINK
+    };
+  }
+
+  /* 沿 offsetParent 链累加到 stop，得到未受 3D 变换污染的布局坐标
+     （getBoundingClientRect 会被 rotateX + 透视压缩约 10%，不能用来算几何） */
+  function offTo(node, stop, prop){
+    let v = 0, guard = 0;
+    while (node && node !== stop && guard++ < 12){
+      v += node['offset' + prop] || 0;
+      node = node.offsetParent;
+    }
+    return v;
+  }
+
   function layoutWings(){
+    const stage = $('hubStage');
+    const core = document.querySelector('.hcore');
+    /* 圆盘中心（舞台坐标）—— 它就是整条弧的圆心 */
+    let cx = 0, cy = 0;
+    if (core && stage){
+      cx = offTo(core, stage, 'Left') + (core.offsetWidth || 0) / 2;
+      cy = offTo(core, stage, 'Top') + (core.offsetHeight || 0) / 2;
+    }
     ['.hub-l', '.hub-r'].forEach(sel => {
       const box = document.querySelector(sel);
       if (!box) return;
       const items = Array.prototype.slice.call(box.children);
       const n = items.length;
       if (!n) return;
+      const sgn = sel === '.hub-r' ? 1 : -1;
+      const bh = box.clientHeight || box.offsetHeight || 0;
+      /* 弧半径 = 这一翼到圆盘中心的横向距离 */
+      let Rx = Math.abs(cx - (offTo(box, stage, 'Left') + (box.offsetWidth || 0) / 2));
+      if (!Rx || !isFinite(Rx)) Rx = 150;
+      if (Rx < 60) Rx = 60;
+      if (Rx > 340) Rx = 340;
+      /* 整条翼上下平移到与圆盘同心：否则上下两端的角度不等，弧会歪向一边 */
+      if (cy) box.style.setProperty('--wshift',
+        Math.max(-46, Math.min(46, cy - (offTo(box, stage, 'Top') + bh / 2))).toFixed(1) + 'px');
       items.forEach((el, i) => {
-        const dy = n === 1 ? 0 : ((i - (n - 1) / 2) / ((n - 1) / 2));
-        el.style.setProperty('--dy', dy.toFixed(3));
+        const t = n === 1 ? 0 : ((i - (n - 1) / 2) / ((n - 1) / 2));
+        const y = (el.offsetTop || 0) + (el.offsetHeight || 0) / 2 - bh / 2;
+        const a = wingArc(y, Rx, sgn, t);
+        el.style.setProperty('--dy', t.toFixed(3));
+        el.style.setProperty('--px', a.px.toFixed(1) + 'px');
+        el.style.setProperty('--pz', a.pz.toFixed(1) + 'px');
+        el.style.setProperty('--prz', a.rz.toFixed(2) + 'deg');
+        el.style.setProperty('--pry', a.ry.toFixed(2) + 'deg');
+        el.style.setProperty('--psc', a.sc.toFixed(3));
         if (!el.querySelector('.wlock')){
           const lk = document.createElement('i');
           lk.className = 'wlock';
@@ -4191,8 +4267,14 @@ const Game = (function(){
   $('btnBlock').disabled = true;
   $('btnPass').disabled = true;
   updateHUD(false);
-  layoutWings();          // 两翼弧形排布 + 锁定角标
+  layoutWings();          // 两翼沿圆弧环抱圆盘 + 锁定角标
   bindWingLink();         // 两翼与中央圆盘的光束联动
+  /* 弧半径取自实际布局，横竖屏切换 / 改窗口后必须重算 */
+  let wingRz = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(wingRz);
+    wingRz = setTimeout(layoutWings, 160);
+  });
   syncFloatHome();
   syncPauseBtn();
 
@@ -4211,6 +4293,7 @@ const Game = (function(){
     plugInstallView, plugInstallSubmit, plugPickFile, plugExport, plugUninstall,
     copyPlugExample,
     _debug: {
+      wingArc, layoutWings,
       resolve, makePoster, catOf, worstCat,
       makeFamily, buildNote, encChal, decChal, dailyPick, totalScams,
       plugRunCode, plugInstallFromText, plugExampleCode,

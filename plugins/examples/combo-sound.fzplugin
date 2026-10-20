@@ -1,0 +1,8 @@
+{
+  "fzplugin": 1,
+  "name": "连击音效增强",
+  "ver": "1.0.0",
+  "desc": "示例插件：连击达到 3 / 5 时弹提示，演示 onJudge 钩子",
+  "icon": "⚡",
+  "code": "FZ.use({\n  id: 'combo-sound',\n  name: '连击音效增强',\n  ver: '1.0.0',\n  icon: '⚡',\n  desc: '示例插件：连击达到 3 / 5 时弹提示',\n  onJudge(ev) {\n    if (ev.combo === 3) FZ.toast('连击 x3！', '示例插件在这里被钩子触发');\n    if (ev.combo === 5) FZ.toast('连击 x5，状态火热！', '示例插件');\n  }\n});"
+}

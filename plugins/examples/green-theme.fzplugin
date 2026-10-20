@@ -1,0 +1,8 @@
+{
+  "fzplugin": 1,
+  "name": "青竹主题",
+  "ver": "1.0.0",
+  "desc": "示例插件：用 onTheme 钩子把全部关卡覆写为青绿色系",
+  "icon": "🎋",
+  "code": "FZ.use({\n  id: 'green-theme',\n  name: '青竹主题',\n  ver: '1.0.0',\n  icon: '🎋',\n  desc: '把所有关卡主题覆写为青绿色系',\n  onTheme(c) {\n    c.accent = '#25e6c4';\n    c.accent2 = '#a3e635';\n    c.glow1 = 'rgba(37,230,196,.3)';\n    c.glow2 = 'rgba(163,230,53,.16)';\n  }\n});"
+}

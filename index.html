@@ -1,0 +1,3680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#070b16">
+<title>反诈守门人 · 三关闯关 + 地狱模式</title>
+<style>
+:root{
+  --bg0:#04060d;
+  --bg1:#080e20;
+  --surface:rgba(255,255,255,.055);
+  --surface2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.18);
+  --text:#f2f6ff; --text2:#dbe4fb; --muted:#8496bb; --dim:#5d6d92;
+  --accent:#25e6c4; --accent2:#5b8cff;
+  --glow1:rgba(91,140,255,.26); --glow2:rgba(37,230,196,.14);
+  --red:#ff4d63; --green:#22d68a; --amber:#ffb020; --gold:#ffcc55;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  background:var(--bg0); color:var(--text); -webkit-font-smoothing:antialiased;
+  user-select:none; -webkit-user-select:none;
+}
+#bgfx{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(760px 520px at 50% -12%, var(--glow1), transparent 62%),
+    radial-gradient(640px 560px at 92% 104%, var(--glow2), transparent 60%),
+    radial-gradient(680px 520px at 2% 98%, rgba(255,77,99,.10), transparent 62%),
+    linear-gradient(180deg,#04060d,#080e20 56%,#04060d);
+}
+#bgfx::before{
+  content:""; position:absolute; inset:0; opacity:.38;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(74% 62% at 50% 42%, #000, transparent 78%);
+  -webkit-mask-image:radial-gradient(74% 62% at 50% 42%, #000, transparent 78%);
+}
+#bgfx::after{
+  content:""; position:absolute; inset:0; opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#stage{
+  position:relative; z-index:2; height:100dvh; display:flex; flex-direction:column;
+  max-width:520px; margin:0 auto;
+  padding:calc(12px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+  gap:11px;
+}
+
+/* ============ 仪表条 ============ */
+#topbar{display:flex; gap:9px; align-items:stretch; flex:none}
+#hud{
+  flex:1; display:flex; align-items:center; min-width:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.032));
+  border:1px solid var(--line); border-radius:18px; padding:10px 14px;
+  backdrop-filter:blur(18px) saturate(1.3);
+  box-shadow:0 12px 32px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.hi{min-width:0}
+.hi .lbl{font-size:9.5px; color:var(--muted); letter-spacing:1px; display:block; font-weight:700}
+.hi.wallet{flex:1; min-width:0; padding-right:14px}
+.hi.wallet b{
+  display:block; font-size:23px; font-weight:800; letter-spacing:-.7px; line-height:1.15; margin-top:2px;
+  font-variant-numeric:tabular-nums; color:var(--green); transition:color .25s;
+}
+.hi.wallet.hurt b{color:var(--red)}
+.hi.wallet .wbar{height:4px; border-radius:99px; background:rgba(255,255,255,.1); margin-top:8px; overflow:hidden}
+.hi.wallet .wbar i{
+  display:block; height:100%; width:100%; border-radius:99px;
+  background:linear-gradient(90deg,var(--green),var(--accent));
+  box-shadow:0 0 12px rgba(34,214,138,.55);
+  transition:width .45s cubic-bezier(.4,0,.2,1), background .3s;
+}
+.hi.wallet.hurt .wbar i{background:linear-gradient(90deg,var(--red),var(--amber)); box-shadow:0 0 12px rgba(255,77,99,.55)}
+.hi.hcell{flex:none; min-width:64px; text-align:right; padding-left:13px; border-left:1px solid var(--line)}
+.hi.hcell b{display:block; font-size:19px; font-weight:800; letter-spacing:-.5px; margin-top:2px;
+  font-variant-numeric:tabular-nums; transform-origin:100% 60%}
+.hi.flash{animation:mflash .6s ease}
+@keyframes mflash{0%,100%{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.032)); border-color:var(--line)}
+  35%{background:rgba(255,77,99,.32); border-color:rgba(255,77,99,.62)}}
+#muteBtn{
+  width:52px; flex:none; border:1px solid var(--line); border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.032));
+  color:var(--muted); font-size:18px; cursor:pointer; backdrop-filter:blur(18px);
+  transition:color .2s, transform .14s; box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+#muteBtn.on{color:var(--accent)}
+#muteBtn:active{transform:scale(.93)}
+
+/* ============ 关卡进度条 ============ */
+#dots{flex:none; display:flex; gap:6px; padding:0 1px}
+#dots i{flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.1); transition:.45s}
+#dots i.done{background:linear-gradient(90deg,var(--accent),var(--accent2)); opacity:.5}
+#dots i.now{background:linear-gradient(90deg,var(--accent),var(--accent2)); box-shadow:0 0 14px var(--accent)}
+
+/* ============ 卡区 ============ */
+#arena{position:relative; flex:1; min-height:0}
+#arena::before{
+  content:""; position:absolute; left:50%; top:50%; width:min(90vw,430px); aspect-ratio:1;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(circle, transparent 57.4%, rgba(255,255,255,.075) 57.6%, transparent 58.2%),
+    radial-gradient(circle, transparent 71.4%, rgba(255,255,255,.058) 71.6%, transparent 72.2%),
+    radial-gradient(circle, transparent 85.4%, rgba(255,255,255,.042) 85.6%, transparent 86.2%);
+}
+#arena::after{
+  content:""; position:absolute; left:50%; top:50%; width:min(90vw,430px); aspect-ratio:1;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:1; pointer-events:none; opacity:.55;
+  background:conic-gradient(from 0deg, transparent 0deg, var(--glow1) 26deg, transparent 56deg);
+  animation:sweep 10s linear infinite;
+}
+@keyframes sweep{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#wm{position:absolute; left:0; right:0; top:15%; z-index:0; text-align:center;
+  font-size:74px; font-weight:900; letter-spacing:8px; line-height:1;
+  color:rgba(255,255,255,.045); -webkit-text-stroke:1.5px rgba(255,255,255,.085);
+  pointer-events:none; user-select:none; white-space:nowrap; overflow:hidden}
+#deck{position:absolute; inset:0; display:grid; place-items:center; z-index:2; padding-bottom:7vh}
+#deck::after{content:""; position:absolute; left:50%; bottom:9%; width:54%; height:34px;
+  transform:translateX(-50%); border-radius:50%; z-index:-1;
+  background:radial-gradient(ellipse, rgba(0,0,0,.55), transparent 70%)}
+
+#combo{
+  position:absolute; left:0; right:0; top:2px; z-index:5; height:32px; text-align:center;
+  font-weight:900; font-size:17px; letter-spacing:.6px; line-height:32px;
+  opacity:0; transition:opacity .18s;
+  background:linear-gradient(92deg,var(--gold),var(--amber));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 4px 14px rgba(255,176,32,.45));
+}
+#combo.on{opacity:1}
+#combo.pop{animation:cpop .36s cubic-bezier(.3,1.7,.5,1)}
+@keyframes cpop{0%{transform:scale(.55)}62%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* ============ 消息卡 ============ */
+.card{
+  position:absolute; width:100%; max-width:440px; border-radius:28px; overflow:hidden;
+  background:
+    radial-gradient(120% 78% at 50% -12%, rgba(255,255,255,.1), transparent 62%),
+    linear-gradient(168deg,#1b2449,#121a33 62%,#0e162b);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 32px 72px rgba(0,0,0,.62), 0 2px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.15);
+  will-change:transform; touch-action:none;
+}
+.card::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent); opacity:.9;
+}
+.card::after{
+  content:""; position:absolute; right:-30px; top:-30px; width:140px; height:140px; border-radius:50%;
+  background:var(--accent); opacity:.09; filter:blur(26px); pointer-events:none;
+}
+.card.top{cursor:grab}
+.card.top.grabbing{cursor:grabbing}
+.card.enter{animation:cin .34s cubic-bezier(.2,.9,.3,1) both}
+@keyframes cin{from{opacity:0;transform:translateY(34px) scale(.95)}to{opacity:1;transform:none}}
+.timer{height:3px; background:rgba(255,255,255,.08)}
+.timer i{display:block; height:100%; width:100%; background:var(--accent); box-shadow:0 0 9px rgba(255,255,255,.4); transition:background .3s}
+.chead{display:flex; align-items:center; gap:13px; padding:19px 21px 15px; position:relative; z-index:1}
+.av{
+  width:50px; height:50px; border-radius:16px; display:grid; place-items:center; flex:none;
+  font-size:18px; font-weight:800; color:#dce7ff;
+  background:linear-gradient(145deg,#2f3d6b,#1c2444);
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 8px 20px rgba(0,0,0,.38);
+}
+.who{min-width:0; flex:1; position:relative; z-index:1}
+.who b{font-size:16.5px; display:block; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.who span{font-size:11.5px; color:var(--muted); display:block; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.cbody{padding:0 21px 25px; font-size:17px; line-height:1.88; color:#e6edfc; letter-spacing:.1px; position:relative; z-index:1}
+.cbody .url{
+  display:block; margin-top:14px; font-size:13px; color:#ffcf85; word-break:break-all;
+  background:linear-gradient(90deg,rgba(255,176,32,.18),rgba(255,176,32,.05));
+  border-left:3px solid var(--amber); border-radius:0 12px 12px 0; padding:10px 13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+}
+.callui{display:flex; gap:10px; padding:0 21px 25px; position:relative; z-index:1}
+.callui span{flex:1; text-align:center; padding:12px; border-radius:14px; font-size:13.5px; font-weight:800; letter-spacing:.6px}
+.callui .no{background:rgba(255,77,99,.14); color:#ff9aa8; border:1px solid rgba(255,77,99,.34)}
+.callui .yes{background:rgba(34,214,138,.14); color:#8ff0c2; border:1px solid rgba(34,214,138,.34)}
+.stamp{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:29px; font-weight:900; letter-spacing:4px; padding:9px 22px; border-radius:14px; z-index:9;
+  opacity:0; pointer-events:none; transition:opacity .08s;
+}
+.stamp.l{border:4px solid var(--red); color:var(--red); transform:translate(-50%,-50%) rotate(12deg); text-shadow:0 0 24px rgba(255,77,99,.7)}
+.stamp.r{border:4px solid var(--green); color:var(--green); transform:translate(-50%,-50%) rotate(-12deg); text-shadow:0 0 24px rgba(34,214,138,.7)}
+
+.float{
+  position:absolute; left:50%; top:30%; transform:translateX(-50%);
+  font-size:26px; font-weight:900; pointer-events:none; z-index:60; white-space:nowrap;
+  animation:fup .9s ease-out forwards; text-shadow:0 4px 20px rgba(0,0,0,.75);
+}
+@keyframes fup{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}
+  22%{opacity:1;transform:translate(-50%,-6px) scale(1.12)}
+  100%{opacity:0;transform:translate(-50%,-66px) scale(1)}}
+.float.good{color:var(--green)} .float.bad{color:var(--red)} .float.warn{color:var(--amber)}
+#shake{position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0; background:rgba(255,77,99,.2)}
+#shake.hit{animation:sk .4s ease}
+@keyframes sk{0%{opacity:.95}100%{opacity:0}}
+@keyframes shakeit{
+  0%,100%{transform:translate(0)}
+  14%{transform:translate(calc(-11px * var(--sk,1)), calc(3px * var(--sk,1)))}
+  30%{transform:translate(calc(10px * var(--sk,1)), calc(-3px * var(--sk,1)))}
+  46%{transform:translate(calc(-8px * var(--sk,1)), calc(2px * var(--sk,1)))}
+  62%{transform:translate(calc(6px * var(--sk,1)), calc(-2px * var(--sk,1)))}
+  80%{transform:translate(calc(-3px * var(--sk,1)), calc(1px * var(--sk,1)))}
+}
+#stage.shake{animation:shakeit .44s cubic-bezier(.36,.07,.19,.97)}
+
+/* ==================================================================
+   判定特效层 · 三种结果三种视觉语言
+   正确 = 绿色能量外扩 / 错误 = 红色故障撕裂 + 掉钱 / 超时 = 琥珀色向内收拢
+   ================================================================== */
+#ringFx{position:fixed; inset:0; z-index:78; pointer-events:none; overflow:hidden}
+#fx{position:fixed; inset:0; z-index:80; pointer-events:none; display:block}
+#fxScan{position:fixed; inset:0; z-index:84; pointer-events:none; overflow:hidden}
+#fxBad,#fxGood,#fxWarn{position:fixed; inset:0; z-index:82; pointer-events:none; opacity:0; mix-blend-mode:screen}
+#fxBad{background:radial-gradient(122% 94% at 50% 50%, transparent 30%, rgba(255,48,72,.5) 74%, rgba(255,14,44,.88) 100%)}
+#fxGood{background:radial-gradient(80% 62% at 50% 42%, rgba(34,214,138,.38), rgba(37,230,196,.15) 46%, transparent 74%)}
+#fxWarn{background:radial-gradient(112% 90% at 50% 50%, transparent 36%, rgba(255,176,32,.46) 84%, rgba(255,132,6,.74) 100%)}
+#fxBad.on{animation:vigA .68s cubic-bezier(.2,.7,.3,1)}
+#fxGood.on{animation:vigG .56s ease-out}
+#fxWarn.on{animation:vigW .6s ease-out}
+@keyframes vigA{0%{opacity:0} 9%{opacity:1} 32%{opacity:.3} 50%{opacity:.9} 100%{opacity:0}}
+@keyframes vigG{0%{opacity:0} 20%{opacity:1} 100%{opacity:0}}
+@keyframes vigW{0%{opacity:0} 14%{opacity:1} 100%{opacity:0}}
+
+/* 能量环 */
+.ring{position:absolute; border-radius:50%; transform:translate(-50%,-50%); will-change:transform,opacity}
+.ring.out{border-style:solid; border-color:var(--rc); border-width:var(--rbd);
+  box-shadow:0 0 26px var(--rc), inset 0 0 24px var(--rc);
+  animation:rOut var(--rd) cubic-bezier(.16,.75,.3,1) forwards}
+@keyframes rOut{0%{opacity:.96; transform:translate(-50%,-50%) scale(.14)}
+  66%{opacity:.32} 100%{opacity:0; transform:translate(-50%,-50%) scale(1)}}
+.ring.in{border-style:solid; border-color:var(--rc); border-width:var(--rbd);
+  box-shadow:0 0 24px var(--rc), inset 0 0 22px var(--rc);
+  animation:rIn var(--rd) cubic-bezier(.3,.1,.5,1) forwards}
+@keyframes rIn{0%{opacity:.95; transform:translate(-50%,-50%) scale(1.45)}
+  100%{opacity:0; transform:translate(-50%,-50%) scale(.2)}}
+.ring.dash{border-style:dashed}
+
+/* 错误：故障撕裂碎片 */
+.cslice{position:absolute; pointer-events:none; mix-blend-mode:screen; border-radius:2px;
+  animation:cs var(--sd) cubic-bezier(.2,.8,.32,1) forwards}
+@keyframes cs{0%{opacity:0; transform:translateX(0)}
+  9%{opacity:1; transform:translateX(var(--sx))}
+  38%{opacity:.6; transform:translateX(calc(var(--sx) * -.6))}
+  64%{opacity:.85; transform:translateX(var(--sx))}
+  100%{opacity:0; transform:translateX(0)}}
+/* 错误：扫描线掠过 */
+.scanbar{position:absolute; left:-6%; right:-6%; height:132px; pointer-events:none; mix-blend-mode:screen;
+  background:linear-gradient(180deg, transparent, rgba(255,60,84,.62) 48%, rgba(255,60,84,.12) 80%, transparent);
+  animation:scanGo .66s cubic-bezier(.3,0,.34,1) forwards}
+@keyframes scanGo{0%{opacity:0; transform:translateY(-160px)} 14%{opacity:1} 100%{opacity:0; transform:translateY(104vh)}}
+/* 正确 / 超时：符号弹出 */
+.iconpop{position:absolute; transform:translate(-50%,-50%); font-size:52px; line-height:1;
+  pointer-events:none; color:var(--ic); text-shadow:0 0 32px var(--ic), 0 10px 28px rgba(0,0,0,.55);
+  animation:icp .82s cubic-bezier(.2,1.35,.32,1) forwards}
+@keyframes icp{0%{opacity:0; transform:translate(-50%,-50%) scale(.25) rotate(-18deg)}
+  26%{opacity:1; transform:translate(-50%,-58%) scale(1.18) rotate(5deg)}
+  62%{opacity:1; transform:translate(-50%,-74%) scale(1)}
+  100%{opacity:0; transform:translate(-50%,-126%) scale(.92)}}
+
+/* 卡牌判定描边光（只动 box-shadow，不碰 transform，避免与拖拽内联样式打架） */
+.card.good{animation:glowG .58s ease-out}
+.card.bad{animation:glowB .64s ease-out}
+.card.timeout{animation:glowW .6s ease-out}
+@keyframes glowG{0%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 2px rgba(34,214,138,.95), 0 0 52px 12px rgba(34,214,138,.62)}
+  100%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 0 rgba(34,214,138,0), 0 0 0 0 rgba(34,214,138,0)}}
+@keyframes glowB{0%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 2px rgba(255,77,99,.98), 0 0 58px 15px rgba(255,77,99,.66)}
+  100%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 0 rgba(255,77,99,0), 0 0 0 0 rgba(255,77,99,0)}}
+@keyframes glowW{0%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 2px rgba(255,176,32,.95), 0 0 48px 12px rgba(255,176,32,.55)}
+  100%{box-shadow:0 32px 72px rgba(0,0,0,.62), 0 0 0 0 rgba(255,176,32,0), 0 0 0 0 rgba(255,176,32,0)}}
+
+/* HUD 反馈 */
+.hi.hcell b.punch{animation:punch .46s cubic-bezier(.2,1.7,.36,1)}
+@keyframes punch{0%{transform:scale(1)} 26%{transform:scale(1.46); color:var(--green)} 100%{transform:scale(1)}}
+.hi.hcell b.punchr{animation:punchr .46s cubic-bezier(.2,1.7,.36,1)}
+@keyframes punchr{0%{transform:scale(1)} 26%{transform:scale(.74); color:var(--red)} 100%{transform:scale(1)}}
+#hud.jolt{animation:jolt .46s cubic-bezier(.36,.07,.19,.97)}
+@keyframes jolt{0%,100%{transform:translate(0)} 14%{transform:translate(-7px,1px)} 28%{transform:translate(6px,-1px)}
+  44%{transform:translate(-5px,1px)} 60%{transform:translate(4px,0)} 78%{transform:translate(-2px,0)}}
+#dots i.pop{animation:dpop .52s cubic-bezier(.2,1.5,.35,1)}
+@keyframes dpop{0%{transform:scaleY(1)} 40%{transform:scaleY(2.8)} 100%{transform:scaleY(1)}}
+
+/* 结算 / 破产 的整屏脉冲 */
+#flashEnd{position:fixed; inset:0; z-index:120; pointer-events:none; opacity:0; mix-blend-mode:screen;
+  background:radial-gradient(96% 76% at 50% 46%, rgba(255,204,85,.5), transparent 68%)}
+#flashEnd.lose{background:radial-gradient(110% 86% at 50% 50%, transparent 18%, rgba(255,20,48,.9) 100%)}
+#flashEnd.on{animation:fend 1.15s ease-out}
+@keyframes fend{0%{opacity:0} 10%{opacity:1} 36%{opacity:.36} 100%{opacity:0}}
+
+#tipbar{flex:none; text-align:center; font-size:11px; color:var(--dim); letter-spacing:.5px; padding:0 0 10px; font-weight:600}
+#controls{flex:none; display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.cbtn{
+  position:relative; overflow:hidden; border:none; border-radius:20px; padding:19px;
+  font-family:inherit; font-size:17px; font-weight:800; letter-spacing:.3px; color:#fff;
+  cursor:pointer; transition:transform .14s, box-shadow .2s;
+}
+.cbtn::after{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38)}
+.cbtn:active{transform:scale(.955)}
+.cbtn.block{background:linear-gradient(160deg,#ff6274,#e02438); box-shadow:0 14px 32px rgba(224,36,56,.42), 0 0 0 1px rgba(255,255,255,.12)}
+.cbtn.pass{background:linear-gradient(160deg,#2ee79a,#12a866); box-shadow:0 14px 32px rgba(18,168,102,.4), 0 0 0 1px rgba(255,255,255,.12)}
+.cbtn[disabled]{opacity:.3; pointer-events:none}
+/* 判定瞬间，你按下的那个键会亮一下：对=绿光，错=红光 */
+.cbtn.hitok{animation:btok .46s cubic-bezier(.2,1.35,.4,1)}
+.cbtn.hitno{animation:btno .5s cubic-bezier(.2,1.35,.4,1)}
+@keyframes btok{0%{filter:brightness(1.95) saturate(1.3)} 32%{transform:scale(1.055)}
+  100%{filter:none; transform:scale(1)}}
+@keyframes btno{0%{filter:brightness(1.85) saturate(1.45) hue-rotate(-10deg)} 26%{transform:scale(.955)}
+  100%{filter:none; transform:scale(1)}}
+
+/* ============ 遮罩 ============ */
+.ov{position:fixed; inset:0; z-index:100; display:none; overflow-y:auto; overscroll-behavior:contain;
+  background:radial-gradient(720px 520px at 50% -8%, var(--glow1), transparent 62%), rgba(4,6,13,.95);
+  backdrop-filter:blur(14px);
+  padding:calc(30px + env(safe-area-inset-top)) 20px calc(38px + env(safe-area-inset-bottom));}
+.ov.on{display:block; animation:fade .32s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.ovin{max-width:440px; margin:0 auto}
+.big{font-size:60px; text-align:center; line-height:1; margin-bottom:8px; filter:drop-shadow(0 12px 34px rgba(91,140,255,.4))}
+h1{font-size:34px; text-align:center; margin:0 0 10px; letter-spacing:-1px; font-weight:900}
+h1 em{font-style:normal; background:linear-gradient(96deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; background-clip:text; color:transparent}
+.tagline{text-align:center; color:var(--muted); font-size:13.5px; line-height:1.85; margin:0 auto 20px; max-width:320px}
+
+/* 关卡列表 */
+.levels{display:grid; gap:11px; margin-bottom:16px}
+.lv{
+  position:relative; overflow:hidden; display:flex; align-items:center; gap:14px; text-align:left;
+  font-family:inherit; cursor:pointer; color:var(--text);
+  background:linear-gradient(150deg,rgba(255,255,255,.078),rgba(255,255,255,.03));
+  border:1px solid var(--line); border-radius:19px; padding:15px 16px;
+  box-shadow:0 10px 26px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09);
+  transition:transform .15s, border-color .25s;
+}
+.lv::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(180deg,var(--laccent),transparent); z-index:1}
+.lv::after{content:""; position:absolute; right:-46px; top:-46px; width:126px; height:126px; border-radius:50%;
+  background:var(--laccent); opacity:.12; filter:blur(24px); pointer-events:none}
+.lv:active{transform:scale(.982)}
+.lv .num{width:38px; height:38px; border-radius:13px; display:grid; place-items:center; flex:none;
+  font-weight:900; font-size:16px; background:var(--laccentbg); color:var(--laccent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14); position:relative; z-index:1}
+.lv .txt{flex:1; min-width:0; position:relative; z-index:1}
+.lv .txt b{font-size:15.5px; display:block; letter-spacing:-.2px}
+.lv .txt span{font-size:11.5px; color:var(--muted); display:block; margin-top:3px}
+.lv .meta{flex:none; text-align:right; font-size:11px; color:var(--muted); line-height:1.5; position:relative; z-index:1}
+.lv .meta b{display:block; color:var(--laccent); font-size:13px; font-weight:800}
+.lv.locked{opacity:.44}
+.lv.locked::before{background:#4a5570}
+.lv.locked::after{display:none}
+.lv.locked .num{background:rgba(255,255,255,.07); color:var(--muted)}
+
+.btn{width:100%; border:none; border-radius:18px; padding:18px; font-size:16.5px; font-weight:800;
+  letter-spacing:.2px; color:#fff; font-family:inherit; cursor:pointer;
+  background:linear-gradient(96deg,var(--accent),var(--accent2));
+  box-shadow:0 16px 36px rgba(91,140,255,.3), inset 0 1px 0 rgba(255,255,255,.32);
+  transition:transform .15s;}
+.btn:active{transform:scale(.972)}
+.btn+.btn{margin-top:11px}
+.btn.ghost{background:linear-gradient(150deg,rgba(255,255,255,.078),rgba(255,255,255,.03));
+  border:1px solid var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.09); color:var(--text)}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:11px}
+.row2 .btn{margin-top:0}
+.bestrow{display:flex; gap:11px; margin:20px 0 0}
+.bestrow div{flex:1; background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-radius:16px; padding:13px 8px; text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.bestrow b{display:block; font-size:20px; font-weight:900; font-variant-numeric:tabular-nums;
+  background:linear-gradient(92deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.bestrow span{font-size:10.5px; color:var(--muted); display:block; margin-top:3px}
+
+/* 关卡过渡 */
+.lvhero{text-align:center; padding:10px 0 0}
+.lvhero .p{font-size:11.5px; letter-spacing:4px; color:var(--accent); font-weight:800}
+.lvhero h2{font-size:36px; margin:10px 0 8px; letter-spacing:-1.2px; font-weight:900}
+.lvhero .s{font-size:13.5px; color:var(--muted)}
+.lvdesc{background:linear-gradient(150deg,rgba(255,255,255,.072),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-radius:19px; padding:17px 18px; margin:22px 0;
+  font-size:14px; line-height:1.9; color:#d3ddf5; box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.lvdesc b{color:var(--accent); display:block; margin-bottom:8px; font-size:11.5px; letter-spacing:1.5px}
+.lvfacts{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:20px}
+.lvfacts div{background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-radius:16px; padding:13px 4px; text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.lvfacts b{display:block; font-size:16px; font-weight:800; letter-spacing:-.3px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.lvfacts span{font-size:10px; color:var(--muted); display:block; margin-top:4px}
+.minirule{text-align:center; font-size:11.5px; color:var(--muted); line-height:1.9;
+  margin:-10px auto 18px; max-width:330px}
+.minirule b{color:#ff9aa5; font-weight:800}
+.reward{text-align:center; font-size:13.5px; font-weight:800; color:#8ff0c2;
+  background:linear-gradient(96deg,rgba(34,214,138,.17),rgba(34,214,138,.06));
+  border:1px solid rgba(34,214,138,.34); border-radius:15px; padding:12px; margin-bottom:16px}
+
+/* 结算 */
+.rankbox{text-align:center; padding:6px 0 20px}
+.rankbox .em{display:inline-grid; place-items:center; width:96px; height:96px; margin-bottom:14px;
+  border-radius:50%; font-size:50px;
+  background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.16), rgba(255,255,255,.035));
+  border:1px solid var(--line2); box-shadow:0 0 46px var(--glow1), inset 0 1px 0 rgba(255,255,255,.22)}
+.rankbox h2{font-size:26px; margin:0 0 10px; letter-spacing:-.6px; font-weight:900}
+.rankbox p{color:var(--muted); font-size:13.5px; line-height:1.85; margin:0 auto; max-width:330px}
+.scorebig{text-align:center; margin:0 0 22px}
+.scorebig b{display:block; font-size:64px; line-height:1; font-weight:900; letter-spacing:-2.5px;
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(96deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 10px 28px rgba(91,140,255,.38))}
+.scorebig span{font-size:10.5px; color:var(--muted); letter-spacing:3px; font-weight:700}
+.stats{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px}
+.stat{background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-radius:17px; padding:14px 15px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.stat span{font-size:11px; color:var(--muted); display:block; margin-bottom:5px}
+.stat b{font-size:20px; font-weight:800; letter-spacing:-.4px; font-variant-numeric:tabular-nums}
+.stat.g b{color:var(--green)} .stat.r b{color:var(--red)}
+.stat.a b{color:var(--amber)} .stat.c b{color:var(--accent)}
+.sect{display:flex; align-items:center; gap:9px; font-size:13px; font-weight:800; color:var(--muted); margin:22px 0 11px; letter-spacing:.4px}
+.sect::before{content:""; width:3px; height:15px; border-radius:2px; background:linear-gradient(180deg,var(--accent),var(--accent2))}
+.recap{background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-left:3px solid var(--red);
+  border-radius:0 15px 15px 0; padding:13px 15px; margin-bottom:10px}
+.recap b{font-size:13.2px; color:#ffb8c0; display:block; margin-bottom:5px}
+.recap span{font-size:12.6px; color:#c2cfe8; line-height:1.75}
+
+/* ---- 结算增强：反诈画像 ---- */
+.weakbox{background:linear-gradient(150deg,rgba(255,255,255,.075),rgba(255,255,255,.03));
+  border:1px solid var(--line); border-radius:18px; padding:16px; margin-bottom:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.weakbox .wtop{display:flex; align-items:center; gap:11px; margin-bottom:13px}
+.weakbox .wic{width:44px; height:44px; border-radius:14px; display:grid; place-items:center;
+  font-size:21px; flex:none; background:rgba(255,79,96,.16); border:1px solid rgba(255,79,96,.3)}
+.weakbox .wtxt{min-width:0}
+.weakbox .wtxt b{display:block; font-size:15px; font-weight:900; color:#fff; letter-spacing:-.2px; margin-bottom:3px}
+.weakbox .wtxt span{font-size:11.6px; color:var(--muted)}
+.weakbar .wbrow{display:flex; align-items:center; gap:9px; margin-bottom:8px; font-size:12px}
+.weakbar .wbname{width:80px; flex:none; color:#c2cfe8; font-weight:600; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+.weakbar .wbtrack{flex:1; height:8px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden}
+.weakbar .wbfill{display:block; height:100%; border-radius:5px;
+  background:linear-gradient(90deg,#ffb020,#ff4d63); transition:width .55s cubic-bezier(.3,1,.4,1)}
+.weakbar .wbnum{width:48px; flex:none; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums}
+.weakadv{font-size:12.5px; line-height:1.8; color:#e2ebff; margin-top:12px;
+  background:rgba(255,255,255,.045); border-left:2px solid var(--accent);
+  border-radius:0 12px 12px 0; padding:11px 13px}
+.weakadv b{color:#fff}
+
+/* ---- 结算增强：战绩趋势 ---- */
+.trendbox{background:linear-gradient(150deg,rgba(255,255,255,.075),rgba(255,255,255,.03));
+  border:1px solid var(--line); border-radius:18px; padding:16px 16px 13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.trendbox svg{display:block; width:100%; height:76px; overflow:visible}
+.trendfoot{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:9px}
+
+/* ---- 结算增强：被骗后的止损指引 ---- */
+.emgbox{border-radius:18px; padding:16px; margin-bottom:12px;
+  background:linear-gradient(150deg,rgba(255,79,96,.16),rgba(255,176,32,.05));
+  border:1px solid rgba(255,79,96,.36)}
+.emgbox h4{margin:0 0 5px; font-size:15.5px; color:#ffd0d5; letter-spacing:-.2px}
+.emgbox .esub{display:block; font-size:11.8px; color:rgba(255,208,213,.72); margin-bottom:10px; line-height:1.6}
+.emgstep{display:flex; gap:10px; padding:10px 0; border-top:1px solid rgba(255,255,255,.08)}
+.emgstep:first-of-type{border-top:none; padding-top:2px}
+.emgstep .en{width:22px; height:22px; border-radius:8px; flex:none; display:grid; place-items:center;
+  font-size:11.5px; font-weight:900; color:#ffd0d5; background:rgba(255,79,96,.22); margin-top:1px}
+.emgstep .et{font-size:12.6px; line-height:1.72; color:#dbe6fb}
+.emgstep .et b{color:#fff}
+.emgstep .et i{font-style:normal; color:#ffcc55; font-weight:800}
+.emgtel{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px}
+.emgtel a{display:block; text-align:center; text-decoration:none; padding:11px 6px; border-radius:13px;
+  font-size:14px; font-weight:800; color:#fff; background:rgba(255,79,96,.24);
+  border:1px solid rgba(255,79,96,.42)}
+.emgtel a.blue{background:rgba(79,140,255,.22); border-color:rgba(79,140,255,.42)}
+.emgtel a i{display:block; font-style:normal; font-size:10.5px; font-weight:600;
+  color:rgba(255,255,255,.66); margin-top:2px}
+.recap.w{border-left-color:var(--amber)}
+.recap.w b{color:#ffd98a}
+.legalnote{text-align:center; font-size:11px; color:#55658a; margin-top:20px; line-height:1.85}
+.unlockbox{text-align:center; margin:18px 0 4px; padding:16px; border-radius:17px;
+  background:linear-gradient(150deg,rgba(255,79,96,.2),rgba(255,176,32,.08));
+  border:1px solid rgba(255,79,96,.38); box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.unlockbox b{display:block; font-size:15px; color:#ffd0d5; margin-bottom:5px}
+.unlockbox span{font-size:12.3px; color:var(--muted); line-height:1.75}
+
+/* 战绩图 */
+#posterImg{width:100%; border-radius:20px; display:block; box-shadow:0 24px 56px rgba(0,0,0,.66)}
+#famImg{width:100%; border-radius:20px; display:block; box-shadow:0 24px 56px rgba(0,0,0,.66)}
+.posterhint{text-align:center; font-size:11.5px; color:var(--muted); margin-top:13px; line-height:1.75}
+
+/* ==================================================================
+   色觉友好模式：红绿色盲最难分辨的红/绿，改成蓝(正确) / 橙(错误)，
+   同时放大符号与文字差异——颜色永远只是辅助，符号才是主要通道
+   ================================================================== */
+body.cb{ --green:#3b9dff; --red:#ff7a00; }
+body.cb .cbtn.block{background:linear-gradient(160deg,#ffa04d,#dd5a00); box-shadow:0 14px 32px rgba(221,90,0,.42), 0 0 0 1px rgba(255,255,255,.12)}
+body.cb .cbtn.pass{background:linear-gradient(160deg,#59b6ff,#1667c8); box-shadow:0 14px 32px rgba(22,103,200,.4), 0 0 0 1px rgba(255,255,255,.12)}
+body.cb #fxBad{background:radial-gradient(122% 94% at 50% 50%, transparent 30%, rgba(255,122,0,.5) 74%, rgba(255,90,0,.88) 100%)}
+body.cb #fxGood{background:radial-gradient(80% 62% at 50% 42%, rgba(59,157,255,.4), rgba(59,157,255,.15) 46%, transparent 74%)}
+body.cb .stamp.l{border-color:#ff7a00; color:#ff7a00; text-shadow:0 0 24px rgba(255,122,0,.7)}
+body.cb .stamp.r{border-color:#3b9dff; color:#3b9dff; text-shadow:0 0 24px rgba(59,157,255,.7)}
+body.cb .recap{border-left-color:#ff7a00}
+body.cb .recap b{color:#ffc099}
+body.cb .weakbar .wbfill{background:linear-gradient(90deg,#ffd23d,#ff7a00)}
+body.cb .float.bad{color:#ff9c4d}
+body.cb .float.good{color:#7cc4ff}
+
+/* ==================================================================
+   长辈版（家人模式）：字号加大、按钮加大、判定文案口语化
+   ================================================================== */
+body.senior .cbody{font-size:20px; line-height:2.05}
+body.senior .who b{font-size:18.5px}
+body.senior .who span{font-size:13px}
+body.senior .av{width:56px; height:56px; font-size:21px}
+body.senior .hi.wallet b{font-size:25px}
+body.senior .hi .lbl{font-size:11px}
+body.senior .cbtn{font-size:19.5px; padding:23px}
+body.senior #tipbar{font-size:13px}
+body.senior .tagline{font-size:15px}
+body.senior .minirule{font-size:13px}
+body.senior #combo{font-size:19px}
+
+/* ==================================================================
+   首页：更多玩法入口 + 设置
+   ================================================================== */
+.feat{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin:16px 0 0}
+.fbtn{
+  position:relative; overflow:hidden; text-align:left; font-family:inherit; cursor:pointer;
+  color:var(--text); padding:14px 13px; border-radius:18px; border:1px solid var(--line);
+  background:linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+  box-shadow:0 10px 26px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09);
+  transition:transform .15s, border-color .2s;
+}
+.fbtn:active{transform:scale(.975)}
+.fbtn::after{content:""; position:absolute; right:-36px; top:-36px; width:100px; height:100px; border-radius:50%;
+  background:var(--faccent,var(--accent)); opacity:.14; filter:blur(20px); pointer-events:none}
+.fbtn .fi{font-size:21px; display:block; margin-bottom:7px; position:relative; z-index:1}
+.fbtn b{display:block; font-size:14.5px; letter-spacing:-.2px; position:relative; z-index:1}
+.fbtn span{display:block; font-size:11px; color:var(--muted); margin-top:3px; line-height:1.55; position:relative; z-index:1}
+.fbtn .badge{position:absolute; right:10px; top:10px; z-index:2; font-size:9.5px; font-weight:800;
+  padding:3px 7px; border-radius:99px; background:rgba(255,77,99,.22); color:#ffb3bd; border:1px solid rgba(255,77,99,.4)}
+.fbtn .badge.b2{background:rgba(255,176,32,.2); color:#ffd98a; border-color:rgba(255,176,32,.42)}
+.setrow{display:flex; gap:9px; margin-top:11px}
+.setrow button{flex:1; font-family:inherit; cursor:pointer; font-size:11.5px; font-weight:700; padding:11px 6px;
+  border-radius:14px; border:1px solid var(--line); color:var(--muted);
+  background:linear-gradient(150deg,rgba(255,255,255,.06),rgba(255,255,255,.025));
+  transition:color .2s, border-color .2s, transform .14s}
+.setrow button:active{transform:scale(.96)}
+.setrow button.on{color:var(--accent); border-color:var(--accent)}
+
+/* 挑战横幅 */
+#chalBar{display:none; align-items:center; gap:11px; margin:0 0 16px; padding:13px 15px; border-radius:17px;
+  background:linear-gradient(150deg,rgba(255,176,32,.2),rgba(255,77,99,.09));
+  border:1px solid rgba(255,176,32,.42); box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+#chalBar.on{display:flex}
+#chalBar .ci{font-size:22px; flex:none}
+#chalBar .ct{flex:1; min-width:0; font-size:12.6px; line-height:1.62; color:#ffe6b8}
+#chalBar .ct b{color:#fff}
+#chalBar .cx{flex:none; border:none; background:rgba(255,255,255,.1); color:var(--muted);
+  width:28px; height:28px; border-radius:9px; font-size:14px; cursor:pointer; font-family:inherit}
+
+/* ==================================================================
+   每日一题
+   ================================================================== */
+.dqstreak{display:flex; gap:9px; margin:16px 0 18px}
+.dqstreak div{flex:1; background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); border-radius:16px; padding:13px 6px; text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.dqstreak b{display:block; font-size:21px; font-weight:900; font-variant-numeric:tabular-nums;
+  background:linear-gradient(92deg,var(--accent),var(--accent2)); -webkit-background-clip:text;
+  background-clip:text; color:transparent}
+.dqstreak span{font-size:10.5px; color:var(--muted); display:block; margin-top:3px}
+.dqcard{background:linear-gradient(150deg,rgba(255,255,255,.078),rgba(255,255,255,.03));
+  border:1px solid var(--line); border-radius:20px; padding:17px; box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}
+.dqcard .dqwho{display:flex; align-items:center; gap:11px; margin-bottom:13px}
+.dqcard .dqav{width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
+  font-size:16px; font-weight:800; color:#dce7ff; background:linear-gradient(145deg,#2f3d6b,#1c2444);
+  border:1px solid rgba(255,255,255,.11)}
+.dqcard .dqmeta{min-width:0}
+.dqcard .dqmeta b{display:block; font-size:15px}
+.dqcard .dqmeta span{font-size:11.5px; color:var(--muted); display:block; margin-top:2px}
+.dqcard .dqbody{font-size:15px; line-height:1.9; color:#e6edfc}
+.dqcard .dqurl{display:block; margin-top:11px; font-size:12.5px; color:#ffcf85; word-break:break-all;
+  background:linear-gradient(90deg,rgba(255,176,32,.18),rgba(255,176,32,.05));
+  border-left:3px solid var(--amber); border-radius:0 12px 12px 0; padding:9px 12px;
+  font-family:ui-monospace,Menlo,Consolas,monospace}
+.opt{display:block; width:100%; text-align:left; font-family:inherit; font-size:14px; line-height:1.68;
+  color:var(--text); cursor:pointer; margin-top:10px; padding:14px 15px; border-radius:15px;
+  background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); transition:transform .14s, border-color .2s, background .2s}
+.opt:active{transform:scale(.985)}
+.opt.ok{border-color:rgba(34,214,138,.62); background:linear-gradient(150deg,rgba(34,214,138,.2),rgba(34,214,138,.06))}
+.opt.no{border-color:rgba(255,77,99,.62); background:linear-gradient(150deg,rgba(255,77,99,.2),rgba(255,77,99,.06))}
+.opt[disabled]{pointer-events:none}
+.opt .oi{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:8px; margin-right:9px;
+  background:rgba(255,255,255,.09); font-size:11.5px; font-weight:900; vertical-align:-2px}
+.explain{margin-top:14px; font-size:13px; line-height:1.85; color:#e2ebff;
+  background:rgba(255,255,255,.045); border-left:2px solid var(--accent);
+  border-radius:0 13px 13px 0; padding:12px 14px}
+.explain b{color:#fff}
+.explain i{font-style:normal; color:#ffcc55; font-weight:800}
+
+/* ==================================================================
+   骗子视角（反转关）
+   ================================================================== */
+.tgtbox{border-radius:19px; padding:16px; margin-bottom:16px;
+  background:linear-gradient(150deg,rgba(255,77,99,.17),rgba(255,176,32,.05));
+  border:1px solid rgba(255,77,99,.36)}
+.tgtbox .tlbl{font-size:10.5px; letter-spacing:2.5px; color:#ffb3bd; font-weight:800; display:block; margin-bottom:7px}
+.tgtbox .ttxt{font-size:14.5px; line-height:1.82; color:#ffe1e5}
+.sopt{display:block; width:100%; text-align:left; font-family:inherit; cursor:pointer; position:relative;
+  font-size:14px; line-height:1.72; color:var(--text); padding:15px 16px 15px 46px;
+  border-radius:16px; margin-bottom:10px;
+  background:linear-gradient(150deg,rgba(255,255,255,.07),rgba(255,255,255,.028));
+  border:1px solid var(--line); transition:transform .14s, border-color .2s, background .2s}
+.sopt::before{content:attr(data-k); position:absolute; left:14px; top:14px; width:22px; height:22px;
+  border-radius:8px; display:grid; place-items:center; font-size:11.5px; font-weight:900;
+  background:rgba(255,255,255,.09); color:var(--muted)}
+.sopt:active{transform:scale(.985)}
+.sopt.ok{border-color:rgba(34,214,138,.62); background:linear-gradient(150deg,rgba(34,214,138,.17),rgba(34,214,138,.05))}
+.sopt.ok::before{content:'✓'; color:#8ff0c2; background:rgba(34,214,138,.22)}
+.sopt.no{border-color:rgba(255,77,99,.62); background:linear-gradient(150deg,rgba(255,77,99,.17),rgba(255,77,99,.05))}
+.sopt.no::before{content:'✕'; color:#ffb3bd; background:rgba(255,77,99,.22)}
+.sopt[disabled]{pointer-events:none}
+.sopt.ok[disabled],.sopt.no[disabled]{opacity:1}
+.sopt:disabled{opacity:.5}
+
+/* 反诈笔记 / 挑战码 */
+.note{white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,Menlo,Consolas,"PingFang SC",monospace;
+  font-size:12.3px; line-height:1.9; color:#dbe6fb; background:rgba(0,0,0,.32);
+  border:1px solid var(--line); border-radius:16px; padding:15px; max-height:46vh; overflow:auto; margin-bottom:14px}
+.codebox{text-align:center; padding:19px 16px; border-radius:18px; margin-bottom:14px;
+  background:linear-gradient(150deg,rgba(255,176,32,.16),rgba(255,77,99,.06));
+  border:1px solid rgba(255,176,32,.4)}
+.codebox .cc{display:block; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:21px; font-weight:900;
+  letter-spacing:2.5px; color:#ffd98a; margin:9px 0 7px; word-break:break-all}
+.codebox span{font-size:11.5px; color:var(--muted); line-height:1.72}
+.codebox .cnote{margin-top:9px; font-size:11px; color:#8e9dbc; display:block}
+
+/* 骗局速查表 */
+.bkcat{margin-bottom:18px}
+.bkcat h4{margin:0 0 10px; font-size:13px; color:#fff; letter-spacing:.3px; display:flex; align-items:center; gap:8px}
+.bkcat h4 i{font-style:normal; font-size:10.5px; font-weight:700; color:var(--muted);
+  background:rgba(255,255,255,.08); border-radius:99px; padding:2px 9px}
+.bkitem{border-radius:14px; padding:12px 14px; margin-bottom:9px;
+  background:linear-gradient(150deg,rgba(255,255,255,.06),rgba(255,255,255,.022));
+  border:1px solid var(--line); border-left:3px solid rgba(255,77,99,.6)}
+.bkitem b{font-size:13px; color:#ffb8c0; display:block}
+.bkitem .bkwho{font-size:12.6px; color:#e6edfc; line-height:1.7; margin-top:6px; display:block}
+.bkitem span{font-size:12.2px; color:#b9c7e2; line-height:1.72; display:block; margin-top:6px}
+.bkitem .bkam{color:#ffcc55; font-weight:800}
+/* ===== 插件中心 ===== */
+.plughead{text-align:center; margin-bottom:16px}
+.plughead .ptitle{font-size:22px; font-weight:800; color:#fff}
+.plughead .psub{font-size:12px; color:var(--muted); margin-top:5px}
+.prow{background:var(--surface2); border:1px solid var(--line); border-radius:16px; padding:13px 14px; margin-bottom:9px}
+.prow .ptop{display:flex; align-items:center; gap:11px}
+.prow .pico{width:38px; height:38px; border-radius:11px; background:rgba(255,255,255,.07); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:var(--accent); flex-shrink:0}
+.prow .pmeta{flex:1; min-width:0}
+.prow .pmeta b{display:block; font-size:14.5px; color:#fff}
+.prow .pmeta b i{font-style:normal; font-size:10.5px; color:var(--muted); font-weight:400; margin-left:6px}
+.prow .pmeta span{display:block; font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.5}
+.ptoggle{width:44px; height:25px; border-radius:13px; background:rgba(255,255,255,.12); position:relative; flex-shrink:0; transition:background .2s; cursor:pointer; border:none; padding:0}
+.ptoggle::after{content:''; position:absolute; top:2.5px; left:2.5px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s}
+.ptoggle.on{background:var(--green)}
+.ptoggle.on::after{transform:translateX(19px)}
+.ppanel{margin-top:11px; padding-top:11px; border-top:1px dashed var(--line)}
+.pchiprow{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:9px}
+.pchip{padding:6px 12px; border-radius:9px; border:1px solid var(--line); background:transparent; color:var(--muted); font-size:12px; cursor:pointer}
+.pchip.on{border-color:var(--accent); color:#fff; background:rgba(255,255,255,.08)}
+.pslider{display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted)}
+.pslider input[type=range]{flex:1; accent-color:var(--accent)}
+.pslider b{color:#fff; min-width:44px; text-align:right}
+.plugacts{display:flex; flex-direction:column; gap:9px; margin-top:14px}
+#plugInstallBox{background:var(--surface2); border:1px solid var(--line); border-radius:16px; padding:14px; margin-top:12px}
+#plugInstallBox textarea{width:100%; min-height:130px; background:rgba(0,0,0,.3); border:1px solid var(--line); border-radius:10px; color:#e6edfc; font-family:monospace; font-size:12px; padding:10px; box-sizing:border-box; resize:vertical}
+#plugInstallBox .pwarn{font-size:11.5px; color:#ffb020; line-height:1.6; margin:8px 0 10px}
+.pinstrow{display:flex; gap:8px; margin-top:10px}
+.pinstrow .btn{flex:1; margin:0; padding:11px 0; font-size:13.5px}
+.badgegrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.badge{background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:12px; padding:10px 6px; text-align:center; opacity:.38; filter:grayscale(1)}
+.badge.got{opacity:1; filter:none; border-color:var(--accent)}
+.badge .bic{font-size:21px}
+.badge b{display:block; font-size:11px; color:#fff; margin-top:4px}
+.badge span{display:block; font-size:9.5px; color:var(--muted); margin-top:2px; line-height:1.4}
+.mark-radar{background:rgba(255,79,96,.28); color:#ffb9c4; border-radius:4px; padding:0 3px; box-shadow:inset 0 -1.5px 0 rgba(255,79,96,.55)}
+#plugTimer{position:fixed; top:0; left:0; right:0; height:4px; z-index:260; display:none; pointer-events:none}
+#plugTimer i{display:block; height:100%; width:100%; background:var(--accent); transition:none}
+#plugTimer.low i{background:var(--red, #ff4d63)}
+#plugTimer.crit{animation:plugPulse .5s infinite}
+@keyframes plugPulse{0%,100%{opacity:1}50%{opacity:.35}}
+#plugCoach{position:fixed; left:14px; right:14px; bottom:96px; z-index:300; background:rgba(10,14,26,.94); border:1px solid var(--line); border-radius:14px; padding:12px 14px; transform:translateY(24px); opacity:0; transition:all .25s; pointer-events:none; max-height:34vh; overflow-y:auto}
+#plugCoach.on{transform:translateY(0); opacity:1}
+#plugCoach b{display:block; font-size:13px; color:var(--accent2, #25e6c4); margin-bottom:4px}
+#plugCoach span{font-size:12.5px; color:#c6d2e8; line-height:1.7}
+#plugToast{position:fixed; top:56px; left:50%; transform:translate(-50%,-16px); z-index:400; background:rgba(10,14,26,.96); border:1px solid var(--accent); border-radius:12px; padding:10px 18px; font-size:13px; color:#fff; opacity:0; transition:all .3s; pointer-events:none; text-align:center; max-width:82vw}
+#plugToast.on{opacity:1; transform:translate(-50%,0)}
+#plugToast span{display:block; font-size:11px; color:var(--muted); margin-top:2px}
+.docbox h4{margin:18px 0 6px; font-size:14.5px; color:#fff}
+.docbox p, .docbox li{font-size:13px; color:#c6d2e8; line-height:1.85}
+.docbox code{font-family:monospace; background:rgba(255,255,255,.08); border-radius:5px; padding:1px 6px; font-size:12px; color:#7be0a0}
+.docbox pre{background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:12px; padding:12px 14px; overflow-x:auto; font-family:monospace; font-size:11.5px; line-height:1.75; color:#a8d8c8; margin:8px 0}
+.docbox table{width:100%; border-collapse:collapse; font-size:12px; color:#c6d2e8}
+.docbox th,.docbox td{border:1px solid var(--line); padding:7px 9px; text-align:left; line-height:1.6}
+.docbox th{color:#fff; background:rgba(255,255,255,.05)}
+</style>
+</head>
+<body>
+<div id="bgfx"></div>
+
+<div id="stage">
+  <div id="topbar">
+    <div id="hud">
+      <div class="hi wallet" id="walletBox">
+        <span class="lbl">钱包余额</span>
+        <b id="moneyEl">¥10,000</b>
+        <div class="wbar"><i id="wbarFill"></i></div>
+      </div>
+      <div class="hi hcell"><span class="lbl">得分</span><b id="scoreEl">0</b></div>
+      <div class="hi hcell"><span class="lbl" id="levelEl">第 1 关</span><b id="progEl">0/12</b></div>
+    </div>
+    <button id="muteBtn" class="on" title="音效 / 震动开关">🔊</button>
+  </div>
+  <div id="dots"></div>
+  <div id="arena">
+    <div id="wm"></div>
+    <div id="combo"></div>
+    <div id="deck"></div>
+  </div>
+  <div id="tipbar">← 左滑拦截　·　右滑放行 →</div>
+  <div id="controls">
+    <button class="cbtn block" id="btnBlock">🚫 拦截</button>
+    <button class="cbtn pass" id="btnPass">✅ 放行</button>
+  </div>
+</div>
+
+<div id="shake"></div>
+
+<!-- ============ 判定特效层 ============ -->
+<div id="ringFx"></div>
+<canvas id="fx"></canvas>
+<div id="fxBad"></div>
+<div id="fxGood"></div>
+<div id="fxWarn"></div>
+<div id="fxScan"></div>
+<div id="flashEnd"></div>
+
+<!-- ============ 首页 ============ -->
+<div class="ov on" id="ovHome">
+  <div class="ovin">
+    <div id="chalBar">
+      <span class="ci">🎯</span>
+      <span class="ct" id="chalText"></span>
+      <button class="cx" onclick="Game.dismissChal()">✕</button>
+    </div>
+    <div class="big">🛡️</div>
+    <h1>反诈<em>守门人</em></h1>
+    <p class="tagline">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
+    <p class="minirule">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
+    <div class="levels" id="levelList"></div>
+    <button class="btn" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
+    <div class="bestrow">
+      <div><b id="bestScoreTop">0</b><span>历史最高分</span></div>
+      <div><b id="bestStageTop">0</b><span>最远进度</span></div>
+      <div><b id="hellStateTop">未解锁</b><span>地狱模式</span></div>
+    </div>
+    <div class="sect" style="margin:24px 0 0">换个玩法</div>
+    <div class="feat">
+      <button class="fbtn" style="--faccent:#ffb020" onclick="Game.openDaily()">
+        <span class="fi">🌅</span><b>今日一题</b><span id="dailySub">每天一条，答完看拆解</span></button>
+      <button class="fbtn" style="--faccent:#ff4f60" onclick="Game.startScam()">
+        <span class="fi">🎭</span><b>骗子视角</b><span>反转关：你替骗子挑最有效的话术</span></button>
+      <button class="fbtn" style="--faccent:#7be0a0" onclick="Game.startSenior()">
+        <span class="fi">👴</span><b>长辈版</b><span>大字慢速，适合陪家人一起玩</span></button>
+      <button class="fbtn" style="--faccent:#39d0ff" onclick="Game.openBook()">
+        <span class="fi">📖</span><b>骗局速查</b><span id="bookSub">全部骗术与判据</span></button>
+      <button class="fbtn" style="--faccent:#c99cff" onclick="Game.openPlug()">
+        <span class="fi">🧩</span><b>插件中心</b><span id="plugSub">自定义你的守门体验</span></button>
+    </div>
+    <div class="setrow">
+      <button id="setCb" onclick="Game.toggleCb()">🎨 色觉友好：关</button>
+      <button id="setFam" onclick="Game.openFamTip()">👨‍👩‍👧 给家人的提醒图</button>
+    </div>
+    <p class="legalnote">点上方任意关卡可单独练习 · 内容均为虚构改编<br>澳门遇骗：司警局报案 993 · 防诈查询热线 8800 7777<br>内地遇骗：110 · 国家反诈专线 96110</p>
+  </div>
+</div>
+
+<!-- ============ 关卡过渡 ============ -->
+<div class="ov" id="ovLevel">
+  <div class="ovin">
+    <div class="lvhero">
+      <div class="p" id="lvP">第 1 关</div>
+      <h2 id="lvName">校园兼职</h2>
+      <div class="s" id="lvSub">兼职 · 刷单 · 校园贷</div>
+    </div>
+    <div class="lvdesc"><b>本关要点</b><span id="lvDesc"></span></div>
+    <div class="reward" id="lvReward" style="display:none"></div>
+    <div class="lvfacts">
+      <div><b id="lvCards">12</b><span>条消息</span></div>
+      <div><b id="lvTime">6.0s</b><span>每条限时</span></div>
+      <div><b id="lvMoney">¥10,000</b><span>钱包余额</span></div>
+      <div><b id="lvMis">−2,000</b><span>误拦代价</span></div>
+    </div>
+    <button class="btn" onclick="Game.beginLevel()">开始这一关 →</button>
+    <button class="btn ghost" onclick="Game.showHome()">返回首页</button>
+  </div>
+</div>
+
+<!-- ============ 结算 ============ -->
+<div class="ov" id="ovOver">
+  <div class="ovin">
+    <div class="rankbox">
+      <span class="em" id="ovEm">🛡️</span>
+      <h2 id="ovTitle">守住了</h2>
+      <p id="ovDesc"></p>
+    </div>
+    <div class="scorebig"><b id="ovScore">0</b><span>本局得分</span></div>
+    <div class="stats">
+      <div class="stat c"><span>历史最高</span><b id="ovBest">0</b></div>
+      <div class="stat a"><span>拦下骗子</span><b id="ovBlocked">0 次</b></div>
+      <div class="stat r"><span>被骗金额</span><b id="ovLost">¥0</b></div>
+      <div class="stat r"><span>误拦真消息</span><b id="ovFalse">0 次</b></div>
+      <div class="stat a"><span>最高连击</span><b id="ovCombo">0</b></div>
+      <div class="stat g"><span>钱包剩余</span><b id="ovMoney">¥0</b></div>
+    </div>
+    <div id="ovUnlock" style="display:none" class="unlockbox">
+      <b>🔥 地狱模式已解锁</b>
+      <span>链接线索被隐藏、每条只有 2.4 秒，骗术更难分辨。敢来试试吗？</span>
+    </div>
+    <div id="ovRecapWrap" style="display:none">
+      <div class="sect">你放走的骗子（下次别再上钩）</div>
+      <div id="ovRecap"></div>
+    </div>
+    <div id="ovFalseWrap" style="display:none">
+      <div class="sect">你误伤的真消息</div>
+      <div id="ovRecap2"></div>
+    </div>
+
+    <div id="ovWeakWrap" style="display:none">
+      <div class="sect">你的反诈画像</div>
+      <div class="weakbox">
+        <div class="wtop">
+          <div class="wic" id="wkIcon">⚠️</div>
+          <div class="wtxt"><b id="wkTitle"></b><span id="wkSub"></span></div>
+        </div>
+        <div class="weakbar" id="wkBars"></div>
+        <div class="weakadv" id="wkAdv"></div>
+      </div>
+    </div>
+
+    <div id="ovTrendWrap" style="display:none">
+      <div class="sect">最近战绩</div>
+      <div class="trendbox">
+        <svg id="trendSvg" viewBox="0 0 300 76" preserveAspectRatio="none"></svg>
+        <div class="trendfoot"><span id="trLeft"></span><span id="trRight"></span></div>
+      </div>
+    </div>
+
+    <div id="ovEmgWrap" style="display:none">
+      <div class="sect">钱已经转出去了怎么办</div>
+      <div class="emgbox">
+        <h4>被骗后的黄金 30 分钟</h4>
+        <span class="esub">越早动手，钱被追回的可能越大。这五步照着做就行——别先急着自责。</span>
+        <div class="emgstep"><span class="en">1</span><span class="et"><b>立刻打反诈专线</b>要求<i>紧急止付</i>：内地在打 96110，澳门打司警局报案热线 993；情况紧急就直接拨 110（内地）或 999（澳门）。</span></div>
+        <div class="emgstep"><span class="en">2</span><span class="et"><b>同时联系银行</b>客服或去就近网点，申请<i>冻结涉案账户、止付这笔转账</i>。转账后 24 小时内是最好的窗口。</span></div>
+        <div class="emgstep"><span class="en">3</span><span class="et"><b>把证据留全再清理</b>：聊天记录、转账凭证、对方账号与姓名、对方发来的链接或 App 名称。先截图，<i>千万别删聊天</i>。</span></div>
+        <div class="emgstep"><span class="en">4</span><span class="et"><b>去报案</b>：内地的就近派出所、澳门的司警局或警区，带身份证和全部证据，<i>务必拿到受案回执</i>——那是后续冻结、追赃的依据。</span></div>
+        <div class="emgstep"><span class="en">5</span><span class="et"><b>警惕二次诈骗</b>：任何人说“交钱就能帮你追回”的都是骗子。真正的追赃不会先收费。</span></div>
+        <div class="emgtel">
+          <a href="tel:96110">96110<i>内地反诈专线</i></a>
+          <a href="tel:110" class="blue">110<i>内地报警</i></a>
+        </div>
+        <div class="emgtel" style="margin-top:9px">
+          <a href="tel:993">993<i>澳门司警局报案</i></a>
+          <a href="tel:88007777" class="blue">8800 7777<i>澳门防诈查询热线</i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">带走点什么</div>
+    <button class="btn" onclick="Game.openNote()">📝 生成我的反诈笔记</button>
+    <div class="row2">
+      <button class="btn ghost" onclick="Game.openFamTip()">👨‍👩‍👧 给家人的提醒图</button>
+      <button class="btn ghost" onclick="Game.openChal()">🎯 发起好友挑战</button>
+    </div>
+
+    <div class="sect">晒一下</div>
+    <button class="btn" onclick="Game.showPoster()">📸 生成战绩图</button>
+    <div class="row2">
+      <button class="btn ghost" onclick="Game.copyText(this)">复制文案</button>
+      <button class="btn ghost" onclick="Game.replay()">再来一次</button>
+    </div>
+    <button class="btn ghost" onclick="Game.showHome()">返回首页</button>
+  </div>
+</div>
+
+<!-- ============ 战绩图 ============ -->
+<div class="ov" id="ovPoster">
+  <div class="ovin">
+    <img id="posterImg" alt="战绩图">
+    <p class="posterhint">长按图片可保存到相册 · 或点下方按钮下载</p>
+    <button class="btn" id="posterSave">保存图片</button>
+    <div class="row2">
+      <button class="btn ghost" onclick="Game.copyText(this)">复制文案</button>
+      <button class="btn ghost" onclick="Game.closePoster()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 今日一题 ============ -->
+<div class="ov" id="ovDaily">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">🌅</div>
+    <h1 style="font-size:27px">今日<em>一题</em></h1>
+    <p class="tagline" id="dqDate"></p>
+    <div class="dqstreak">
+      <div><b id="dqStreak">0</b><span>连续打卡</span></div>
+      <div><b id="dqTotal">0</b><span>累计答题</span></div>
+      <div><b id="dqAcc">—</b><span>正确率</span></div>
+    </div>
+    <div class="dqcard" id="dqCard"></div>
+    <button class="btn ghost" onclick="Game.showHome()" style="margin-top:14px">返回首页</button>
+  </div>
+</div>
+
+<!-- ============ 骗子视角（反转关） ============ -->
+<div class="ov" id="ovScam">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">🎭</div>
+    <h1 style="font-size:27px">骗子的<em>第一句话</em></h1>
+    <p class="tagline" id="scTop">换位思考：如果由你来骗，哪一句最容易得手？<br>看穿开局，才不会被开局拿下。</p>
+    <div id="scBody">
+      <div class="tgtbox"><span class="tlbl">你这次的目标</span><span class="ttxt" id="scTarget"></span></div>
+      <div id="scOpts"></div>
+      <div id="scWhy"></div>
+    </div>
+    <div id="scEnd" style="display:none"></div>
+    <div class="row2" id="scNav" style="display:none">
+      <button class="btn ghost" onclick="Game.startScam()">重新开始</button>
+      <button class="btn" onclick="Game.scamNext()">下一题 →</button>
+    </div>
+    <button class="btn ghost" onclick="Game.showHome()" style="margin-top:11px">返回首页</button>
+  </div>
+</div>
+
+<!-- ============ 个人反诈笔记 ============ -->
+<div class="ov" id="ovNote">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">📝</div>
+    <h1 style="font-size:27px">我的<em>反诈笔记</em></h1>
+    <p class="tagline">按你这一局暴露的弱点自动生成。<br>存下来，比任何鸡汤都有用。</p>
+    <div class="note" id="noteBox"></div>
+    <button class="btn" id="noteSave">💾 下载笔记（.md）</button>
+    <div class="row2">
+      <button class="btn ghost" id="noteCopy">复制全文</button>
+      <button class="btn ghost" onclick="Game.closeNote()">返回</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 给家人的提醒图 ============ -->
+<div class="ov" id="ovFam">
+  <div class="ovin">
+    <img id="famImg" alt="给家人的反诈提醒">
+    <p class="posterhint">长按图片保存到相册 · 或点下方按钮下载<br>然后发到家人群里，比转十条新闻有用</p>
+    <button class="btn" id="famSave">保存图片</button>
+    <button class="btn ghost" onclick="Game.closeFam()">返回</button>
+  </div>
+</div>
+
+<!-- ============ 骗局速查表 ============ -->
+<div class="ov" id="ovBook">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">📖</div>
+    <h1 style="font-size:27px">骗局<em>速查表</em></h1>
+    <p class="tagline" id="bkCount"></p>
+    <div id="bookBody"></div>
+    <button class="btn ghost" onclick="Game.showHome()">返回首页</button>
+  </div>
+</div>
+
+<!-- ============ 好友挑战 ============ -->
+<div class="ov" id="ovChal">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">🎯</div>
+    <h1 style="font-size:27px">发起<em>好友挑战</em></h1>
+    <p class="tagline">把挑战码或链接发给朋友，他打开后在首页就能看到你的成绩，并直接开同一局。</p>
+    <div class="codebox">
+      <span>你的挑战码</span>
+      <b class="cc" id="chalCode">—</b>
+      <span id="chalWho"></span>
+      <span class="cnote">挑战码里打包了分数、拦下的骗子数、被骗金额和最高连击</span>
+    </div>
+    <button class="btn" id="chalCopyLink">🔗 复制挑战链接</button>
+    <div class="row2">
+      <button class="btn ghost" id="chalCopyCode">复制挑战码</button>
+      <button class="btn ghost" onclick="Game.closeChal()">返回</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 插件中心 ============ -->
+<div class="ov" id="ovPlug">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">🧩</div>
+    <h1 style="font-size:27px">插件<em>中心</em></h1>
+    <p class="tagline">游戏的功能像积木一样拼出来：每个插件独立开关、<br>立即生效、自动保存。你也可以写自己的插件。</p>
+    <div class="plughead" style="display:none"></div>
+    <div id="plugList"></div>
+    <div id="plugInstallBox" style="display:none">
+      <b style="font-size:14px;color:#fff">安装自定义插件</b>
+      <div class="pwarn">⚠ 插件代码会在本页面里运行。只安装你看得懂的、或来自可信来源的代码。</div>
+      <textarea id="plugCodeArea" placeholder="把插件代码粘贴到这里（一段调用 FZ.use({...}) 的 JS）"></textarea>
+      <div class="pinstrow">
+        <button class="btn ghost" onclick="Game.plugPickFile()">从文件导入</button>
+        <button class="btn" onclick="Game.plugInstallSubmit()">安装</button>
+        <button class="btn ghost" onclick="Game.plugInstallView(false)">收起</button>
+      </div>
+      <input type="file" id="plugFile" accept=".fzplugin,.json,.txt,.js" style="display:none">
+    </div>
+    <div class="plugacts">
+      <button class="btn" onclick="Game.plugInstallView(true)">＋ 安装自定义插件</button>
+      <div class="row2">
+        <button class="btn ghost" onclick="Game.openPlugDoc()">📘 插件开发指南</button>
+        <button class="btn ghost" onclick="Game.showHome()">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 插件开发指南 ============ -->
+<div class="ov" id="ovPlugDoc">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">📘</div>
+    <h1 style="font-size:27px">插件<em>开发指南</em></h1>
+    <div class="docbox" style="text-align:left">
+      <h4>一个插件是什么</h4>
+      <p>一个普通的 JS 对象：用 <code>id</code> 标识自己，用生命周期钩子参与游戏。调用 <code>FZ.use(插件)</code> 完成注册。</p>
+      <pre>FZ.use({
+  id: 'hello',              // 必填，全局唯一
+  name: '我的插件',
+  ver: '1.0.0',
+  icon: 'hello',
+  desc: '一句话说明它做什么',
+  onCardShow({ card, el }) {
+    // 每张卡片滑入时触发
+  },
+  onJudge({ card, good, dir, combo }) {
+    // 每次判定（拦截/放行/超时）后触发
+  },
+  onSettle(data) {
+    // 一局结束：{ win, score, lost, mode, ... }
+  },
+  onTick({ left }) {
+    // 每帧回调：left 是本卡剩余时间 0~1
+  },
+  onEnable() {}, onDisable() {}   // 开关时触发
+});</pre>
+      <h4>可用钩子</h4>
+      <table>
+        <tr><th>钩子</th><th>触发时机 · 参数</th></tr>
+        <tr><td><code>onCardShow</code></td><td>卡片滑入 · { card, el }</td></tr>
+        <tr><td><code>onTick</code></td><td>每帧 · { left, el }（left 为剩余时间比例）</td></tr>
+        <tr><td><code>onJudge</code></td><td>判定后 · { card, good, dir, delta, combo }</td></tr>
+        <tr><td><code>onSettle</code></td><td>结算 · { win, score, lost, mode, blocked, maxCombo }</td></tr>
+        <tr><td><code>onTheme</code></td><td>关卡换肤 · 当前关卡配置</td></tr>
+        <tr><td><code>onEnable / onDisable</code></td><td>插件开关时，用来挂载/清理自己的 DOM</td></tr>
+      </table>
+      <h4>插件 API（FZ 对象）</h4>
+      <p><code>FZ.toast(标题, 副标题)</code> 弹全局提示；<code>FZ.storage.get/set</code> 存你自己的数据（自动持久化）；<code>FZ.fx.setDensity(0~1.6)</code> 调粒子密度。</p>
+      <h4>安装与分享</h4>
+      <p>在插件中心点「安装自定义插件」，粘贴代码或导入 <code>.fzplugin</code> 文件即可；<code>.fzplugin</code> 就是一个 JSON，里面带着你的代码和元信息，可以随意分享。官方插件也可以直接导出成文件发给朋友。</p>
+      <h4>示例：一键复制试装</h4>
+      <p>点下面的按钮复制一个完整的示例插件（连击音效增强），然后到插件中心粘贴安装。</p>
+    </div>
+    <button class="btn" onclick="Game.copyPlugExample(this)">复制示例插件代码</button>
+    <button class="btn ghost" onclick="Game.closePlugDoc()">返回插件中心</button>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   关卡配置
+   ================================================================== */
+const LEVELS = [
+  {
+    id:'L1', pool:'L1', name:'校园兼职', sub:'兼职 · 刷单 · 校园贷',
+    desc:'开学季最密集的一类骗局。凡是让你“先出钱”的机会——垫付、资料费、押金、培训费——都是陷阱。真正的兼职和助学金，一分钱都不会让你先交。',
+    scams:6, reals:6, perCard:6000,
+    accent:'#38e8d0', accent2:'#4f8cff', glow1:'rgba(56,232,208,.26)', glow2:'rgba(79,140,255,.16)'
+  },
+  {
+    id:'L2', pool:'L2', name:'公检法恐吓', sub:'冒充公安 · 客服 · 社保',
+    desc:'用恐惧和紧迫感让你来不及思考：涉嫌犯罪、账户冻结、24 小时内停机。记住一句话——所有官方机构都不会用一条短信链接催你，更不会让你转账。',
+    scams:6, reals:6, perCard:4600,
+    accent:'#4f8cff', accent2:'#ff4f60', glow1:'rgba(79,140,255,.3)', glow2:'rgba(255,79,96,.16)'
+  },
+  {
+    id:'L3', pool:'L3', name:'AI 换脸', sub:'熟人借钱 · 情感投资',
+    desc:'脸可以是假的，声音也可以是假的，几秒钟素材就能合成。一旦出现「紧急 + 保密 + 要转账」这个组合，唯一的正确动作是挂断，然后打你自己通讯录里的号码。',
+    scams:6, reals:6, perCard:3600,
+    accent:'#a855f7', accent2:'#38e8d0', glow1:'rgba(168,85,247,.3)', glow2:'rgba(56,232,208,.16)'
+  },
+  {
+    id:'L4', pool:'L4', name:'澳门 · 跨境', sub:'入境处 · 换汇 · 跨境汇款',
+    desc:'跨境场景最容易被骗，因为你没法当面核实。冒充入境处、司警局的电话，私下换汇的「好汇率」，扫码付款后对方不到账——记住：任何要你转账、给验证码、下载未知 App 的，先挂断，再自己打官方电话查。',
+    scams:6, reals:6, perCard:3200,
+    accent:'#39d0ff', accent2:'#ffb020', glow1:'rgba(57,208,255,.28)', glow2:'rgba(255,176,32,.16)'
+  }
+];
+
+const HELL = {
+  id:'HELL', pool:'ALL', name:'地狱模式', sub:'链接线索隐藏 · 2.4 秒判断',
+  desc:'这一关不给你任何提示：可疑链接不再显示，每条消息只有 2.4 秒。骗术本身没有变，变的是你有没有真正学会看内容，而不是看表象。得分翻倍。',
+  scams:12, reals:10, perCard:2400, scoreMul:2, hideUrl:true,
+  accent:'#ff4f60', accent2:'#ffb33d', glow1:'rgba(255,79,96,.32)', glow2:'rgba(255,179,61,.16)'
+};
+
+/* ==================================================================
+   题库：每关 9 条诈骗 + 9 条真实
+   ================================================================== */
+const POOLS = {
+  L1:{
+    scams:[
+      { t:'msg', who:'兼职群·招聘员', av:'招', sub:'QQ群 · 刚刚', body:'招短视频点赞员，一单 5 元日结！先垫 99 元试单立返 128，之后需垫付 2800 元完成“连单”才能全部提现。', url:'任务派发 · 微信群', amount:2800,
+        why:'“垫付连单”是刷单诈骗的核心。前期真给你返几块买信任，等你敢垫大钱，就以“任务未完成”冻结资金。' },
+      { t:'msg', who:'线上录入·HR', av:'HR', sub:'招聘网站 · 刚刚', body:'急招线上文字录入，日结 300。入职先交 198 元资料费，之后还需缴纳 2200 元“接单保证金”才能派单。', amount:2400,
+        why:'《劳动合同法》明确禁止用人单位向劳动者收取任何财物。先交钱的兼职，本质都是骗钱，而且名目会一个接一个。' },
+      { t:'msg', who:'征信中心·陈专员', av:'陈', sub:'陌生号码 · 刚刚', body:'您学生时期开通的校园贷账户未注销，将影响征信。请向指定账户转账 3000 元完成账户清退，核验后原路返还。', amount:3000,
+        why:'征信只有人民银行征信中心管，不存在“帮你注销账户”。凡是要你转账才能“清退”的，都是诈骗。' },
+      { t:'msg', who:'学生资助中心', av:'助', sub:'陌生号码 · 刚刚', body:'您已获评国家助学金 5000 元，需先缴纳 2800 元手续费即可到账，请点击链接办理。', url:'edu-subsidy-gov.cn/apply', amount:2800,
+        why:'假域名里塞进 gov 冒充政府站。助学金发放不收取任何费用，也不会让你在陌生链接里填卡号。' },
+      { t:'msg', who:'班主任·王老师', av:'师', sub:'班级群 · 刚刚', body:'各位同学，本学期研学活动费用 2600 元，请扫码缴纳，今晚 20:00 截止。', url:'收款码 · 个人微信', amount:2600,
+        why:'学校收任何费用都走官方通知和对公账户，不会让你扫个人收款码。老师和同学的头像昵称都可以被克隆。' },
+      { t:'msg', who:'游戏客服中心', av:'游', sub:'热血战纪 · 刚刚', body:'恭喜您被抽中幸运玩家，只需充值 2300 元即可领取限定皮肤礼包，充值金额 24 小时内全额返还。', amount:2300,
+        why:'正规游戏发奖从不需要你先付费。“会返还”是最常见的垫付话术，钱一转就再也要不回来。' },
+      { t:'msg', who:'学长', av:'学', sub:'校园二手群 · 刚刚', body:'这个演唱会我有内部票，2500 元全款转让，先付定金我就给你留着，晚了就没了。', amount:2500,
+        why:'热门演出没有“内部票”流出。定金一转人就消失，或者继续跟你要“尾款”“激活费”。' },
+      { t:'msg', who:'论文辅导·李编辑', av:'李', sub:'陌生号码 · 刚刚', body:'毕业论文代写包过，先付 2700 元定金，查重不通过全额退款，全程保密。', amount:2700,
+        why:'代写本身违规，且是诈骗高发区。收钱后要么直接拉黑，要么用 AI 拼一篇再回来勒索“保密费”。' },
+      { t:'msg', who:'大厂实习内推', av:'内', sub:'求职群 · 刚刚', body:'内推名额只剩两个，交 2900 元培训费即可锁定实习 offer，转正后全额返还。', amount:2900,
+        why:'正规实习、内推都不会收费。“内推费”“培训费”“押金”只是换个名目套钱，交完之后还有下一个名目。' },
+      { t:'msg', who:'兼职平台·七号客服', av:'客', sub:'兼职App · 刚刚', body:'检测到您是普通用户，单价较低。充值 1999 元升级会员即可解锁高佣金任务，会员费做满 5 单全额返还。', amount:1999,
+        why:'「会员费返还」是刷单骗局的新外壳。正规兼职平台不会让求职者先充值——你在找工作，凭什么先给平台打钱？' },
+      { t:'msg', who:'校园代理·刘学长', av:'代', sub:'创业群 · 刚刚', body:'校园代理招募：代理文具和四六级资料，先交 2500 元进货押金，卖不完可以退，月入过万不是梦。', amount:2500,
+        why:'「卖不完可以退」永远退不掉：要么货是劣质品，要么人直接失联。凡是先交钱拿货的代理，本质都是把库存风险转给你。' },
+      { t:'msg', who:'游戏交易·收购商', av:'收', sub:'交易平台 · 刚刚', body:'高价收购您的《王者荣耀》账号，出价 3200 元。请到指定交易平台挂售，平台需先缴纳保证金，交易完成后全额退回。', amount:3200,
+        why:'假买家 + 假平台是成套的。平台是骗子搭的，保证金一交就出现「账户冻结需再充值解冻」，一步步套到你自己掏钱。' },
+      { t:'msg', who:'爱心领养', av:'宠', sub:'同城群 · 刚刚', body:'免费领养布偶猫，只因要出国无法带走。需先支付 2200 元疫苗和空运费用，收到猫咪后全程回访。', amount:2200,
+        why:'「免费领养」是引流钩子，运费、检疫费、空运费都是虚构的，交完还有「押金」「保险」。真正送养的人不会先跟你要钱。' },
+      { t:'msg', who:'支教项目·招募组', av:'支', sub:'志愿服务群 · 刚刚', body:'暑期山区支教招募，有志愿时长证明和证书。名额有限，需先交 2600 元项目费与保险费用以锁定名额。', amount:2600,
+        why:'正规的志愿服务和支教项目不向志愿者收费。拿「志愿时长」「证书」当卖点再收钱的，多半是机构敛财，甚至是纯诈骗。' },
+      { t:'msg', who:'考证培训·周老师', av:'考', sub:'陌生号码 · 刚刚', body:'教师资格证包过班，签协议保过，不过退费。现在报名立减，只需先付 2800 元学费锁定名额。', amount:2800,
+        why:'「包过」「保过」「不过退费」是培训诈骗的三件套。签的协议主体往往查无实人，退费时人已经联系不上。' }
+    ],
+    reals:[
+      { t:'msg', who:'菜鸟驿站', av:'驿', sub:'取件通知 · 刚刚', body:'您的快递已放入 3 号柜，取件码 8-2-4471，请在 24 小时内取走。' },
+      { t:'msg', who:'阿杰（室友）', av:'杰', sub:'微信 · 2 分钟前', body:'今晚 7 点食堂二楼，一起去吃饭不？我先去占个座。' },
+      { t:'msg', who:'图书馆', av:'图', sub:'借阅提醒 · 刚刚', body:'您借阅的《数据结构与算法分析》还有 2 天到期，请及时归还或续借。' },
+      { t:'msg', who:'教务处', av:'教', sub:'教务系统 · 刚刚', body:'本学期选课结果已公布，请在校园网内登录教务系统查看，如有问题到教务处窗口咨询。' },
+      { t:'msg', who:'摄影社', av:'摄', sub:'社团群 · 刚刚', body:'周六早上 8 点校门口集合去拍外景，记得带相机和备用电池～' },
+      { t:'msg', who:'勤工助学中心', av:'勤', sub:'校内通知 · 刚刚', body:'您申请的图书馆助理岗位已通过初审，请于本周四 14:30 到学生活动中心 203 面试。本岗位不收取任何费用。' },
+      { t:'msg', who:'外卖骑手', av:'骑', sub:'美团 · 刚刚', body:'您好，您的外卖已送到 2 号楼下，麻烦下来取一下，我在这儿等您。' },
+      { t:'msg', who:'班长', av:'班', sub:'班级群 · 刚刚', body:'明天第一节调课，改成上午 10 点在 B302 上课，别忘了。' },
+      { t:'msg', who:'妈妈', av:'妈', sub:'微信 · 10 分钟前', body:'天冷了记得加衣服，周末回家吃饭吗？我炖了汤。' },
+      { t:'msg', who:'校园一卡通', av:'卡', sub:'服务号 · 刚刚', body:'您的一卡通余额为 86.40 元，低于提醒值，可前往食堂充值窗口或校内自助机充值。' },
+      { t:'msg', who:'教务处考务科', av:'考', sub:'教务系统 · 刚刚', body:'本学期普通话水平测试报名将于本周五截止，请在教务系统内报名，报名费由学校统一代扣。' },
+      { t:'msg', who:'学院办公室', av:'院', sub:'学院群 · 刚刚', body:'本学期导师双选开始，请在本周五前将意向表交到学院办公室 A208，表格在群文件里。' }
+    ]
+  },
+
+  L2:{
+    scams:[
+      { t:'call', who:'上海市公安局经侦支队', av:'警', sub:'来电 · 0086 21-62****71', body:'你名下银行卡涉嫌一起洗钱案，现需配合资金清查。请将 3600 元存款转入我们指定的安全账户，查清后原路返还。此事涉密，不得告知任何人。', amount:3600,
+        why:'公检法办案绝不会电话要求转账，也根本没有“安全账户”。凡是让你“保密、别告诉家人”的，就是怕你去核实。' },
+      { t:'msg', who:'快递客服', av:'递', sub:'圆通速递 · 刚刚', body:'您的包裹运输途中丢失，我们按三倍价格赔付 2800 元。请下载“XX会议”App 并开启屏幕共享，由客服协助您操作。', url:'理赔专员 · 企业微信', amount:2800,
+        why:'屏幕共享等于把你的验证码、密码、人脸验证全程直播给对方。任何要求“开屏幕共享”的客服都是骗子。' },
+      { t:'msg', who:'社保局', av:'社', sub:'陌生号码 · 刚刚', body:'您的社保卡因信息异常已暂停使用，请点击链接补录信息并缴纳 2600 元工本费，逾期将影响医保报销与养老金发放。', url:'shsb-fix.com/update', amount:2600,
+        why:'社保、医保不会用短信链接办业务，更不会收费。凡是“逾期影响报销/发放”的恐吓型短信，都在利用你对断保的恐惧。' },
+      { t:'msg', who:'ETC 客服', av:'E', sub:'高速通行 · 刚刚', body:'您的 ETC 通行卡已过期，请点击链接重新认证并缴纳 2200 元设备升级费，否则将无法通过高速收费站。', url:'etc-renew.cc/auth', amount:2200,
+        why:'全国高发的批量诈骗短信。ETC 业务在银行网点或官方小程序办理，不会用 .cc 域名发认证链接，更不会收费。' },
+      { t:'msg', who:'10086', av:'移', sub:'中国移动 · 刚刚', body:'【中国移动】您的手机号因实名信息不全将在 24 小时后停机，请点击链接补录身份并支付 2500 元实名保证金，逾期无法恢复。', url:'10086-safe.com/verify', amount:2500,
+        why:'真 10086 的域名不会被加连字符（10086-safe.com）。运营商不会用“24 小时停机”逼你点陌生链接，更不会收“保证金”。' },
+      { t:'msg', who:'微信支付', av:'微', sub:'腾讯科技 · 刚刚', body:'检测到您有一笔 2900 元的待付款订单，若非本人操作请立即点击链接取消，超时将自动扣款。', url:'wx-pay-check.cn/cancel', amount:2900,
+        why:'制造“超时自动扣款”的紧迫感，让你来不及想就点链接。微信支付不会用外部域名通知你，打开 App 看账单最可靠。' },
+      { t:'msg', who:'航空公司客服', av:'航', sub:'东方航空 · 刚刚', body:'您预订的航班因机械故障取消，可领取 2400 元延误补偿。请点击链接填写银行卡信息，2 小时内到账。', url:'refund-air.cn/compensate', amount:2400,
+        why:'航班变动只会在官方 App 和短信里通知改签退票，退款原路返回，不需要你填卡号。“补贴”就是钓你的钩子。' },
+      { t:'msg', who:'95588', av:'工', sub:'工商银行 · 刚刚', body:'【工商银行】恭喜您符合提额条件，信用额度可提升至 20 万元，点击链接缴纳 2300 元征信评估费即可办理，名额有限。', url:'icbc-credit.top/apply', amount:2300,
+        why:'银行官方短信不会带外部链接，更不会用 .top 这类域名。提额不收取任何费用，只走官方 App 或柜台。' },
+      { t:'msg', who:'征信修复中心', av:'信', sub:'陌生号码 · 刚刚', body:'您有一条不良征信记录可申请消除，需先缴纳 3200 元服务费并签署电子协议，办不成全额退款。', amount:3200,
+        why:'征信记录任何机构和个人都无权“消除”。声称能“修复征信”的，100% 是诈骗，且往往在收钱后继续加价。' },
+      { t:'msg', who:'通信管理局', av:'通', sub:'陌生号码 · 刚刚', body:'您名下有一张电话卡因涉嫌发送诈骗短信被举报，将于 24 小时后关停并列入黑名单。请拨打本号码转接公安核查，并缴纳 2600 元保证金。', amount:2600,
+        why:'12381 是国家反诈预警号码，但它只会单向提醒，不会要你转账。任何自称通信管理局、还要你转接「公安」的来电，都是伪造的。' },
+      { t:'msg', who:'海关通关科', av:'关', sub:'国际物流 · 刚刚', body:'您有一个国际包裹在海关被暂扣，需缴纳 2400 元清关费和关税后方可放行，请在 12 小时内扫码支付，逾期将退回寄件人。', amount:2400,
+        why:'海关扣件会有正式的书面通知和官方缴税渠道，绝不会用短信催你扫码付费。凡是「包裹被扣 + 限时扫码支付」，一律是诈骗。' },
+      { t:'msg', who:'税务局', av:'税', sub:'陌生号码 · 刚刚', body:'【国家税务总局】您有一笔 2800 元个人所得税退税待领取，请点击链接填写银行卡号及验证码，逾期视为放弃。', url:'tax-refund-gov.vip/claim', amount:2800,
+        why:'退税只在「个人所得税」官方 App 里办理，钱原路退回你已绑定的卡，不需要你填卡号，更不需要验证码。要验证码的，就是要你的钱。' },
+      { t:'msg', who:'12308 领保热线', av:'领', sub:'国际来电 · 刚刚', body:'这里是外交部 12308 热线，你名下有一份重要公文未领取，涉嫌协助他人非法出境。转接国内办案单位，请如实说明，切勿自行联系他人。', amount:3300,
+        why:'驻外使领馆和 12308 不会用电话通知「公文」「涉案」，也不会转接公安。留学生是这类骗局的重点目标——挂断，自己打总领馆官方电话核实。' },
+      { t:'msg', who:'供电局', av:'电', sub:'陌生号码 · 刚刚', body:'您所在户号电费欠费 2500 元，将于今晚 20:00 断电。请扫描下方二维码立即缴费，或联系客服专员协助处理。', amount:2500,
+        why:'电费欠费会由供电局通过官方渠道和正规账单催缴，不会让你扫陌生二维码、更不会「今晚就断」。扫码付款后对方既不销账也联系不上。' },
+      { t:'msg', who:'快递稽查部', av:'稽', sub:'陌生号码 · 刚刚', body:'您的包裹在安检中被查出违禁品，已移交公安机关。配合调查可先从轻处理，需先缴纳 3100 元保证金，查清后原路退还。', amount:3100,
+        why:'真海关查出违禁品会直接走法律程序，不可能让你交钱「从轻处理」。用「涉案」吓你、再用「交钱就没事」给你台阶，是典型双面话术。' }
+    ],
+    reals:[
+      { t:'msg', who:'95533', av:'建', sub:'建设银行 · 刚刚', body:'【建设银行】您尾号 6688 的账户于 10 月 14 日支出 32.50 元，当前余额 4218.60 元。如需查询请登录官方 App。' },
+      { t:'msg', who:'10086', av:'移', sub:'中国移动 · 刚刚', body:'【中国移动】您本月套餐内流量已使用 85%，剩余 3.2GB，可登录官方 App 查看详情。' },
+      { t:'msg', who:'12306', av:'铁', sub:'铁路12306 · 刚刚', body:'【铁路12306】您购买的 10 月 20 日 G1234 次车票已出票成功，可在官方 App 内查询订单。' },
+      { t:'msg', who:'交管12123', av:'交', sub:'官方推送 · 刚刚', body:'【交管12123】您的小型汽车有一条违法记录待处理，请登录官方 App 查看详情并处理。' },
+      { t:'msg', who:'学院办公室', av:'院', sub:'教务通知 · 刚刚', body:'您申请的教室借用已通过：周三 14:00-16:00，B203。使用后请关闭电源并锁好门窗。' },
+      { t:'msg', who:'学校财务处', av:'财', sub:'校内通知 · 刚刚', body:'您本学年学费已入账，电子票据可在校内财务系统自行下载打印，无需任何操作。' },
+      { t:'msg', who:'校医院', av:'医', sub:'预约提醒 · 刚刚', body:'您的体检预约已确认：10 月 20 日上午 9:00，请空腹前往门诊楼三楼。' },
+      { t:'msg', who:'图书馆', av:'图', sub:'借阅提醒 · 刚刚', body:'您借阅的《线性代数》还有 1 天到期，请及时归还或在线续借。' },
+      { t:'msg', who:'宿管阿姨', av:'宿', sub:'一楼值班室 · 刚刚', body:'你们宿舍的快递我帮放到一楼值班室了，记得下来拿，别放太久。' },
+      { t:'msg', who:'12381', av:'反', sub:'国家反诈中心 · 刚刚', body:'【国家反诈中心】您近期可能接到诈骗电话或短信，请注意甄别，切勿向陌生人转账、透露验证码。有疑问请拨 96110。' },
+      { t:'msg', who:'12366', av:'税', sub:'纳税服务热线 · 刚刚', body:'【税务】您 2025 年度综合所得汇算已完成，退税金额已原路退回至您本人银行卡，可登录个人所得税 App 查看详情。' },
+      { t:'msg', who:'银行客服', av:'建', sub:'建设银行 · 刚刚', body:'【建设银行】您账户的银行卡将于 2027 年 3 月到期，可在手机银行或任一网点免费换卡，无需缴纳任何费用。' }
+    ]
+  },
+
+  L3:{
+    scams:[
+      { t:'call', who:'阿杰', av:'杰', sub:'视频通话 · 画面与本人一致', body:'我在外面出事了急需用钱，这事先别告诉别人，你先转 3000 给我，回头我解释。', amount:3000,
+        why:'AI 换脸+拟声已能以假乱真，几秒素材就能合成。“紧急 + 保密 + 要转账”三个信号同时出现，挂断后用自己存的号码回拨。' },
+      { t:'call', who:'儿子', av:'儿', sub:'来电 · 声音与本人一致', body:'爸我出事了急需用钱，这事千万别告诉别人，你先转 2800 给我，我回头解释。', amount:2800,
+        why:'骗子会先制造恐慌，再用“别告诉别人”切断你求证的渠道。真出事的人不会阻止你联系家人。' },
+      { t:'msg', who:'辅导员·张老师', av:'张', sub:'微信 · 刚刚', body:'我在开会不方便接电话，你先帮我转 2600 给一个学生应急，这事先别声张，回头我还你。', amount:2600,
+        why:'头像昵称几分钟就能克隆，盗号也能直接操作。涉及转账，必须用你自己拨出去的电话或当面核实。' },
+      { t:'msg', who:'小雅', av:'雅', sub:'同城交友 · 3 分钟前', body:'哥哥今天心情不好吗？我跟着表哥在一个平台玩，很稳的，你先充 3200 我带你赚一波，亏了我赔你。', amount:3200,
+        why:'杀猪盘标准剧本：情感铺垫 → 小额甜头 → 诱导大额。平台是骗子自己搭的，提现时才见真章。' },
+      { t:'msg', who:'面试官·王经理', av:'王', sub:'线上面试 · 刚刚', body:'恭喜通过初试。入职前需完成实名认证：请开启摄像头，按提示眨眼、转头、张嘴，系统会录制人脸用于建档，并缴纳 4000 元入职保证金。', amount:4000,
+        why:'这是在采集你的人脸动态，用来绕过网贷的人脸核验。正规面试不会让你对着摄像头做眨眼转头动作，更不会收保证金。' },
+      { t:'msg', who:'抽奖小助手', av:'奖', sub:'粉丝群 · 刚刚', body:'恭喜您被抽中粉丝福利！奖品为最新款手机，需先支付 2400 元关税和运费即可发货，名额仅保留 2 小时。', amount:2400,
+        why:'真实抽奖不会让你先付“关税”“运费”“保证金”。所有“中奖但要先交钱”的都是诈骗。' },
+      { t:'msg', who:'主播小柔', av:'柔', sub:'直播间私信 · 刚刚', body:'哥哥加个微信吧，平台抽成太高了。我这边有专属福利，你先转 2500 给我充值，我返你双倍。', amount:2500,
+        why:'绕开平台私下转账，就失去了平台的所有保护和追回渠道。主播诱导私下转账、承诺返利，是典型骗局。' },
+      { t:'call', who:'南京市公安局', av:'警', sub:'视频通话 · 出示警官证', body:'我们看到你涉嫌参与一起电信诈骗案，现在视频给你看我的警官证。请配合调查，把 3400 元资金转到指定账户自证清白。', amount:3400,
+        why:'警官证图片、视频画面都能伪造。真警察不会视频办案、不会让你转账自证清白，只会请你到派出所当面做笔录。' },
+      { t:'call', who:'外婆', av:'婆', sub:'视频通话 · 画面与本人一致', body:'孩子，外婆在菜市场摔了，急着用钱做手术，你快转 2900 到这个账号，别跟你爸妈说，怕他们担心。', amount:2900,
+        why:'专门挑你最容易心软、最来不及思考的场景下手。“别告诉父母”就是防止你去核实。先挂断，打父母电话确认。' },
+      { t:'msg', who:'表妹', av:'妹', sub:'微信 · 语音 5 秒', body:'（语音 5 秒）哥我手机摔了正在修，借我 3000 应急，回头见面给你，别跟我妈说。', amount:3000,
+        why:'5 秒语音足以克隆音色。亲友账号被盗、语音被合成后借钱的案例非常多——挂断，用你自己存的号码打回去确认。' },
+      { t:'msg', who:'投资导师·陆老师', av:'投', sub:'股友群 · 刚刚', body:'恭喜你被拉进核心群。跟着我操作，本月已带学员翻倍。先入金 3600 元体验机构通道，盈利你七我三。', amount:3600,
+        why:'群里除了你全是托。所谓「机构通道」是骗子自建平台，账面数字随便改，能提现的只有第一次小额。' },
+      { t:'msg', who:'数字人民币推广', av:'数', sub:'陌生号码 · 刚刚', body:'国家数字人民币推广活动，参与可领 2000 元消费红包。请点击链接完成实名认证并完成人脸识别，红包即刻发放。', amount:2400,
+        why:'借国家项目名义采集你的身份证和人脸动态，人脸一交出去，可能被用来开通网贷。数字人民币官方不会通过短信链接让你认证。' },
+      { t:'msg', who:'君君（相亲对象）', av:'君', sub:'交友软件 · 刚刚', body:'哥哥，我妈妈突然住院要交押金，我实在没办法了才开口找你，能不能先借我 3200，下个月发了工资就还你。', amount:3200,
+        why:'刚认识不久就开口借钱，是「杀猪盘」转现金环节。感情是真的吗？先视频、先让对方家人出现，或者干脆说「我陪你去医院交」。' },
+      { t:'call', who:'王总', av:'总', sub:'来电 · 声音与本人一致', body:'（语速急促）我在开会走不开，你现在马上给这个供应商转 4000 定金，合同我回头发你，先办，别声张。', amount:4000,
+        why:'AI 拟声能克隆老板的声音，且专挑「开会、不方便、要保密」这种无法回拨的场景。涉及转账必须用另一条渠道（当面或你自己拨出）复核。' }
+    ],
+    reals:[
+      { t:'msg', who:'妈妈', av:'妈', sub:'微信语音 · 3 分钟前', body:'（语音 8 秒）饭在锅里温着，你回来自己热一下，我出去跳个广场舞。' },
+      { t:'msg', who:'阿杰（室友）', av:'杰', sub:'宿舍群 · 刚刚', body:'这周末谁回宿舍？我买了水果，回来的人有份。' },
+      { t:'msg', who:'小雨（同学）', av:'雨', sub:'微信 · 6 分钟前', body:'上节课老师留的作业是第几章呀？我走神了，方便拍一下笔记吗。' },
+      { t:'msg', who:'宿管阿姨', av:'宿', sub:'一楼值班室 · 刚刚', body:'今晚 11 点停水检修，记得提前洗漱，通知贴在楼下门口了。' },
+      { t:'msg', who:'班长', av:'班', sub:'班级群 · 刚刚', body:'周五下午 4 点在 A301 开班会，讲一下奖学金的申请材料，记得来。' },
+      { t:'msg', who:'团支书', av:'团', sub:'班级群 · 刚刚', body:'上次团日活动的照片我传到群文件里了，需要的自己下载。' },
+      { t:'msg', who:'摄影社', av:'摄', sub:'社团群 · 刚刚', body:'这周的外拍因为下雨改到下周，具体时间群里再通知。' },
+      { t:'msg', who:'外卖骑手', av:'骑', sub:'美团 · 刚刚', body:'您好，您的外卖放在 2 号楼门口架子上了，我拍了照，麻烦尽快取一下。' },
+      { t:'msg', who:'10086', av:'移', sub:'中国移动 · 刚刚', body:'【中国移动】您本月话费已出账，共 38.00 元，可登录官方 App 查看账单明细。' },
+      { t:'msg', who:'学习委员', av:'学', sub:'课程群 · 刚刚', body:'老师把期末复习提纲发到课程平台了，大家记得下载，下周课上会讲一遍重点。' },
+      { t:'msg', who:'好友·阿哲', av:'哲', sub:'微信 · 12 分钟前', body:'周末来打球不？场地我已经订好了，下午三点老地方见。' },
+      { t:'msg', who:'就业指导中心', av:'就', sub:'校内通知 · 刚刚', body:'本月校园招聘宣讲会安排已发布，请登录就业信息网查看时间地点，无需报名费。' }
+    ]
+  },
+
+  L4:{
+    scams:[
+      { t:'call', who:'澳门入境处', av:'境', sub:'来电 · 853 2xxx xxxx', body:'这里是澳门入境事务厅，您名下有一封投诉邮件，报出姓名才能打开核实。核实后若涉及案件，我们会转接内地公安处理。', amount:3800,
+        why:'真实案例：冒充「澳门入境处」再转接内地「公安」，是专打港澳与留学生的高发套路。出入境部门不会用电话通知你「有投诉邮件」，更不会转接所谓公安。' },
+      { t:'call', who:'司法警察局·陈警官', av:'警', sub:'来电 · 853 2xxx xxxx', body:'我是澳门司警局警官，你的证件被人用于洗钱，现需配合调查。案件涉密不得外泄，请将 4000 元转入指定账户作保证金，查清后退还。', amount:4000,
+        why:'司警局不会电话办案、不会要求转账或缴纳保证金。真正的核实方式只有一个：挂断电话，自己拨司警局防诈骗查询热线 8800 7777 或报案热线 993。' },
+      { t:'msg', who:'换汇·阿豪', av:'汇', sub:'同学群 · 刚刚', body:'我这边汇率比银行划算，港币人民币都能换，走我这边省手续费。小额先换给你试，大额也可以，转账备注写生活费就行。', amount:3600,
+        why:'私下换汇不受任何平台保护。常见结局有两种：大额时对方收款消失；或对方打入的是涉诈资金，你的账户被司法冻结——钱和卡一起没了。' },
+      { t:'msg', who:'跨境代购·招募', av:'代', sub:'兼职群 · 刚刚', body:'澳门代购兼职，你只管垫付货款，我们负责销售，每单返你 15% 佣金，日结到账，做满三单全额退还本金。', amount:2800,
+        why:'换汤不换药的刷单骗局，只是把「点赞」换成「代购」。凡是「垫付 + 返佣 + 做满退还」，都是在钓你越垫越多。' },
+      { t:'msg', who:'CTM 澳门电讯', av:'C', sub:'陌生号码 · 刚刚', body:'【澳门电讯】您的积分将于 3 日后清零，可兑换 300 元话费或家电礼品，请点击链接登录账户兑换，逾期作废。', url:'ctm-reward.top/redeem', amount:2600,
+        why:'积分清零是经典的紧迫感钩子。假域名（.top）套上运营商名字，登录页就是要你的账号密码和短信验证码。查积分请打开 CTM 官方 App。' },
+      { t:'call', who:'澳门水务', av:'水', sub:'来电 · 853 2xxx xxxx', body:'您的水费账户已欠费 2400 元，今日 18:00 前未缴纳将停止供水。可加我们客服微信扫码缴费，立即恢复。', amount:2400,
+        why:'公共事业欠费会有正式账单和官方缴费渠道（银行、自动转账、官方 App），不会让你加私人微信扫码付款。扫了钱，对方既不销账也联系不上。' },
+      { t:'msg', who:'跨境车务·代办', av:'车', sub:'车友群 · 刚刚', body:'港澳两地牌代办，内部渠道包过，只需先付 3200 元手续费，材料我们全包，办不成全额退款。', amount:3200,
+        why:'两地牌、跨境保险必须通过官方渠道与指定机构办理，所谓「内部名额」「包过」都是为了骗手续费。「全额退款」是最常见的定心丸话术。' },
+      { t:'msg', who:'贵宾厅·阿强', av:'强', sub:'陌生私信 · 刚刚', body:'帮赌场代刷流水，稳赚返点。你先把钱转进我的账户，我帮你刷完流水，本金和 8% 返点一起给你，当天结算。', amount:3600,
+        why:'所谓「代刷流水拿返点」本身就是洗钱链条的一环。钱转进去拿不回，还可能因为资金涉诈让你的账户被冻结——既破财，又可能被调查。' },
+      { t:'msg', who:'留学中介·升学部', av:'升', sub:'留学群 · 刚刚', body:'学校要求做资金证明，请把这学期学费 4000 元先转到我们公司的监管账户，验资通过后原路退回，这是常规流程，很多同学都办了。', amount:4000,
+        why:'学校的学费缴纳只走官方账户与官方系统，不会有「中介监管账户」。凡是让你把钱转到私人或第三方公司账户「验资」的，都是诈骗。' },
+      { t:'msg', who:'澳门邮政', av:'邮', sub:'陌生号码 · 刚刚', body:'【澳门邮政】您有一个国际包裹因资料不全被扣留，需缴纳 2600 元清关处理费，请点击链接支付，超过 24 小时将退回寄件地。', url:'macaupost-ck.cc/pay', amount:2600,
+        why:'假域名套官方名字 + 限时恐吓 + 让你线上付费，是这类骗局的三件套。包裹有问题，直接拿单号去官方渠道查，别点短信里的链接。' },
+      { t:'msg', who:'横琴置业·李经理', av:'置', sub:'置业群 · 刚刚', body:'横琴有内部认购名额，只要先交 3600 元诚意金就能锁定，开盘必涨，不去可全额退。名额只剩两个，先到先得。', amount:3600,
+        why:'「内部名额 + 诚意金 + 不买可退」是地产类诈骗模板。钱转出去之后你会发现名额没了、人也联系不上，「诚意金」三个字在法律上毫无保障。' },
+      { t:'call', who:'赴澳劳务中介', av:'劳', sub:'来电 · 陌生号码', body:'澳门酒店招服务员，月薪两万包吃住，包签证包过。只需先交 3000 元劳务费和押金，办不成全退，我们做这行十几年了。', amount:3000,
+        why:'正规外派劳务必须通过有资质的机构，且不会在签证下来前收取大额费用。「包过」「包签证」是话术，收完钱就以「材料不合格」为由拖延甚至失联。' }
+    ],
+    reals:[
+      { t:'msg', who:'澳门通', av:'通', sub:'服务号 · 刚刚', body:'【澳门通】您的卡内余额为 32.50 澳门元，可在全线便利店或客服中心加值，交通及零售均可使用。' },
+      { t:'msg', who:'CTM', av:'C', sub:'官方通知 · 刚刚', body:'【澳门电讯】您本期账单已出账，金额 MOP 288.00，可登录官方 App 或到门店缴费，支持的缴费方式见官网说明。' },
+      { t:'msg', who:'澳门邮政', av:'邮', sub:'取件通知 · 刚刚', body:'您的挂号邮件已到达网点，请于 14 天内携通知卡及身份证明文件到指定网点领取，逾期将退回收件地。' },
+      { t:'msg', who:'地球物理暨气象局', av:'气', sub:'天气警告 · 刚刚', body:'三号风球现正生效，预计本澳风力将增强，请留意最新消息，做好防风措施，避免前往海边及低洼地区。' },
+      { t:'msg', who:'教务系统', av:'教', sub:'校内通知 · 刚刚', body:'本学期期末考表已公布，请登录学生信息系统查看，如时间冲突请于本周五前到教务处申请调考。' },
+      { t:'msg', who:'卫生局', av:'医', sub:'预约提醒 · 刚刚', body:'您的门诊预约已确认：10 月 22 日上午 10:15，请携带身份证及医疗卡提前 15 分钟到达登记。' },
+      { t:'msg', who:'银行', av:'银', sub:'官方推送 · 刚刚', body:'您的账户于 10 月 14 日收到一笔转账 MOP 2,000.00，当前余额 MOP 13,240.80，可登录官方 App 查询明细。' },
+      { t:'msg', who:'同学·阿wing', av:'w', sub:'微信群 · 5 分钟前', body:'下课后一起去氹仔吃饭吗？那边新开了一家，听说还不错。' },
+      { t:'msg', who:'图书馆', av:'图', sub:'借阅提醒 · 刚刚', body:'您借阅的图书将于 3 天后到期，可在线续借或到馆归还，逾期将产生滞纳金。' },
+      { t:'msg', who:'司警局', av:'警', sub:'防罪宣传 · 刚刚', body:'【司法警察局】近期电话诈骗高发，如接获可疑来电，请立即挂断，并致电本局防诈骗查询热线 8800 7777 或报案热线 993 求助。' },
+      { t:'msg', who:'外卖员', av:'外', sub:'送达通知 · 刚刚', body:'您好，您的外卖已送达大堂门口，麻烦下来取一下，我在这里等您。' }
+    ]
+  }
+};
+/* 地狱模式：混合全部题目 */
+POOLS.ALL = {
+  scams: POOLS.L1.scams.concat(POOLS.L2.scams, POOLS.L3.scams, POOLS.L4.scams),
+  reals: POOLS.L1.reals.concat(POOLS.L2.reals, POOLS.L3.reals, POOLS.L4.reals)
+};
+
+/* ==================================================================
+   长辈版选池：只留最典型、最好懂的骗局，篇幅短、语速慢
+   ================================================================== */
+const SENIOR_PICK = {
+  scams:['兼职群·招聘员','学生资助中心','游戏客服中心','抽奖小助手','上海市公安局经侦支队','10086','快递客服','社保局','儿子','阿杰','澳门入境处','CTM 澳门电讯'],
+  reals:['菜鸟驿站','妈妈','图书馆','勤工助学中心','宿管阿姨','外卖骑手','班长','澳门通','CTM','卫生局']
+};
+(function(){
+  const pick = (arr, who) => arr.find(x => x.who === who);
+  POOLS.SENIOR = {
+    scams: SENIOR_PICK.scams.map(w => pick(POOLS.ALL.scams, w)).filter(Boolean),
+    reals: SENIOR_PICK.reals.map(w => pick(POOLS.ALL.reals, w)).filter(Boolean)
+  };
+})();
+
+const SENIOR = {
+  id:'SENIOR', pool:'SENIOR', name:'长辈版', sub:'大字慢速 · 只留最典型的骗局',
+  desc:'给父母长辈准备的版本：字更大、时间更宽裕、只保留最典型的骗局，句子也更短。陪他们玩两局，比转发十条新闻有用。',
+  scams:5, reals:5, perCard:12000,
+  accent:'#7be0a0', accent2:'#39d0ff', glow1:'rgba(123,224,160,.26)', glow2:'rgba(57,208,255,.16)'
+};
+
+/* ==================================================================
+   骗子视角反转关：给你一个目标，让你替骗子挑最有效的那句话
+   —— 只判断「真假」是不够的，看懂「怎么设计」才真的免疫
+   ================================================================== */
+const SCAM_DECK = [
+  {
+    target:'大二学生，刚开学，生活费紧巴巴，正在各种群里翻兼职信息，对「日结」两个字特别敏感。',
+    opts:[
+      '你好，我们公司现在招人，有兴趣可以了解一下。',
+      '招短视频点赞员，一单 5 元日结。先垫 99 元试单，立返 128，做完立结。',
+      '我们是正规企业，请把简历发到邮箱，人事会安排面试。'
+    ],
+    best:1,
+    why:'有效的开场必须同时具备三件事：<b>具体金额</b>、<b>立刻兑现</b>、<b>门槛低到不用想</b>。垫 99 返 128 不是要你的钱，是<b>买你的信任</b>——等你相信「真的会返」，下一次的垫付金额就会变成两三千。'
+  },
+  {
+    target:'七十岁的独居老人，子女在外地工作，平时只用手机接打电话和看微信。',
+    opts:[
+      '您好，我是您儿子的同事，他让我联系您一下。',
+      '妈，我出车祸了，手机摔坏了这是借的号码，快给我转钱，千万别跟我爸说。',
+      '尊敬的用户，您的话费余额不足，请及时充值。'
+    ],
+    best:1,
+    why:'对长辈来说最有效的不是利益，是<b>恐慌 + 切断核实</b>。「我出事了」瞬间击穿判断力，「别告诉别人」堵死了所有求证渠道。家里有老人的，最好提前约定一个只有家人知道的<b>暗号</b>。'
+  },
+  {
+    target:'刚到境外读书的留学生，家长刚把一年的学费生活费打过来，人生地不熟。',
+    opts:[
+      '您有一份重要公文尚未领取，请回复姓名核实。',
+      '这里是澳门入境处，您名下有一封投诉邮件。若查实涉及案件，我们会转接内地公安，请你保密配合，否则影响签证与学籍。',
+      '欢迎来澳就读，请关注我们的官方公众号了解最新政策。'
+    ],
+    best:1,
+    why:'留学生最怕的不是破财，而是<b>身份出问题</b>——签证、学籍、留下记录。先把「后果」讲得足够严重，再以「保密」为由让他不敢告诉父母，最后才提钱。真正案例里，这一步之后往往还有长达数十天的精神控制。'
+  },
+  {
+    target:'高校教师，忙于课题和考核，邮箱里每天几十封工作往来邮件。',
+    opts:[
+      '老师您好，我是 XX 期刊编辑，您的投稿需要小修。',
+      '贵校有一笔科研经费待核对，请点击链接填写银行卡号与验证码确认，逾期将退回财政。',
+      '请问贵校图书馆周末开放时间是几点？'
+    ],
+    best:1,
+    why:'对教师、行政人员最有效的是<b>与工作挂钩</b>：经费、考核、报销、期刊。它把最危险的环节（要验证码）包装成最日常的动作（核对信息），让专业素养反而成了帮凶。凡是把「验证码」说成「身份核对」的，都是同一个套路。'
+  },
+  {
+    target:'想买热门演唱会门票的大学生，官方渠道早就售罄，正在超话和二手群里找票。',
+    opts:[
+      '票已经卖完了，你等等看有没有人转。',
+      '我手里有两张内场票，朋友去不了原价转。位置很好，问的人挺多的，你先付个定金我帮你留着。',
+      '请问你要买票吗？我有很多票。'
+    ],
+    best:1,
+    why:'稀缺（内场票）＋ 同好身份（我也是粉丝）＋ 抢购压力（问的人挺多）＋ 低门槛起步（先付定金）。定金是设计好的第一步，付完必然还有尾款、改签费、出票激活费。<b>所有「先付一点点锁定名额」的，都是在给你设第一步。</b>'
+  },
+  {
+    target:'公司财务，老板经常出差，偶尔会微信或电话临时安排小额付款。',
+    opts:[
+      '你好，我们是新供应商，想和贵司合作。',
+      '我是王总，现在开会不方便接电话。你先给这个账户转定金，合同我回头补，先办，别外传。',
+      '请查收附件中的对账单。'
+    ],
+    best:1,
+    why:'AI 拟声和换脸时代，最有效的是制造<b>「不能回拨核实」的场景</b>：正在开会、不方便、要保密。话术里还预先给好了理由（合同后补），让经办人自己说服自己。企业财务的安全线只有一条：<b>换账户必须用另一条渠道当面或电话复核。</b>'
+  },
+  {
+    target:'三十五岁，工资不高，想在业余时间赚点外快，看到过很多「爆雷」新闻所以比较谨慎。',
+    opts:[
+      '跟着我投资，稳赚不赔，月底翻倍。',
+      '这个月我已经带学员翻倍了。你先拿 3000 试试，赚了再加，亏了我赔你。',
+      '投资有风险，入市需谨慎，请理性决策。'
+    ],
+    best:1,
+    why:'杀猪盘的关键从来不是「暴富」，而是<b>「低风险试水」</b>。第一笔小额真的会让你赚，还会让你顺利提现一次——这是最贵的学费。<b>「亏了我赔」</b>是几乎没有人能拒绝的钩子，因为它在逻辑上堵住了你唯一的退路。'
+  },
+  {
+    target:'急着用钱的人，征信一般，银行渠道走不通，正在网上搜「低息贷款」。',
+    opts:[
+      '我们提供贷款服务，欢迎咨询。',
+      '您资质符合放款条件。银行放款前需验证还款能力，先转 2000 元到监管账户做流水，放款后连同贷款一并返还。',
+      '请携带身份证到就近网点办理。'
+    ],
+    best:1,
+    why:'贷款诈骗永远卡在<b>「放款前收费」</b>这一步。话术的高明之处是把收费包装成「验证」「监管账户」，让你觉得自己不是在付钱，而是在配合流程。<b>记住：正规贷款在任何情况下都不会先收你一分钱。</b>'
+  }
+];
+
+/* ==================================================================
+   工具函数
+   ================================================================== */
+function hexA(hex, a){
+  const h = String(hex).replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
+  return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+}
+
+/* ==================================================================
+   游戏本体
+   ================================================================== */
+const Game = (function(){
+  const START_MONEY = 10000;
+  const LEVEL_REWARD = 2000;
+  const MIS_BLOCK = 2000;     // 误拦真消息（乱拦一样守不住门）
+  const MIS_TIMEOUT = 1000;   // 漏看真消息
+  const K_SCORE = 'fz2_best', K_HELL = 'fz2_hell', K_MUTE = 'fz2_mute', K_HIST = 'fz2_hist';
+
+  /* ------ 运行状态 ------ */
+  let mode = 'campaign';           // campaign | practice | hell
+  let practiceIdx = 0;
+  let levelIdx = 0;
+  let money = START_MONEY, score = 0, combo = 0, maxCombo = 0;
+  let blocked = 0, falseAlarm = 0, timeoutMiss = 0, lost = 0;
+  let mistakes = [], played = 0, totalCards = 0, runStart = 0;
+  let queue = [], idx = 0;
+  let catStat = {};                // 本局按骗局类型统计：遇到 hit / 漏放 miss
+  let over = true, resolving = false, cur = null, topEl = null, activeEnd = null;
+  let cardStart = 0, cardDur = 0, raf = 0, cfg = LEVELS[0];
+  let silent = false;
+
+  const $ = id => document.getElementById(id);
+  const moneyEl = $('moneyEl'), scoreEl = $('scoreEl'), progEl = $('progEl'), levelEl = $('levelEl');
+  const wbarFill = $('wbarFill'), walletBox = $('walletBox'), comboEl = $('combo');
+  const deck = $('deck'), stage = $('stage'), dots = $('dots');
+
+  const shuffle = a => { const b = a.slice(); for (let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; };
+
+  function declump(arr){
+    const pool = arr.slice(), out = [];
+    while (pool.length){
+      let pick = 0;
+      if (out.length >= 2 && out[out.length-1].scam === out[out.length-2].scam){
+        const want = !out[out.length-1].scam;
+        const j = pool.findIndex(x => x.scam === want);
+        if (j >= 0) pick = j;
+      }
+      out.push(pool.splice(pick,1)[0]);
+    }
+    return out;
+  }
+
+  function buildQueue(c){
+    const p = POOLS[c.pool];
+    const sc = shuffle(p.scams).slice(0, c.scams).map(o => Object.assign({}, o, {scam:true}));
+    const re = shuffle(p.reals).slice(0, c.reals).map(o => Object.assign({}, o, {scam:false}));
+    return declump(shuffle(sc.concat(re)));
+  }
+
+  const mult = () => Math.min(5, 1 + Math.floor(combo / 3));
+
+  /* ------ 音效 ------ */
+  let actx = null;
+  function beep(freq, dur, type, vol){
+    if (silent) return;
+    try{
+      if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || .05, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(); o.stop(actx.currentTime + dur);
+    }catch(e){}
+  }
+  const sfxGood = () => beep(880, .11, 'sine', .05);
+  const sfxBad  = () => { beep(150, .3, 'sawtooth', .07); setTimeout(() => beep(110, .3, 'sawtooth', .06), 90); };
+  const sfxUp   = () => { beep(660, .1, 'triangle', .05); setTimeout(() => beep(990, .16, 'triangle', .05), 90); };
+
+  /* 手机震动反馈：跟着判定结果走，跟音效共用静音开关 */
+  function buzz(p){
+    if (silent) return;
+    try{ if (navigator && navigator.vibrate) navigator.vibrate(p); }catch(e){}
+  }
+
+  /* ------ 主题 ------ */
+  function applyTheme(c){
+    try { PLUG.fire('onTheme', c); }catch(e){}   // 插件可以在此时改写 c 的颜色字段
+    const r = document.documentElement.style;
+    r.setProperty('--accent', c.accent);
+    r.setProperty('--accent2', c.accent2);
+    r.setProperty('--glow1', c.glow1);
+    r.setProperty('--glow2', c.glow2);
+  }
+
+  /* ------ 渲染 ------ */
+  function makeCard(c, k){
+    const el = document.createElement('div');
+    el.className = 'card' + (k === 0 ? ' top enter' : '');
+    el.dataset.k = k;
+    el.style.zIndex = String(30 - k * 10);
+    el.style.transform = 'translateY(' + (k * 13) + 'px) scale(' + (1 - k * .045) + ')';
+    el.style.opacity = k === 2 ? '.5' : (k === 1 ? '.78' : '1');
+    if (k > 0) el.style.filter = 'saturate(.7)';
+
+    let inner = '<div class="timer"><i></i></div><div class="chead"><div class="av">' + c.av + '</div>'
+      + '<div class="who"><b>' + c.who + '</b><span>' + c.sub + '</span></div></div>';
+
+    if (c.t === 'call'){
+      inner += '<div class="cbody">' + c.body + '</div>'
+        + '<div class="callui"><span class="no">拒接</span><span class="yes">接听</span></div>';
+    } else {
+      inner += '<div class="cbody">' + c.body;
+      if (c.url && !cfg.hideUrl) inner += '<span class="url">🔗 ' + c.url + '</span>';
+      inner += '</div>';
+    }
+    inner += '<div class="stamp l">拦 截</div><div class="stamp r">放 行</div>';
+    el.innerHTML = inner;
+    return el;
+  }
+
+  function renderDeck(){
+    deck.innerHTML = '';
+    for (let k = 2; k >= 0; k--){
+      const c = queue[idx + k];
+      if (!c) continue;
+      deck.appendChild(makeCard(c, k));
+    }
+    topEl = deck.querySelector('.card[data-k="0"]');
+    if (topEl) bindDrag(topEl);
+  }
+
+  function renderDots(){
+    if (mode !== 'campaign'){ dots.innerHTML = ''; return; }
+    let h = '';
+    for (let i = 0; i < LEVELS.length; i++){
+      const cls = i < levelIdx ? 'done' : (i === levelIdx ? 'now' : '');
+      h += '<i class="' + cls + '"></i>';
+    }
+    dots.innerHTML = h;
+  }
+
+  function updateHUD(hurt){
+    moneyEl.textContent = '¥' + money.toLocaleString('en-US');
+    scoreEl.textContent = score;
+    progEl.textContent = Math.min(played, totalCards) + '/' + totalCards;
+    levelEl.textContent = mode === 'hell' ? '地狱'
+      : (mode === 'senior' ? '长辈版' : (mode === 'practice' ? '练习' : '第 ' + (levelIdx + 1) + ' 关'));
+    wbarFill.style.width = Math.max(0, Math.min(100, money / START_MONEY * 100)) + '%';
+    walletBox.classList.toggle('hurt', money <= 3000);
+    if (hurt){ walletBox.classList.remove('flash'); void walletBox.offsetWidth; walletBox.classList.add('flash'); }
+  }
+
+  function showCombo(){
+    if (combo >= 2){
+      comboEl.textContent = '⚡ 连击 x' + combo + (mult() > 1 ? '　得分 ×' + mult() : '');
+      comboEl.classList.add('on');
+      comboEl.classList.remove('pop'); void comboEl.offsetWidth; comboEl.classList.add('pop');
+    } else comboEl.classList.remove('on');
+  }
+
+  function float(text, cls){
+    const d = document.createElement('div');
+    d.className = 'float ' + cls;
+    d.textContent = text;
+    $('arena').appendChild(d);
+    setTimeout(() => d.remove(), 900);
+  }
+
+  function shakeScreen(k, flash){
+    const amt = Math.max(.4, Math.min(1.5, k || 1));
+    stage.style.setProperty('--sk', amt.toFixed(2));
+    stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake');
+    if (flash === false) return;
+    const s = $('shake'); s.classList.remove('hit'); void s.offsetWidth; s.classList.add('hit');
+  }
+
+  /* ==================================================================
+     判定特效引擎
+     正确 = 绿色能量外扩 + 粒子迸发 + 符号上浮 + 得分弹跳
+     错误 = 红色故障撕裂 + 扫描线 + 掉钱 + 整屏红晕 + 桌面级抖动
+     超时 = 琥珀色环向内收拢 + 沙粒下沉
+     ================================================================== */
+  const FX = (function(){
+    const cv = $('fx');
+    const ctx = cv && cv.getContext ? cv.getContext('2d') : null;
+    const DPR = Math.min(2, window.devicePixelRatio || 1);
+    const RM = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let W = 430, H = 900, parts = [], raf2 = 0, live = false;
+    let density = 1;   // 插件「粒子调音台」可调：0.2 ~ 1.6
+
+    function size(){
+      W = window.innerWidth || 430; H = window.innerHeight || 900;
+      if (!cv) return;
+      cv.width = Math.max(1, Math.round(W * DPR));
+      cv.height = Math.max(1, Math.round(H * DPR));
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      if (ctx && ctx.setTransform) ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    size();
+    window.addEventListener('resize', size);
+
+    const rr = (a, b) => a + Math.random() * (b - a);
+    const PY = Math.PI;
+
+    function frame(){
+      if (!ctx){ parts = []; live = false; return; }
+      ctx.clearRect(0, 0, W, H);
+      const keep = [];
+      for (let i = 0; i < parts.length; i++){
+        const p = parts[i];
+        p.life--;
+        if (p.life <= 0) continue;
+        p.vy += p.g; p.vx *= p.fr; p.vy *= p.fr;
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        const a = Math.max(0, Math.min(1, p.life / p.max)) * p.a;
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.translate(p.x, p.y);
+        if (p.rot) ctx.rotate(p.rot);
+        if (p.glyph){
+          ctx.font = p.size.toFixed(0) + 'px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.shadowColor = p.c; ctx.shadowBlur = 12;
+          ctx.fillStyle = p.c; ctx.fillText(p.glyph, 0, 0);
+        } else if (p.sq){
+          ctx.shadowColor = p.c; ctx.shadowBlur = 9; ctx.fillStyle = p.c;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        } else {
+          ctx.beginPath(); ctx.arc(0, 0, p.size, 0, 6.2832);
+          ctx.shadowColor = p.c; ctx.shadowBlur = 10; ctx.fillStyle = p.c; ctx.fill();
+        }
+        ctx.restore();
+        keep.push(p);
+      }
+      parts = keep;
+      if (parts.length){ raf2 = requestAnimationFrame(frame); }
+      else { live = false; ctx.clearRect(0, 0, W, H); }
+    }
+    function run(){ if (live || !ctx || !parts.length) return; live = true; raf2 = requestAnimationFrame(frame); }
+
+    function burst(x, y, n, cols, o){
+      o = o || {};
+      if (RM || !ctx) return;
+      n = Math.round(n * density);
+      for (let i = 0; i < n; i++){
+        const ang = PY * rr(o.a0 === undefined ? 0 : o.a0, o.a1 === undefined ? 2 : o.a1);
+        const sp = rr(o.s0 === undefined ? 2.2 : o.s0, o.s1 === undefined ? 8.2 : o.s1);
+        const l1 = o.l1 === undefined ? 42 : o.l1;
+        parts.push({
+          x: x + (o.jx ? rr(-o.jx, o.jx) : 0), y: y + (o.jy ? rr(-o.jy, o.jy) : 0),
+          vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp + (o.vy0 || 0),
+          g: o.g === undefined ? .17 : o.g, fr: o.fr === undefined ? .965 : o.fr,
+          size: rr(o.z0 === undefined ? 1.7 : o.z0, o.z1 === undefined ? 4.4 : o.z1),
+          c: cols[i % cols.length],
+          life: Math.round(rr(o.l0 === undefined ? 24 : o.l0, l1)), max: l1,
+          rot: rr(0, .4), vr: rr(-.28, .28),
+          sq: o.sq === undefined ? (i % 3 === 0) : o.sq, a: 1
+        });
+      }
+      run();
+    }
+
+    function rain(n, glyphs, cols, o){
+      o = o || {};
+      if (RM || !ctx) return;
+      n = Math.round(n * density);
+      for (let i = 0; i < n; i++){
+        parts.push({
+          x: rr(W * (o.x0 === undefined ? .06 : o.x0), W * (o.x1 === undefined ? .94 : o.x1)),
+          /* 只从屏幕上方一点点开始：起步太高的话，按自由落体速度根本飘不进画面就消失了 */
+          y: rr(-H * (o.y0 === undefined ? .08 : o.y0), -10),
+          vx: rr(-.55, .55), vy: rr(o.v0 === undefined ? 1.1 : o.v0, o.v1 === undefined ? 2.7 : o.v1),
+          g: .035, fr: .996,
+          size: rr(o.z0 === undefined ? 17 : o.z0, o.z1 === undefined ? 30 : o.z1),
+          c: cols[i % cols.length], glyph: glyphs[i % glyphs.length],
+          life: o.life === undefined ? 150 : o.life, max: o.life === undefined ? 150 : o.life,
+          rot: rr(-.45, .45), vr: rr(-.05, .05), a: o.a === undefined ? .92 : o.a
+        });
+      }
+      run();
+    }
+
+    function node(cls, css, into, ttl){
+      const h = $(into); if (!h) return null;
+      const d = document.createElement('div');
+      d.className = cls;
+      if (css) d.style.cssText = css;
+      h.appendChild(d);
+      setTimeout(() => { if (d.parentNode) d.parentNode.removeChild(d); }, ttl);
+      return d;
+    }
+    function ring(x, y, sz, color, dur, width, mode, dash){
+      if (RM) return;
+      node('ring ' + (mode || 'out') + (dash ? ' dash' : ''),
+        'left:' + x.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;width:' + sz.toFixed(0) + 'px;height:' + sz.toFixed(0) + 'px;'
+        + '--rc:' + color + ';--rbd:' + width + 'px;--rd:' + dur + 'ms', 'ringFx', dur + 120);
+    }
+    function icon(x, y, glyph, color){
+      if (RM) return;
+      const d = node('iconpop', 'left:' + x.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;--ic:' + color, 'ringFx', 920);
+      if (d) d.textContent = glyph;
+    }
+    function scan(){
+      if (RM) return;
+      node('scanbar', '', 'fxScan', 740);
+    }
+    function slices(r, n){
+      if (RM || !r || !r.width) return;
+      for (let i = 0; i < n; i++){
+        const h = Math.max(6, r.height / n * rr(.3, .74));
+        const y = r.top + rr(0, Math.max(1, r.height - h));
+        const bg = i % 3 === 0 ? 'rgba(255,77,99,.44)' : (i % 3 === 1 ? 'rgba(91,140,255,.36)' : 'rgba(255,255,255,.2)');
+        node('cslice',
+          'left:' + r.left.toFixed(0) + 'px;top:' + y.toFixed(0) + 'px;width:' + r.width.toFixed(0) + 'px;height:' + h.toFixed(0) + 'px;'
+          + 'background:' + bg + ';--sx:' + rr(-24, 24).toFixed(1) + 'px;--sd:' + Math.round(rr(300, 500)) + 'ms',
+          'ringFx', 660);
+      }
+    }
+    /* 每次判定前先清场：上一题的环 / 符号 / 碎片 / 粒子全部撤掉，
+       否则上一题的绿色余晖会和这一题的红色故障叠在一起，视觉就糊了 */
+    let gen = 0;
+    function reset(){
+      gen++;
+      const h = $('ringFx'), s = $('fxScan');
+      if (h) h.innerHTML = '';
+      if (s) s.innerHTML = '';
+      const ws = ['fxBad', 'fxGood', 'fxWarn'];
+      for (let i = 0; i < ws.length; i++){
+        const el = $(ws[i]);
+        if (el){ clearTimeout(el._t); el.classList.remove('on'); }
+      }
+      parts = [];
+    }
+
+    function wash(id, ms){
+      if (RM) return;
+      /* 三种全屏光晕互斥，避免两题之间颜色叠加 */
+      const all = ['fxBad', 'fxGood', 'fxWarn'];
+      for (let i = 0; i < all.length; i++){
+        if (all[i] === id) continue;
+        const o = $(all[i]);
+        if (o){ clearTimeout(o._t); o.classList.remove('on'); }
+      }
+      const el = $(id); if (!el) return;
+      el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), ms);
+    }
+    function bump(el, cls, ms){
+      if (!el) return;
+      el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+      if (ms) setTimeout(() => el.classList.remove(cls), ms);
+    }
+    function center(){
+      const r = topEl && topEl.getBoundingClientRect ? topEl.getBoundingClientRect() : null;
+      if (r && (r.width > 4 || r.height > 4)) return { x: r.left + r.width / 2, y: r.top + r.height / 2, rect: r };
+      return { x: W / 2, y: H * .46, rect: null };
+    }
+
+    return {
+      center, ring, burst, rain, wash, bump,
+      setDensity(d){ density = Math.max(0, Math.min(1.6, +d || 0)); },
+      get density(){ return density; },
+      get parts(){ return parts.length; },
+      get drawing(){ return live; },
+      get glyphs(){ return parts.filter(p => p.glyph).length; },
+      /* ---- 判断正确 ---- */
+      good(spot, comboN, m){
+        reset();
+        const g = gen, x = spot.x, y = spot.y, gold = m > 1;
+        ring(x, y, Math.min(W, H) * .92, 'rgba(34,214,138,.9)', 560, 3, 'out');
+        setTimeout(() => { if (g === gen) ring(x, y, Math.min(W, H) * 1.16,
+          gold ? 'rgba(255,204,85,.8)' : 'rgba(37,230,196,.72)', 660, 2, 'out'); }, 90);
+        burst(x, y, gold ? 34 : 22,
+          gold ? ['#ffcc55', '#ffb020', '#3df5b4', '#ffffff'] : ['#3df5b4', '#25e6c4', '#8ff0c2', '#5b8cff', '#ffffff'],
+          { s0: 2.6, s1: gold ? 10 : 8.4, z0: 1.8, z1: 4.8, vy0: -1.5, l0: 24, l1: 40 });
+        burst(x, y, 7, ['#eafff6', '#bfffe8'],
+          { a0: -1.25, a1: -.08, s0: 1.2, s1: 3, vy0: -1.2, g: -.015, fr: .99, l0: 30, l1: 46, z0: 2, z1: 4.6, sq: false });
+        if (comboN >= 3) ring(x, y, Math.min(W, H) * 1.32, 'rgba(255,204,85,.55)', 780, 1, 'out', true);
+        icon(x, y - 10, gold ? '🛡' : '✓', gold ? '#ffcc55' : '#3df5b4');
+        wash('fxGood', 620);
+        bump(topEl, 'good');
+        bump(scoreEl, 'punch', 520);
+        buzz(gold ? [12, 34, 12] : 14);
+      },
+      /* ---- 判断错误 ---- */
+      bad(spot, delta, isScam){
+        reset();
+        const x = spot.x, y = spot.y;
+        ring(x, y, Math.min(W, H) * 1.02, 'rgba(255,77,99,.85)', 520, 4, 'out');
+        burst(x, y, 26, ['#ff4d63', '#ff8a99', '#ffb020', '#ffffff'],
+          { s0: 3, s1: 9.6, g: .34, fr: .95, z0: 1.6, z1: 4.2, sq: true, l0: 22, l1: 38 });
+        slices(spot.rect, 6);
+        scan();
+        wash('fxBad', 720);
+        bump(topEl, 'bad');
+        bump($('hud'), 'jolt', 540);
+        bump(scoreEl, 'punchr', 520);
+        const hard = Math.abs(delta) >= 1500;
+        shakeScreen(Math.abs(delta) / 2000, hard);
+        buzz(hard ? [95, 50, 60] : 45);
+        if (isScam) rain(15, ['¥', '💸'], ['#ff6b7d', '#ffd9de', '#ff9aa8'],
+          { v0: 1, v1: 2.7, z0: 16, z1: 30, life: 95 });
+      },
+      /* ---- 超时未判断 ---- */
+      timeout(spot){
+        reset();
+        const g = gen, x = spot.x, y = spot.y;
+        ring(x, y, Math.min(W, H) * 1.05, 'rgba(255,176,32,.85)', 560, 3, 'in');
+        setTimeout(() => { if (g === gen) ring(x, y, Math.min(W, H) * .64, 'rgba(255,204,85,.7)', 520, 2, 'in'); }, 110);
+        burst(x, y, 16, ['#ffb020', '#ffd489', '#ffe9b8'],
+          { a0: .15, a1: .85, s0: .5, s1: 2.2, g: .05, fr: .996, z0: 1.4, z1: 3.2, l0: 40, l1: 66, sq: false });
+        wash('fxWarn', 640);
+        bump(topEl, 'timeout');
+        bump($('hud'), 'jolt', 480);
+        shakeScreen(.55, false);
+        buzz([42, 62, 42]);
+      },
+      /* ---- 通关 / 破产（粒子提到结算页之上，做成撒花） ---- */
+      end(win){
+        buzz(win ? [16, 60, 16, 60, 70] : [150, 70, 150]);
+        const el = $('flashEnd');
+        if (el && !RM){
+          el.classList.toggle('lose', !win);
+          el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+          setTimeout(() => el.classList.remove('on'), 1250);
+        }
+        if (RM || !ctx) return;
+        if (cv) cv.style.zIndex = '118';
+        if (win){
+          for (let i = 0; i < 3; i++){
+            setTimeout(() => burst(W * (.26 + .24 * i), H * .3, 30,
+              ['#ffcc55', '#ffb020', '#25e6c4', '#ffffff'],
+              { s0: 2.4, s1: 8.6, g: .22, fr: .96, z0: 1.8, z1: 4.6, l0: 30, l1: 52 }), i * 170);
+          }
+        } else {
+          burst(W / 2, H * .5, 40, ['#ff4d63', '#ff8a99', '#ffffff'],
+            { s0: 4, s1: 13, g: .3, fr: .95, z0: 2, z1: 5, sq: true, l0: 26, l1: 46 });
+          rain(18, ['¥', '💸'], ['#ff6b7d', '#ffd9de'], { v0: 1.2, v1: 3, z0: 16, z1: 32 });
+        }
+        setTimeout(() => { if (cv) cv.style.zIndex = ''; }, 1900);
+      },
+      /* ---- 通过一关 ---- */
+      clear(){
+        buzz([14, 40, 14]);
+        ring(W / 2, H * .46, Math.min(W, H) * 1.2, 'rgba(37,230,196,.7)', 700, 2, 'out');
+        const d = $('dots');
+        bump(d ? d.querySelector('i.now') : null, 'pop', 560);
+      }
+    };
+  })();
+
+  /* ------ 计时 ------ */
+  function startTimer(){
+    cardStart = 0;
+    cancelAnimationFrame(raf);
+    const bar = topEl ? topEl.querySelector('.timer i') : null;
+    const soften = Math.floor(idx / 4) * 260;                   // 同一关内缓慢提速
+    cardDur = Math.max(mode === 'hell' ? 1900 : 2300, cfg.perCard - soften);
+    if (bar) bar.style.background = 'var(--accent)';
+    const loop = t => {
+      if (over || resolving || !topEl) return;
+      if (!cardStart) cardStart = t;
+      const ratio = (t - cardStart) / cardDur;
+      PLUG.fire('onTick', { left: Math.max(0, 1 - ratio), el: topEl });
+      if (bar){
+        const left = Math.max(0, 1 - ratio);
+        bar.style.width = (left * 100) + '%';
+        if (left < .34) bar.style.background = 'var(--red)';
+        else if (left < .62) bar.style.background = 'var(--amber)';
+      }
+      if (ratio >= 1){ resolve('timeout'); return; }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+  }
+
+  /* ------ 拖拽 ------ */
+  function bindDrag(el){
+    let sx = 0, dx = 0, dragging = false;
+    const sL = el.querySelector('.stamp.l'), sR = el.querySelector('.stamp.r');
+    el.addEventListener('pointerdown', e => {
+      if (over || resolving) return;
+      dragging = true; sx = e.clientX; dx = 0;
+      el.classList.add('grabbing');
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    el.addEventListener('pointermove', e => {
+      if (!dragging || over || resolving) return;
+      dx = e.clientX - sx;
+      el.style.transition = 'none';
+      el.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx * .045) + 'deg)';
+      if (sL) sL.style.opacity = dx < -18 ? Math.min(1, -dx / 100) : 0;
+      if (sR) sR.style.opacity = dx > 18 ? Math.min(1, dx / 100) : 0;
+    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false; activeEnd = null;
+      el.classList.remove('grabbing');
+      if (sL) sL.style.opacity = 0;
+      if (sR) sR.style.opacity = 0;
+      if (Math.abs(dx) > 78) resolve(dx < 0 ? 'left' : 'right');
+      else {
+        el.style.transition = 'transform .26s cubic-bezier(.3,1.4,.5,1)';
+        el.style.transform = 'translateX(0) rotate(0)';
+      }
+    };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    activeEnd = end;
+  }
+
+  /* ------ 判定 ------ */
+  function resolve(dir){
+    if (over || resolving || !cur) return;
+    resolving = true;
+    cancelAnimationFrame(raf);
+
+    const c = cur;
+    const sm = cfg.scoreMul || 1;
+    let good = false, delta = 0, label = '', cls = '';
+
+    if (dir === 'timeout'){
+      if (c.scam){ delta = -c.amount; timeoutMiss++; mistakes.push(c); label = '超时 · 中招'; cls = 'bad'; }
+      else { delta = -MIS_TIMEOUT; timeoutMiss++; mistakes.push(c); label = '漏看真消息 −' + MIS_TIMEOUT; cls = 'warn'; }
+      combo = 0;
+    } else if (dir === 'left'){
+      if (c.scam){
+        good = true; blocked++; combo++; score += 100 * mult() * sm;
+        label = '+' + (100 * mult() * sm) + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
+      } else {
+        delta = -MIS_BLOCK; falseAlarm++; mistakes.push(c); combo = 0;
+        label = '误拦真消息 −' + MIS_BLOCK; cls = 'bad';
+      }
+    } else {
+      if (c.scam){
+        delta = -c.amount; mistakes.push(c); combo = 0;
+        label = '被骗 ¥' + c.amount; cls = 'bad';
+      } else {
+        good = true; combo++; score += 60 * mult() * sm;
+        label = '+' + (60 * mult() * sm) + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
+      }
+    }
+
+    /* 反诈画像统计：只统计诈骗类（遇到 hit / 漏放 miss），真消息不参与分类 */
+    if (c.scam){
+      const cn = catOf(c);
+      const cs = catStat[cn] || (catStat[cn] = { hit: 0, miss: 0 });
+      cs.hit++;
+      if (!good) cs.miss++;
+    }
+
+    if (combo > maxCombo) maxCombo = combo;
+    const before = money;
+    money += delta;
+    if (money < 0) money = 0;
+    if (delta < 0 && c.scam) lost += (before - money);   // 只统计真的被骗走的钱
+    const spot = FX.center();                            // 必须在卡片飞出前取坐标
+    updateHUD(delta < 0);
+    showCombo();
+    float(label, cls);
+    if (good) sfxGood(); else sfxBad();
+    /* 三套判定特效：对 / 错 / 超时 各走一条完全不同的视觉线 */
+    if (dir === 'timeout') FX.timeout(spot);
+    else if (good) FX.good(spot, combo, mult());
+    else FX.bad(spot, delta, !!c.scam);
+    /* 让“你按的那个键”也参与反馈：对=绿闪，错=红闪 */
+    const btn = dir === 'left' ? $('btnBlock') : (dir === 'right' ? $('btnPass') : null);
+    if (btn) FX.bump(btn, good ? 'hitok' : 'hitno', 540);
+
+    if (topEl){
+      const tx = dir === 'left' ? -460 : (dir === 'right' ? 460 : 0);
+      topEl.style.transition = 'transform .3s ease-in, opacity .3s ease-in';
+      topEl.style.transform = 'translateX(' + tx + 'px) rotate(' + (tx * .05) + 'deg)';
+      topEl.style.opacity = '0';
+    }
+    PLUG.fire('onJudge', { card: c, good, dir, cls, delta, label, combo, mult: mult() });
+
+    setTimeout(() => {
+      idx++; played++;
+      resolving = false;
+      if (money <= 0){ return finishRun(false); }
+      if (idx >= queue.length){ return clearLevel(); }
+      next();
+    }, 310);
+  }
+
+  function next(){
+    cur = queue[idx];
+    renderDeck();
+    progEl.textContent = Math.min(played, totalCards) + '/' + totalCards;
+    startTimer();
+    PLUG.fire('onCardShow', { card: cur, el: topEl });
+  }
+
+  /* ------ 关卡流程 ------ */
+  function startRun(m, pIdx){
+    mode = m || 'campaign';
+    practiceIdx = pIdx || 0;
+    levelIdx = mode === 'campaign' ? 0 : (mode === 'practice' ? practiceIdx : 0);
+    money = START_MONEY; score = 0; combo = 0; maxCombo = 0;
+    blocked = 0; falseAlarm = 0; timeoutMiss = 0; lost = 0;
+    mistakes = []; played = 0; runStart = Date.now(); catStat = {};
+    cfg = mode === 'hell' ? HELL : (mode === 'senior' ? SENIOR : LEVELS[levelIdx]);
+    document.body.classList.toggle('senior', mode === 'senior');
+    totalCards = mode === 'hell' ? (HELL.scams + HELL.reals)
+      : (mode === 'campaign' ? LEVELS.reduce((s,l) => s + l.scams + l.reals, 0) : (cfg.scams + cfg.reals));
+    applyTheme(cfg);
+    hideAll();
+    showLevelIntro(false);
+  }
+
+  function showLevelIntro(isTransition){
+    over = true;
+    cancelAnimationFrame(raf);
+    const c = mode === 'hell' ? HELL : (mode === 'senior' ? SENIOR : LEVELS[levelIdx]);
+    cfg = c;
+    applyTheme(c);
+    $('btnBlock').disabled = true;
+    $('btnPass').disabled = true;
+    const n = c.scams + c.reals;
+    $('lvP').textContent = mode === 'hell' ? '地狱模式'
+      : (mode === 'senior' ? '家人模式' : (mode === 'practice' ? '单关练习' : '第 ' + (levelIdx + 1) + ' 关'));
+    $('lvName').textContent = c.name;
+    $('lvSub').textContent = c.sub;
+    $('lvDesc').textContent = c.desc;
+    $('lvCards').textContent = n;
+    $('lvTime').textContent = (c.perCard / 1000).toFixed(1) + 's';
+    $('lvMoney').textContent = '¥' + money.toLocaleString('en-US');
+    $('lvMis').textContent = '−' + MIS_BLOCK.toLocaleString('en-US');
+    $('lvReward').style.display = isTransition ? 'block' : 'none';
+    $('lvReward').textContent = '✓ 上一关通过　安全奖金 +¥' + LEVEL_REWARD.toLocaleString('en-US');
+    updateHUD(false);
+    show('ovLevel');
+  }
+
+  function beginLevel(){
+    over = false; resolving = false;
+    idx = 0;
+    queue = buildQueue(cfg);
+    cur = queue[0];
+    const wmEl = $('wm'); if (wmEl) wmEl.textContent = cfg.name;
+    $('btnBlock').disabled = false;
+    $('btnPass').disabled = false;
+    renderDots();
+    hideAll();
+    updateHUD(false);
+    comboEl.classList.remove('on');
+    next();
+  }
+
+  function clearLevel(){
+    over = true;
+    cancelAnimationFrame(raf);
+    $('btnBlock').disabled = true;
+    $('btnPass').disabled = true;
+    sfxUp();
+    const isLast = mode === 'hell' || mode === 'practice' || mode === 'senior' || levelIdx >= LEVELS.length - 1;
+    if (isLast){
+      if (mode === 'campaign') unlockHell();
+      return finishRun(true);
+    }
+    FX.clear();
+    money += LEVEL_REWARD;
+    levelIdx++;
+    showLevelIntro(true);
+  }
+
+  function replay(){
+    if (mode === 'hell') startRun('hell');
+    else if (mode === 'senior') startRun('senior');
+    else if (mode === 'practice') startRun('practice', practiceIdx);
+    else startRun('campaign');
+  }
+
+  /* ------ 骗局分类（用于反诈画像） ------ */
+  const CAT_MAP = {
+    '兼职群·招聘员':'兼职刷单', '线上录入·HR':'兼职刷单', '大厂实习内推':'兼职刷单',
+    '兼职平台·七号客服':'兼职刷单', '校园代理·刘学长':'兼职刷单', '支教项目·招募组':'兼职刷单',
+    '跨境代购·招募':'兼职刷单',
+    '论文辅导·李编辑':'论文代写', '考证培训·周老师':'培训诈骗', '赴澳劳务中介':'劳务中介',
+    '征信中心·陈专员':'征信恐吓', '征信修复中心':'征信恐吓',
+    '学生资助中心':'助学金诈骗',
+    '班主任·王老师':'冒充熟人', '辅导员·张老师':'冒充熟人', '学长':'冒充熟人',
+    '游戏客服中心':'贪利诱惑', '抽奖小助手':'贪利诱惑', '主播小柔':'贪利诱惑',
+    '游戏交易·收购商':'贪利诱惑', '爱心领养':'贪利诱惑',
+    '上海市公安局经侦支队':'冒充公检法', '南京市公安局':'冒充公检法',
+    '12308 领保热线':'冒充公检法', '快递稽查部':'冒充公检法', '司法警察局·陈警官':'冒充公检法',
+    '快递客服':'冒充客服', '航空公司客服':'冒充客服',
+    '社保局':'冒充官方', 'ETC 客服':'冒充官方', '10086':'冒充官方',
+    '微信支付':'冒充官方', '95588':'冒充官方',
+    '通信管理局':'冒充官方', '海关通关科':'冒充官方', '税务局':'冒充官方', '供电局':'冒充官方',
+    '澳门入境处':'冒充官方', 'CTM 澳门电讯':'冒充官方', '澳门水务':'冒充官方', '澳门邮政':'冒充官方',
+    '阿杰':'AI 拟声换脸', '儿子':'AI 拟声换脸', '外婆':'AI 拟声换脸',
+    '表妹':'AI 拟声换脸', '王总':'AI 拟声换脸',
+    '小雅':'情感杀猪盘', '君君（相亲对象）':'情感杀猪盘',
+    '面试官·王经理':'人脸采集', '数字人民币推广':'人脸采集',
+    '投资导师·陆老师':'投资理财',
+    '换汇·阿豪':'私下换汇', '贵宾厅·阿强':'洗钱诱惑',
+    '跨境车务·代办':'代办收费', '横琴置业·李经理':'置业诈骗',
+    '留学中介·升学部':'留学验资'
+  };
+  const CAT_RULE = [
+    [/公安|警察|检察|法院|经侦|警官|涉嫌|洗钱|涉案|自证清白|领保/, '冒充公检法'],
+    [/征信|校园贷|注销账户/, '征信恐吓'],
+    [/人脸|摄像头|眨眼|转头|张嘴|屏幕共享|换脸|数字人民币/, 'AI 技术伪装'],
+    [/投资|平台|稳赚|带你赚|双倍|返利|导师/, '投资理财'],
+    [/兼职|刷单|点赞|录入|垫付|内推|实习|代写|资料费|代购/, '兼职刷单'],
+    [/老师|辅导员|学长|外婆|儿子|爸|妈|借钱|急用|出事/, '冒充熟人'],
+    [/交友|哥哥|情感|小雅|表妹|相亲/, '情感杀猪盘'],
+    [/票|中奖|抽奖|游戏|皮肤|主播|激活|领养/, '贪利诱惑'],
+    [/换汇|汇率|港币|澳门元/, '私下换汇'],
+    [/贵宾厅|流水|返点|赌场/, '洗钱诱惑'],
+    [/留学|验资|升学|中介/, '留学验资'],
+    [/代办|两地牌|车牌|内部名额|横琴|置业/, '代办收费'],
+    [/客服|退款|理赔|快递|航班|延误|ETC|社保|10086|银行|支付|提额|海关|税务|水费|电费/, '冒充官方']
+  ];
+  function catOf(c){
+    if (!c) return '其他';
+    if (CAT_MAP[c.who]) return CAT_MAP[c.who];
+    const s = (c.who || '') + ' ' + (c.why || '') + ' ' + (c.body || '');
+    for (const [re, name] of CAT_RULE) if (re.test(s)) return name;
+    return '其他';
+  }
+  const CAT_ADVICE = {
+    '冒充公检法':'记住这一条就够：<b>真警察永远只会请你到派出所当面做笔录</b>，绝不会电话办案、不会视频出示“警官证”、更没有什么“安全账户”。听到“涉嫌犯罪 + 要求转账 + 此事保密”三个信号同时出现，直接挂断，自己拨 110。',
+    '征信恐吓':'征信只有人民银行征信中心有权记录和更正。<b>没有任何机构能“帮你注销账户”“消除不良记录”</b>，凡是收费修复征信的 100% 是诈骗。查征信请自己上央行征信中心官网。',
+    '冒充官方':'这类骗局靠“官方样式”取信：假域名里塞 gov、假短号、假动账通知。<b>唯一可靠的验证方式是打开官方 App 自己查</b>——不点短信里的链接，不回拨短信里的号码。',
+    '冒充客服':'理赔、退款、改签都<b>不需要你开屏幕共享、不需要你填银行卡、不需要你先付款</b>。对方一要求“共享屏幕”，就等于把你的验证码和密码直播给他看。',
+    '兼职刷单':'判据只有四个字：<b>先出钱</b>。垫付、资料费、押金、培训费、激活金——正规兼职一分钱都不会让你先交。“做完连本带佣返你”是最经典的钩子。',
+    '贪利诱惑':'真实的中奖、福利、返利<b>从不需要你先付费</b>。凡是“中奖了但先交关税/运费/激活金”的，全部是诈骗。热门演出的“内部票”也不存在。',
+    '冒充熟人':'头像昵称几分钟就能克隆，AI 拟声换脸几秒素材就能合成。<b>唯一安全的做法是挂断，用你自己存的号码回拨</b>——不要用对方打来的号回拨。',
+    'AI 拟声换脸':'记住“紧急 + 保密 + 要转账”这个组合：真出事的人<b>不会阻止你联系家人</b>。挂断、打父母或本人电话确认，再谈钱。',
+    'AI 技术伪装':'让你对着摄像头眨眼、转头、张嘴，是在<b>采集你的人脸动态去绕过网贷核验</b>。正规面试不会要求你做这些动作。',
+    '情感杀猪盘':'感情铺垫 → 小额甜头 → 诱导大额，是标准剧本。平台是骗子自己搭的，<b>提现的那一刻才是真相</b>。任何“跟着我玩、亏了我赔你”的邀约，都是钩子。',
+    '论文代写':'代写本身违规，而且是诈骗高发区：收钱后要么拉黑，要么拿一篇 AI 拼的稿子回来再勒索“保密费”。',
+    '助学金诈骗':'助学金走学校正式通知和你已登记的银行卡，<b>不会让你在陌生链接里填卡号身份证</b>。假域名里塞 gov 是常见障眼法。',
+    '私下换汇':'私下换汇不受任何平台保护，而且是涉诈资金最常见的洗白通道。<b>对方打给你的钱可能是别人被骗的钱</b>——你的账户会因为「涉诈资金流入」被司法冻结，钱和卡一起没了。换汇只走银行和持牌机构。',
+    '洗钱诱惑':'任何「代刷流水」「帮忙走走账就能拿返点」的邀约，都是让你当洗钱链条上的工具人。<b>钱转进去拿不回，账户还可能被冻结、被调查</b>。这不是兼职，是替犯罪背锅。',
+    '留学验资':'学校收费只走<b>官方账户和官方系统</b>，不会有「中介监管账户」这种东西。凡是让你先把学费转到某公司或个人账户「验资」「走流程」的，钱一出去就要不回来。',
+    '代办收费':'两地牌、跨境保险、证照办理都必须走官方渠道与指定机构。<b>「内部名额」「包过」本身就是不可能的承诺</b>，「办不成全额退款」是让你放心的定心丸话术——真到了退款那一步，人已经找不到了。',
+    '置业诈骗':'「内部认购 + 先交诚意金 + 不买可退」是地产类骗局的模板。<b>诚意金在法律上几乎没有约束力</b>，钱转出去之后必然出现「名额被别人抢了」「补差价」「政策变了」。认准官方售楼渠道与正规合同。',
+    '劳务中介':'正规的对外劳务合作必须由<b>有资质的经营公司</b>办理，且不会在签证下来之前收你大额费用。「包过」「包签证」是话术，收完钱就以「材料不合格」为由拖延，最后失联。',
+    '培训诈骗':'「包过」「保过」「不过退费」是培训类诈骗的三件套。<b>签的协议往往主体查无实人</b>，退费时电话已经打不通。真正有价值的培训从不用这三句话招生。',
+    '人脸采集':'让你对着摄像头眨眼、转头、张嘴、念一段话，本质是在<b>采集你的生物特征</b>——这些素材可以用来绕过网贷的人脸核验，或者合成你本人的视频。任何机构都没有理由在非官方 App 之外采集你的人脸动态。',
+    '默认':'凡是“催你立刻决定 + 要你转账 + 让你别告诉别人”的，先停下来核实。骗局的核心永远是压缩你的思考时间。'
+  };
+
+  /* ------ 结算 ------ */
+  function rankOf(s, win){
+    if (!win) return {em:'💸', t:'钱包见底了', d:''};
+    const dmg = lost + falseAlarm * MIS_BLOCK + timeoutMiss * MIS_TIMEOUT;
+    if (dmg === 0) return {em:'🛡️', t:'反诈守门员', d:'零失误通关：没放走一个骗子，也没冤枉一条真消息。这份判断力放到现实里，就是最硬的护身符。'};
+    if (dmg <= 2000) return {em:'👁️', t:'火眼金睛', d:'只交了一点学费就守住了门。复盘里那几条，就是你离被骗最近的一次。'};
+    if (dmg <= 4000) return {em:'⚠️', t:'及格线边缘', d:'你守住了钱包，但中间有几次判断付出了代价。看看下面的复盘，那几条正是最容易亏大钱的。'};
+    return {em:'😰', t:'险胜', d:'勉强撑到最后，钱包却已重伤。这些漏洞放到现实里，都要花真金白银才能填上。'};
+  }
+
+  /* ------ 反诈画像：找出你最容易被哪类骗局拿下 ------ */
+  function renderWeak(){
+    const rows = Object.keys(catStat)
+      .map(k => ({ name: k, hit: catStat[k].hit, miss: catStat[k].miss }))
+      .filter(r => r.hit > 0);
+    if (!rows.length){ $('ovWeakWrap').style.display = 'none'; return; }
+    $('ovWeakWrap').style.display = 'block';
+
+    const rate = r => r.miss / r.hit;
+    const sorted = rows.slice().sort((a, b) => rate(b) - rate(a) || b.hit - a.hit);
+    const hitAll = rows.reduce((s, r) => s + r.hit, 0);
+    const missAll = rows.reduce((s, r) => s + r.miss, 0);
+    const worst = sorted[0];
+
+    let barsHtml = sorted.slice(0, 5).map(r => {
+      const pct = Math.round(rate(r) * 100);
+      const w = r.miss ? Math.max(pct, 6) : 3;
+      const fill = r.miss ? 'background:linear-gradient(90deg,#ffb020,#ff4d63)'
+        : 'background:rgba(47,214,138,.6)';
+      return '<div class="wbrow"><span class="wbname">' + r.name + '</span>'
+        + '<span class="wbtrack"><span class="wbfill" style="width:' + w + '%;' + fill + '"></span></span>'
+        + '<span class="wbnum">' + r.miss + '/' + r.hit + '</span></div>';
+    }).join('');
+    // 误拦是另一半风险，一并画出来，否则"乱拦型玩家"会看不到自己的问题
+    if (falseAlarm){
+      barsHtml += '<div class="wbrow"><span class="wbname">误拦真消息</span>'
+        + '<span class="wbtrack"><span class="wbfill" style="width:'
+        + Math.min(100, Math.round(falseAlarm / Math.max(1, falseAlarm + hitAll) * 100) + 10)
+        + '%;background:linear-gradient(90deg,#ff8a5c,#ff4d63)"></span></span>'
+        + '<span class="wbnum">' + falseAlarm + ' 次</span></div>';
+    }
+    $('wkBars').innerHTML = barsHtml;
+
+    if (!missAll){
+      const overBlock = falseAlarm >= 3;
+      $('wkIcon').textContent = overBlock ? '🚧' : '🛡️';
+      $('wkTitle').textContent = overBlock ? '你的问题是拦得太多，不是漏了骗子' : '没有可被利用的弱点';
+      $('wkSub').textContent = overBlock
+        ? '本局 ' + hitAll + ' 条诈骗全拦住了，却误伤 ' + falseAlarm + ' 条真消息'
+        : '本局 ' + hitAll + ' 条诈骗全部拦下';
+      $('wkAdv').innerHTML = overBlock
+        ? '<b>只会乱拦，一样守不住门。</b>真实的银行动账、缴费通知、面试邀约、老师通知，都不带你没申请过的链接、不要验证码、不催你立刻转账。判断标准不是"看着像不像官方"，而是有没有让你<b>出钱、给码、点链接、别告诉别人</b>——这四件事一件都没有，就放行。'
+        : (falseAlarm
+          ? '<b>唯一要留神的是另一面：</b>你误拦了 ' + falseAlarm + ' 条真消息，说明你的默认反应偏向"宁可错杀"。真实的银行动账、缴费通知、面试邀约不带你没申请过的链接、不要验证码、不催你立刻转账——别把"看着像官方"直接等同于"诈骗"。'
+          : '<b>继续保持。</b>面对陌生消息，你的判断既不过松也不过紧。这份稳定放到现实里，就是最硬的护身符。');
+      return;
+    }
+
+    const wr = Math.round(rate(worst) * 100);
+    $('wkIcon').textContent = wr >= 60 ? '🚨' : (wr >= 34 ? '⚠️' : '🔍');
+    $('wkTitle').textContent = '最容易被「' + worst.name + '」拿下';
+    $('wkSub').textContent = '这类你漏了 ' + worst.miss + '/' + worst.hit + ' 条'
+      + (missAll > worst.miss ? '　·　全部类型共漏 ' + missAll + '/' + hitAll + ' 条' : '');
+    let adv = '<b>针对性提醒：</b>' + (CAT_ADVICE[worst.name] || CAT_ADVICE['默认']);
+    if (falseAlarm >= 2)
+      adv += '<br><br><b>另一处：</b>你还误拦了 ' + falseAlarm + ' 条真消息。只会乱拦一样守不住门——真实消息不带你没申请过的链接、不要验证码、不制造“立刻转账”的紧张感。';
+    $('wkAdv').innerHTML = adv;
+  }
+
+  /* ------ 战绩趋势：最近若干局的分数走势 ------ */
+  function renderTrend(){
+    const h = getHist();
+    if (h.length < 2){ $('ovTrendWrap').style.display = 'none'; return; }
+    $('ovTrendWrap').style.display = 'block';
+    const W = 300, H = 76, PADX = 10, PADY = 12;
+    const n = h.length;
+    const maxS = Math.max.apply(null, h.map(x => x.s).concat([10]));
+    const X = i => PADX + i * (W - PADX * 2) / (n - 1);
+    const Y = v => H - PADY - (Math.max(0, v) / maxS) * (H - PADY * 2);
+    let line = '';
+    h.forEach((x, i) => { line += (i ? ' L' : 'M') + X(i).toFixed(1) + ' ' + Y(x.s).toFixed(1); });
+    const area = line + ' L' + X(n - 1).toFixed(1) + ' ' + H + ' L' + X(0).toFixed(1) + ' ' + H + ' Z';
+    const dots = h.map((x, i) =>
+      '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(x.s).toFixed(1) + '" r="' + (i === n - 1 ? 4.6 : 3.1) + '"'
+      + ' fill="' + (x.w ? '#2fd68a' : '#ff4d63') + '" stroke="rgba(9,13,24,.92)" stroke-width="1.6"/>').join('');
+    $('trendSvg').innerHTML =
+      '<defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="rgba(47,214,138,.32)"/>'
+      + '<stop offset="1" stop-color="rgba(47,214,138,0)"/></linearGradient></defs>'
+      + '<path d="' + area + '" fill="url(#tg)"/>'
+      + '<path d="' + line + '" fill="none" stroke="#2fd68a" stroke-width="2"'
+      + ' stroke-linejoin="round" stroke-linecap="round"/>' + dots;
+    const best = Math.max.apply(null, h.map(x => x.s));
+    const avg = Math.round(h.reduce((s, x) => s + x.s, 0) / n);
+    $('trLeft').textContent = '最近 ' + n + ' 局　·　平均 ' + avg.toLocaleString('en-US') + ' 分';
+    $('trRight').textContent = '最高 ' + best.toLocaleString('en-US') + ' 分';
+  }
+
+  /* ------ 止损指引：出局或被骗了钱时给出真实处置流程 ------ */
+  function renderEmerg(win){
+    const show = !win || lost > 0;
+    $('ovEmgWrap').style.display = show ? 'block' : 'none';
+    if (!show) return;
+    const box = $('ovEmgWrap');
+    const h = box.querySelector('h4'), s = box.querySelector('.esub');
+    if (!win && lost > 0){
+      h.textContent = '你在游戏里丢了 ¥' + lost.toLocaleString('en-US') + '，现实里请立刻这么做';
+      s.textContent = '游戏能重开，钱不能。这是真实被骗后的标准处置流程，越早动手越有希望追回。';
+    } else if (lost > 0){
+      h.textContent = '本局你被骗走了 ¥' + lost.toLocaleString('en-US') + '（游戏内）';
+      s.textContent = '假如现实中这笔钱真转出去了，下面是该做的事——存下来，比任何安慰都有用。';
+    } else {
+      h.textContent = '这一局你出局了，但有些事比分数重要';
+      s.textContent = '假如现实中你正被骗，下面五步请立刻执行。';
+    }
+  }
+
+  let lastWin = true;
+  let lastPoster = null;
+
+  function finishRun(win){
+    over = true;
+    lastWin = win;
+    cancelAnimationFrame(raf);
+    $('btnBlock').disabled = true;
+    $('btnPass').disabled = true;
+    FX.end(win);
+
+    const rec = getRec();
+    const stageReached = mode === 'campaign' ? (win ? LEVELS.length + 1 : levelIdx + 1)
+      : (mode === 'hell' ? LEVELS.length + 2 : (mode === 'senior' ? 0 : levelIdx + 1));
+    const nb = { score: Math.max(rec.score, score), stage: Math.max(rec.stage, stageReached) };
+    setRec(nb);
+    pushHist({ s: score, w: win ? 1 : 0, m: mode, t: Date.now() });
+
+    const r = rankOf(score, win);
+    $('ovEm').textContent = win ? r.em : (lost === 0 ? '🚧' : '💸');
+    $('ovTitle').textContent = win ? r.t : (lost === 0 ? '你把真消息全删了' : '钱包见底了');
+    $('ovDesc').textContent = win ? r.d
+      : (lost === 0
+        ? '你没有放走任何一个骗子，却把一条条真实消息当成诈骗删掉了。游戏里只是扣钱，现实里你会错过真正的通知、邀约和求助。只会乱拦的人，同样守不住门。'
+        : '你被骗走了 ¥' + lost.toLocaleString('en-US') + '，在第 ' + played + ' 条消息上出局。真警察只会请你到派出所当面做笔录，绝不会让你把钱转到什么“安全账户”。');
+
+    $('ovScore').textContent = score.toLocaleString('en-US');
+    $('ovBest').textContent = Math.max(rec.score, score).toLocaleString('en-US');
+    $('ovBlocked').textContent = blocked + ' 次';
+    $('ovLost').textContent = '¥' + lost.toLocaleString('en-US');
+    $('ovFalse').textContent = falseAlarm + ' 次';
+    $('ovCombo').textContent = maxCombo;
+    $('ovMoney').textContent = '¥' + money.toLocaleString('en-US');
+
+    const showUnlock = (mode === 'campaign' && win && !isHellSeen());
+    $('ovUnlock').style.display = showUnlock ? 'block' : 'none';
+    if (mode === 'campaign' && win) setHellSeen();
+
+    const dedupe = arr => { const seen = {}; return arr.filter(m => !seen[m.who] && (seen[m.who] = 1)); };
+    const scamMiss = dedupe(mistakes.filter(m => m.scam));
+    const falseHit = dedupe(mistakes.filter(m => !m.scam));
+
+    if (scamMiss.length){
+      $('ovRecapWrap').style.display = 'block';
+      $('ovRecap').innerHTML = scamMiss.slice(0, 5).map(m =>
+        '<div class="recap"><b>✕ ' + m.who + '　（被骗 ¥' + m.amount + '）</b><span>' + m.why + '</span></div>').join('');
+    } else $('ovRecapWrap').style.display = 'none';
+
+    if (falseHit.length){
+      $('ovFalseWrap').style.display = 'block';
+      $('ovRecap2').innerHTML = falseHit.slice(0, 4).map(m =>
+        '<div class="recap w"><b>⚠ ' + m.who + '</b><span>「' + m.body + '」<br>这条是真的——没有陌生链接、不要钱、不要验证码、不制造恐惧。</span></div>').join('');
+    } else $('ovFalseWrap').style.display = 'none';
+
+    /* 三块渲染互相隔离：任何一块出错都不该让整个结算页打不开 */
+    try { renderChalResult(); }catch(e){}
+    try { renderWeak(); }catch(e){}
+    try { renderTrend(); }catch(e){}
+    try { renderEmerg(win); }catch(e){}
+    PLUG.fire('onSettle', { win, score, lost, mode, blocked, falseAlarm, maxCombo, played });
+
+    if (win) sfxUp();
+    hideAll();
+    show('ovOver');
+    $('ovOver').scrollTop = 0;
+    updateHUD(false);
+    renderDots();
+  }
+
+  /* ------ 首页 ------ */
+  function showHome(){
+    over = true;
+    cancelAnimationFrame(raf);
+    $('btnBlock').disabled = true;
+    $('btnPass').disabled = true;
+    document.body.classList.remove('senior');
+    applyTheme(LEVELS[0]);
+    renderLevelList();
+    refreshTop();
+    hideAll();
+    show('ovHome');
+    refreshHomeExtras();
+  }
+
+  function renderLevelList(){
+    const hellOpen = isHellUnlocked();
+    const sty = c => '--laccent:' + c.accent + ';--laccentbg:' + hexA(c.accent, .18);
+    let h = '';
+    LEVELS.forEach((l, i) => {
+      h += '<button class="lv" style="' + sty(l) + '" onclick="Game.startPractice(' + i + ')">'
+        + '<span class="num">' + (i + 1) + '</span>'
+        + '<span class="txt"><b>' + l.name + '</b><span>' + l.sub + '</span></span>'
+        + '<span class="meta"><b>' + (l.perCard / 1000).toFixed(1) + 's</b>' + (l.scams + l.reals) + ' 条</span></button>';
+    });
+    h += '<button class="lv' + (hellOpen ? '' : ' locked') + '" style="' + sty(HELL) + '" '
+      + (hellOpen ? 'onclick="Game.startHell()"' : 'onclick="Game.hellLocked()"') + '>'
+      + '<span class="num">' + (hellOpen ? '🔥' : '🔒') + '</span>'
+      + '<span class="txt"><b>地狱模式</b><span>' + (hellOpen ? '链接线索隐藏 · 骗术更难分辨' : '通过全部四关后解锁') + '</span></span>'
+      + '<span class="meta"><b>' + (hellOpen ? '2.4s' : '未解锁') + '</b>得分 ×2</span></button>';
+    $('levelList').innerHTML = h;
+  }
+
+  function refreshTop(){
+    const r = getRec();
+    $('bestScoreTop').textContent = (r.score || 0).toLocaleString('en-US');
+    $('bestStageTop').textContent = ['—', '第 1 关', '第 2 关', '第 3 关', '第 4 关', '四关通关', '地狱模式'][r.stage || 0] || '—';
+    $('hellStateTop').textContent = isHellUnlocked() ? '已解锁' : '未解锁';
+  }
+
+  /* ------ 存储 ------ */
+  function getRec(){ try{ return JSON.parse(localStorage.getItem(K_SCORE)) || {score:0, stage:0}; }catch(e){ return {score:0, stage:0}; } }
+  function setRec(v){ try{ localStorage.setItem(K_SCORE, JSON.stringify(v)); }catch(e){} }
+  function getHist(){ try{ return JSON.parse(localStorage.getItem(K_HIST)) || []; }catch(e){ return []; } }
+  function pushHist(e){
+    try{
+      const a = getHist(); a.push(e);
+      while (a.length > 24) a.shift();
+      localStorage.setItem(K_HIST, JSON.stringify(a));
+    }catch(err){}
+  }
+  function isHellUnlocked(){ try{ return localStorage.getItem(K_HELL) === '1'; }catch(e){ return false; } }
+  function unlockHell(){ try{ localStorage.setItem(K_HELL, '1'); }catch(e){} }
+  function isHellSeen(){ try{ return localStorage.getItem(K_HELL + '_seen') === '1'; }catch(e){ return false; } }
+  function setHellSeen(){ try{ localStorage.setItem(K_HELL + '_seen', '1'); }catch(e){} }
+
+  /* ==================================================================
+     战绩图（Canvas 手绘）
+     ================================================================== */
+  function makePoster(win){
+    try{
+      const W = 750, H = 1180, DPR = 2;
+      const cv = document.createElement('canvas');
+      cv.width = W * DPR; cv.height = H * DPR;
+      if (!cv.getContext) return null;
+      const g = cv.getContext('2d');
+      if (!g) return null;
+      g.scale(DPR, DPR);
+
+      const c = cfg;
+      const A = c.accent, A2 = c.accent2;
+      const F = '"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif';
+
+      const rr = (x, y, w, h, r) => {
+        g.beginPath();
+        g.moveTo(x + r, y);
+        g.arcTo(x + w, y, x + w, y + h, r);
+        g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r);
+        g.arcTo(x, y, x + w, y, r);
+        g.closePath();
+      };
+      const txt = (s, x, y, font, color, align) => {
+        g.font = font; g.fillStyle = color; g.textAlign = align || 'center'; g.fillText(s, x, y);
+      };
+
+      // 背景
+      const bg = g.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#0a1022'); bg.addColorStop(.5, '#0b1428'); bg.addColorStop(1, '#070b16');
+      g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+      // 光晕
+      const glow = (cx, cy, rad, col) => {
+        const rg = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = rg; g.fillRect(0, 0, W, H);
+      };
+      glow(375, 120, 420, hexA(A, .30));
+      glow(600, 1050, 380, hexA(A2, .18));
+      glow(90, 240, 300, 'rgba(255,79,96,.12)');
+
+      // 外边框
+      g.strokeStyle = hexA(A, .35); g.lineWidth = 2;
+      rr(14, 14, W - 28, H - 28, 30); g.stroke();
+
+      // 顶部小字
+      txt('反诈互动游戏 · 战绩单', 375, 74, '600 17px ' + F, 'rgba(220,232,255,.5)');
+
+      // 盾牌徽章
+      const cy = 200, cw = 74, chh = 88;
+      const sg = g.createLinearGradient(375 - cw, cy - chh / 2, 375 + cw, cy + chh);
+      sg.addColorStop(0, A); sg.addColorStop(1, A2);
+      g.beginPath();
+      g.moveTo(375, cy - chh / 2);
+      g.lineTo(375 + cw, cy - chh / 2 + 18);
+      g.lineTo(375 + cw * .88, cy + chh * .18);
+      g.quadraticCurveTo(375 + cw * .6, cy + chh * .5, 375, cy + chh / 2);
+      g.quadraticCurveTo(375 - cw * .6, cy + chh * .5, 375 - cw * .88, cy + chh * .18);
+      g.lineTo(375 - cw, cy - chh / 2 + 18);
+      g.closePath();
+      g.fillStyle = sg; g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 3; g.stroke();
+      txt('✓', 375, cy + 16, '900 46px ' + F, 'rgba(6,14,26,.85)');
+
+      // 标题
+      txt('反 诈 守 门 人', 375, 322, '900 44px ' + F, '#ffffff');
+      txt(modeLabel(), 375, 358, '600 18px ' + F, 'rgba(200,214,240,.62)');
+
+      // 评级徽章
+      const rt = win ? rankOf(score, true) : { t: lost === 0 ? '真消息全删了' : '钱包见底了' };
+      g.font = '800 22px ' + F;
+      const tw = g.measureText(rt.t).width + 62;
+      rr(375 - tw / 2, 384, tw, 48, 24);
+      g.fillStyle = win ? hexA(A, .18) : 'rgba(255,79,96,.18)'; g.fill();
+      g.strokeStyle = win ? hexA(A, .6) : 'rgba(255,79,96,.6)'; g.lineWidth = 2; g.stroke();
+      txt(rt.t, 375, 416, '800 22px ' + F, win ? A : '#ff8a95');
+
+      // 分数
+      txt('本 局 得 分', 375, 494, '700 15px ' + F, 'rgba(160,178,214,.7)');
+      const sgs = g.createLinearGradient(190, 0, 560, 0);
+      sgs.addColorStop(0, A); sgs.addColorStop(1, A2);
+      txt(score.toLocaleString('en-US'), 375, 578, '900 76px ' + F, sgs);
+
+      // 数据块
+      const blocks = [
+        ['拦下骗子', blocked + ' 次', A],
+        ['被骗金额', '¥' + lost.toLocaleString('en-US'), lost > 0 ? '#ff6b7a' : '#2fd68a'],
+        ['最高连击', maxCombo + ' 连', '#ffc857'],
+        ['撑过消息', played + ' 条', '#9fb4dd']
+      ];
+      const bx = 62, by = 636, bw = 300, bh = 88, gap = 26;
+      blocks.forEach((b, i) => {
+        const x = bx + (i % 2) * (bw + gap), y = by + Math.floor(i / 2) * (bh + 18);
+        rr(x, y, bw, bh, 18);
+        g.fillStyle = 'rgba(255,255,255,.055)'; g.fill();
+        g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1.5; g.stroke();
+        txt(b[0], x + 22, y + 34, '600 14px ' + F, 'rgba(160,178,214,.75)', 'left');
+        txt(b[1], x + 22, y + 68, '900 26px ' + F, b[2], 'left');
+      });
+
+      // 钱包条
+      const wy = 854;
+      txt('钱包余额', 62, wy, '600 14px ' + F, 'rgba(160,178,214,.75)', 'left');
+      txt('¥' + money.toLocaleString('en-US'), 688, wy, '900 22px ' + F, '#2fd68a', 'right');
+      rr(62, wy + 16, 626, 12, 6); g.fillStyle = 'rgba(255,255,255,.1)'; g.fill();
+      const pct = Math.max(0, Math.min(1, money / START_MONEY));
+      if (pct > 0){
+        rr(62, wy + 16, Math.max(10, 626 * pct), 12, 6);
+        const wg = g.createLinearGradient(62, 0, 688, 0);
+        wg.addColorStop(0, '#2fd68a'); wg.addColorStop(1, A); g.fillStyle = wg; g.fill();
+      }
+
+      // 结语
+      const line = win
+        ? '骗术没有变，变的是我学会了不上当。'
+        : (lost === 0 ? '只会乱拦的人，同样守不住门。' : '这局我输了 ¥' + lost.toLocaleString('en-US') + '，但教训记下了。');
+      rr(62, 918, 626, 74, 18);
+      g.fillStyle = hexA(A, .1); g.fill();
+      g.strokeStyle = hexA(A, .3); g.lineWidth = 1.5; g.stroke();
+      txt(line, 375, 963, '700 19px ' + F, hexA(A, .95));
+
+      // 底部
+      txt('把这局发给朋友，看谁能守得更久', 375, 1064, '600 17px ' + F, 'rgba(180,196,224,.72)');
+      const d = new Date();
+      txt(d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日　·　反诈守门人', 375, 1104, '500 14px ' + F, 'rgba(140,158,196,.6)');
+
+      return cv.toDataURL('image/png');
+    }catch(e){ return null; }
+  }
+
+  function modeLabel(){
+    if (mode === 'hell') return '地狱模式 · 链接线索隐藏 · 得分 ×2';
+    if (mode === 'senior') return '长辈版 · 大字慢速';
+    if (mode === 'practice') return '单关练习 · ' + LEVELS[levelIdx].name;
+    return '连续闯关 · ' + LEVELS.length + ' 关';
+  }
+
+  function showPoster(){
+    const url = makePoster(lastWin);
+    if (!url){ alert('当前环境不支持生成图片，可以先用「复制文案」分享成绩。'); return; }
+    lastPoster = url;
+    $('posterImg').src = url;
+    show('ovPoster');
+    $('ovPoster').scrollTop = 0;
+  }
+  function closePoster(){ hide('ovPoster'); show('ovOver'); }
+  function savePoster(){
+    if (!lastPoster){ alert('图片还没生成好'); return; }
+    try{
+      const a = document.createElement('a');
+      a.href = lastPoster;
+      a.download = '反诈守门人战绩_' + score + '分.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }catch(e){ alert('请长按上方图片保存到相册'); }
+  }
+
+  function worstCat(){
+    const rows = Object.keys(catStat)
+      .map(k => ({ n: k, hit: catStat[k].hit, miss: catStat[k].miss }))
+      .filter(r => r.hit > 0 && r.miss > 0);
+    if (!rows.length) return null;
+    rows.sort((a, b) => (b.miss / b.hit) - (a.miss / a.hit) || b.miss - a.miss);
+    return rows[0];
+  }
+
+  function copyText(btn){
+    const lbl = btn ? btn.textContent : '';
+    const w = worstCat();
+    const t = '我在《反诈守门人》里拿到 ' + score + ' 分，' + modeLabel() + '。\n'
+      + '拦下骗子 ' + blocked + ' 次，最高连击 ' + maxCombo + '，被骗 ¥' + lost.toLocaleString('en-US') + '。\n'
+      + (w ? '系统诊断：我最容易栽在「' + w.n + '」这类骗局上。\n' : '')
+      + '每一条都是真实骗局的改编，你也来试试能守住几条？';
+    const done = () => { if (btn){ btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = lbl, 2000); } };
+    if (navigator.clipboard && location.protocol !== 'file:'){
+      navigator.clipboard.writeText(t).then(done).catch(() => fb(t, done));
+    } else fb(t, done);
+  }
+  function fb(t, cb){
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){ alert(t); }
+    document.body.removeChild(ta);
+  }
+
+  /* ==================================================================
+     扩展模块
+     今日一题 + 打卡 / 骗子视角反转关 / 个人反诈笔记 / 给家人的提醒图
+     骗局速查表 / 好友挑战码 / 色觉友好模式
+     ================================================================== */
+  const K_DAILY = 'fz2_daily', K_CB = 'fz2_cb';
+
+  function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+  function todayKey(){ const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function fmtDate(d){ return d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日'; }
+  function dayDiff(from, to){
+    const a = from.split('-').map(Number), b = to.split('-').map(Number);
+    return Math.round((new Date(b[0], b[1] - 1, b[2]).getTime() - new Date(a[0], a[1] - 1, a[2]).getTime()) / 86400000);
+  }
+  function totalScams(){ return LEVELS.reduce((s, l) => s + POOLS[l.pool].scams.length, 0); }
+
+  /* ---------------- 色觉友好 ---------------- */
+  let cbOn = false;
+  function applyCb(){
+    document.body.classList.toggle('cb', cbOn);
+    const b = $('setCb');
+    if (b){ b.textContent = '🎨 色觉友好：' + (cbOn ? '开' : '关'); b.classList.toggle('on', cbOn); }
+  }
+  function toggleCb(){ cbOn = !cbOn; lsSet(K_CB, cbOn); applyCb(); }
+
+  /* ==================================================================
+     今日一题 + 打卡
+     ================================================================== */
+  function dailyPick(){
+    const all = POOLS.ALL.scams.map(c => ({ c, scam: true }))
+      .concat(POOLS.ALL.reals.map(c => ({ c, scam: false })));
+    const k = todayKey();
+    let h = 2166136261;
+    for (let i = 0; i < k.length; i++){ h ^= k.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return all[h % all.length];
+  }
+  function dailyState(){ return lsGet(K_DAILY, { last:'', streak:0, total:0, correct:0, ans:null }); }
+
+  function refreshDailySub(){
+    const st = dailyState(), tk = todayKey(), done = (st.last === tk && st.ans !== null);
+    const el = $('dailySub');
+    if (!el) return;
+    el.textContent = done
+      ? '今天已完成 · 连续打卡 ' + st.streak + ' 天'
+      : (st.streak ? '已连续 ' + st.streak + ' 天，今天别断掉' : '每天一条，答完看拆解');
+  }
+
+  function openDaily(){
+    hideAll(); show('ovDaily');
+    $('ovDaily').scrollTop = 0;
+    renderDaily();
+  }
+
+  function renderDaily(){
+    const st = dailyState(), tk = todayKey();
+    const answered = (st.last === tk && st.ans !== null);
+    $('dqDate').innerHTML = '每天更新一条，答完就能看拆解<br>' + fmtDate(new Date());
+    $('dqStreak').textContent = st.streak;
+    $('dqTotal').textContent = st.total;
+    $('dqAcc').textContent = st.total ? Math.round(st.correct / st.total * 100) + '%' : '—';
+
+    const p = dailyPick(), c = p.c;
+    let h = '<div class="dqwho"><div class="dqav">' + c.av + '</div>'
+      + '<div class="dqmeta"><b>' + c.who + '</b><span>' + c.sub + '</span></div></div>'
+      + '<div class="dqbody">' + c.body + (c.url ? '<span class="dqurl">🔗 ' + c.url + '</span>' : '') + '</div>';
+
+    const cls = v => {
+      if (!answered) return '';
+      if ((v === 1) === p.scam) return ' ok';
+      return (st.ans === v) ? ' no' : '';
+    };
+    h += '<button class="opt' + cls(1) + '" ' + (answered ? 'disabled' : '') + ' onclick="Game.dailyAnswer(1)"><span class="oi">A</span>🚫 这是诈骗，应该拦截</button>';
+    h += '<button class="opt' + cls(0) + '" ' + (answered ? 'disabled' : '') + ' onclick="Game.dailyAnswer(0)"><span class="oi">B</span>✅ 这是真的，应该放行</button>';
+    h += '<div id="dqExp">' + (answered ? dailyExplain(p) : '') + '</div>';
+    $('dqCard').innerHTML = h;
+    refreshDailySub();
+  }
+
+  function dailyExplain(p){
+    const right = p.scam ? '这是诈骗' : '这是真消息';
+    const ok = (dailyState().ans === 1) === p.scam;
+    const body = p.scam
+      ? (p.c.why || '')
+      : '它没有让你先出钱、没有要验证码、没有催你点陌生链接，也没有让你瞒着别人——真消息的共同点，就是这几件事一件都没有。';
+    return '<div class="explain"><b>' + (ok ? '✓ 答对了——' : '✕ 再看一眼——') + right + '。</b>' + body + '</div>';
+  }
+
+  function dailyAnswer(v){
+    const st = dailyState(), tk = todayKey();
+    const already = (st.last === tk && st.ans !== null);
+    const p = dailyPick();
+    const ok = (v === 1) === p.scam;
+    if (!already){
+      st.streak = (st.last && dayDiff(st.last, tk) === 1) ? (st.streak + 1) : 1;
+      st.total++; if (ok) st.correct++;
+    }
+    st.last = tk; st.ans = v;
+    lsSet(K_DAILY, st);
+    if (ok){ sfxGood(); buzz(14); } else { sfxBad(); buzz([60, 40, 60]); }
+    renderDaily();
+  }
+
+  /* ==================================================================
+     骗子视角反转关
+     ================================================================== */
+  let scamDeck = [], scamIdx = 0, scamRight = 0, scamPicked = null;
+
+  function startScam(){
+    scamDeck = shuffle(SCAM_DECK.slice()).slice(0, 6);
+    scamIdx = 0; scamRight = 0; scamPicked = null;
+    hideAll(); show('ovScam');
+    $('ovScam').scrollTop = 0;
+    renderScam();
+  }
+
+  function renderScam(){
+    const d = scamDeck[scamIdx];
+    scamPicked = null;
+    $('scTop').innerHTML = '第 ' + (scamIdx + 1) + ' / ' + scamDeck.length + ' 个目标　·　已看穿 ' + scamRight + ' 次'
+      + '<br>如果由你来骗，哪一句最容易得手？';
+    $('scBody').style.display = 'block';
+    $('scEnd').style.display = 'none';
+    $('scNav').style.display = 'none';
+    $('scTarget').textContent = d.target;
+    $('scOpts').innerHTML = d.opts.map((o, i) =>
+      '<button class="sopt" data-i="' + i + '" data-k="' + 'ABC'.charAt(i) + '" onclick="Game.scamPick(' + i + ')">' + o + '</button>'
+    ).join('');
+    $('scWhy').innerHTML = '';
+  }
+
+  function scamPick(i){
+    if (scamPicked !== null) return;
+    scamPicked = i;
+    const d = scamDeck[scamIdx];
+    const ok = (i === d.best);
+    if (ok) scamRight++;
+    const btns = $('scOpts').querySelectorAll('.sopt');
+    for (let k = 0; k < btns.length; k++){
+      btns[k].setAttribute('disabled', '');
+      if (k === d.best) btns[k].classList.add('ok');
+      else if (k === i) btns[k].classList.add('no');
+    }
+    if (ok){ sfxGood(); buzz(14); } else { sfxBad(); buzz([60, 40, 60]); }
+    $('scWhy').innerHTML = '<div class="explain"><b>'
+      + (ok ? '✓ 判断正确——' : '✕ 更有效的是「' + 'ABC'.charAt(d.best) + '」——') + '</b>' + d.why + '</div>';
+    $('scNav').style.display = 'grid';
+    const nb = $('scNav').querySelectorAll('button')[1];
+    if (nb) nb.textContent = (scamIdx >= scamDeck.length - 1) ? '看结果 →' : '下一个目标 →';
+    $('scTop').innerHTML = '第 ' + (scamIdx + 1) + ' / ' + scamDeck.length + ' 个目标　·　已看穿 ' + scamRight + ' 次';
+  }
+
+  function scamNext(){
+    if (scamIdx >= scamDeck.length - 1) return scamFinish();
+    scamIdx++;
+    renderScam();
+    $('ovScam').scrollTop = 0;
+  }
+
+  function scamFinish(){
+    const n = scamDeck.length, acc = Math.round(scamRight / n * 100);
+    let em, t, d;
+    if (acc >= 100){ em = '🧠'; t = '骗术拆解员'; d = '你选的每一句都是骗子真正在用的开局。能看穿开局的人，很难在现实里被开场带走。'; }
+    else if (acc >= 70){ em = '👁️'; t = '警觉的旁观者'; d = '大部分开局你都看穿了。剩下那几处，恰恰是骗子最依赖的心理按钮——记住它们出现的位置。'; }
+    else if (acc >= 40){ em = '🔍'; t = '还差一眼'; d = '你已经能认出夸张的钩子，但最有效的那几句，往往是最不像骗术的。这也正是它们有效的原因。'; }
+    else { em = '🎣'; t = '容易被开局带走'; d = '别灰心。这些开场之所以最有效，是因为它们精确利用了每个人都有的正常反应。看懂它们，你就已经免疫了一半。'; }
+    $('scBody').style.display = 'none';
+    $('scNav').style.display = 'none';
+    $('scEnd').style.display = 'block';
+    $('scTop').innerHTML = '';
+    $('scEnd').innerHTML = '<div class="rankbox"><span class="em">' + em + '</span><h2>' + t + '</h2>'
+      + '<p>看穿 ' + scamRight + ' / ' + n + ' 次　·　洞察力 ' + acc + '%</p></div>'
+      + '<div class="explain" style="margin-bottom:16px">' + d + '</div>';
+    $('ovScam').scrollTop = 0;
+  }
+
+  /* ==================================================================
+     个人反诈笔记
+     ================================================================== */
+  let noteText = '';
+
+  function buildNote(){
+    const L = [];
+    L.push('# 我的反诈笔记');
+    L.push('');
+    L.push('> 由《反诈守门人》根据本局表现自动生成 · ' + fmtDate(new Date()));
+    L.push('> 游戏能重开，钱不能。下面这份清单，是从你这一局的真实失误里长出来的。');
+    L.push('');
+    L.push('## 一、本局成绩');
+    L.push('');
+    L.push('- 模式：' + modeLabel());
+    L.push('- 得分：' + score.toLocaleString('en-US'));
+    L.push('- 拦下骗子：' + blocked + ' 次');
+    L.push('- 被骗金额：¥' + lost.toLocaleString('en-US'));
+    L.push('- 误拦真消息：' + falseAlarm + ' 次');
+    L.push('- 最高连击：' + maxCombo);
+    L.push('');
+
+    // 弱点
+    const rows = Object.keys(catStat).map(k => ({ n:k, hit:catStat[k].hit, miss:catStat[k].miss })).filter(r => r.hit > 0);
+    rows.sort((a, b) => (b.miss / b.hit) - (a.miss / a.hit) || b.miss - a.miss);
+    const missAll = rows.reduce((s, r) => s + r.miss, 0);
+    L.push('## 二、我最容易被哪类骗局拿下');
+    L.push('');
+    if (!rows.length){
+      L.push('本局没有遇到诈骗类消息。');
+    } else if (!missAll){
+      L.push('本局遇到的 ' + rows.reduce((s, r) => s + r.hit, 0) + ' 条诈骗，你全部拦下了。');
+      if (falseAlarm >= 3) L.push('');
+      if (falseAlarm >= 3) L.push('但要留意另一面：你误伤了 ' + falseAlarm + ' 条真消息，说明默认反应偏向「宁可错杀」。');
+    } else {
+      rows.slice(0, 5).forEach((r, i) => {
+        L.push((i + 1) + '. ' + r.n + '　漏放 ' + r.miss + '/' + r.hit + ' 条' + (r.miss ? '　（漏放率 ' + Math.round(r.miss / r.hit * 100) + '%）' : ''));
+      });
+      L.push('');
+      const worst = rows.filter(r => r.miss > 0)[0];
+      if (worst){
+        L.push('### 针对「' + worst.n + '」的提醒');
+        L.push('');
+        L.push(String(CAT_ADVICE[worst.n] || CAT_ADVICE['默认']).replace(/<\/?b>/g, '').replace(/<br\s*\/?>/g, '\n'));
+      }
+      if (falseAlarm >= 2){
+        L.push('');
+        L.push('### 另一处风险：误拦');
+        L.push('');
+        L.push('你还误拦了 ' + falseAlarm + ' 条真消息。真实的通知不带你没申请过的链接、不要验证码、不制造「立刻转账」的紧张感；判断标准不是「像不像官方」，而是有没有让你出钱、给码、点链接、别告诉别人。');
+      }
+    }
+    L.push('');
+
+    // 错题
+    const dedupe = arr => { const seen = {}; return arr.filter(m => !seen[m.who] && (seen[m.who] = 1)); };
+    const scamMiss = dedupe(mistakes.filter(m => m.scam));
+    const falseHit = dedupe(mistakes.filter(m => !m.scam));
+    L.push('## 三、这局我踩过的坑');
+    L.push('');
+    if (!scamMiss.length && !falseHit.length){
+      L.push('零失误——没有放走骗子，也没有误伤真消息。');
+    } else {
+      if (scamMiss.length){
+        L.push('### 放走的骗子');
+        L.push('');
+        scamMiss.slice(0, 6).forEach(m => {
+          L.push('- **' + m.who + '**（被骗 ¥' + m.amount + '）');
+          L.push('  - 原文：' + String(m.body || '').replace(/\n/g, ' '));
+          L.push('  - 判据：' + String(m.why || '').replace(/<\/?b>/g, ''));
+        });
+        L.push('');
+      }
+      if (falseHit.length){
+        L.push('### 误伤的真消息');
+        L.push('');
+        falseHit.slice(0, 6).forEach(m => {
+          L.push('- **' + m.who + '**：' + String(m.body || '').replace(/\n/g, ' '));
+        });
+        L.push('  （这些是真的：没有陌生链接、不要钱、不要验证码、不制造恐惧）');
+        L.push('');
+      }
+    }
+    L.push('## 四、记死这五条');
+    L.push('');
+    L.push('1. 凡是让你「转账、给验证码、扫码、开屏幕共享」的，先停下来——这四件事和正常沟通无关。');
+    L.push('2. 公检法不会电话办案、没有安全账户、不会让你交保证金；要核实就自己打官方电话。');
+    L.push('3. 让你先出钱的兼职、贷款、中奖、退税、理赔，全部是诈骗。');
+    L.push('4. 亲友借钱：挂断，用你自己存的号码回拨，不要用对方打来的号码。');
+    L.push('5. 私下换汇、私人账户走账不受任何保护，还可能让账户被冻结——只走银行和持牌机构。');
+    L.push('');
+    L.push('## 五、真的被骗了，按顺序做');
+    L.push('');
+    L.push('1. 立刻打反诈专线要求紧急止付：内地 96110，澳门司警局 993；紧急情况拨 110 或 999。');
+    L.push('2. 同时联系银行客服或就近网点，申请冻结涉案账户、止付这笔转账（转账后 24 小时内最关键）。');
+    L.push('3. 把证据留全再清理：聊天记录、转账凭证、对方账号姓名、对方发来的链接或 App 名称。');
+    L.push('4. 去报案：内地就近派出所、澳门司警局或警区，务必拿到受案回执。');
+    L.push('5. 警惕二次诈骗：任何说「交钱就能帮你追回」的都是骗子。');
+    L.push('');
+    L.push('## 六、常用电话');
+    L.push('');
+    L.push('- 内地：报警 110　·　国家反诈专线 96110　·　涉诈预警短信 12381');
+    L.push('- 澳门：司警局报案 993　·　防诈骗查询热线 8800 7777　·　紧急求助 999');
+    L.push('');
+    L.push('---');
+    L.push('');
+    L.push('本文档由一款单机小游戏生成，内容为虚构改编，不构成法律意见。');
+    return L.join('\n');
+  }
+
+  function openNote(){
+    noteText = buildNote();
+    $('noteBox').textContent = noteText;
+    hideAll(); show('ovNote');
+    $('ovNote').scrollTop = 0;
+  }
+  function closeNote(){ hide('ovNote'); show('ovOver'); }
+  function saveNote(){
+    if (!noteText){ alert('笔记还没生成好'); return; }
+    try{
+      const blob = new Blob([noteText], { type:'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = '我的反诈笔记_' + todayKey() + '.md';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => { try{ URL.revokeObjectURL(url); }catch(e){} }, 4000);
+    }catch(e){
+      alert('当前环境不支持直接下载，可以点「复制全文」粘贴到备忘录或文档里。');
+    }
+  }
+  function copyNote(btn){
+    const lbl = btn ? btn.textContent : '';
+    const done = () => { if (btn){ btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = lbl, 2000); } };
+    if (navigator.clipboard && location.protocol !== 'file:'){
+      navigator.clipboard.writeText(noteText).then(done).catch(() => fb(noteText, done));
+    } else fb(noteText, done);
+  }
+
+  /* ==================================================================
+     给家人的提醒图（大字长图，适合转微信）
+     ================================================================== */
+  function makeFamily(){
+    try{
+      const W = 750, H = 1334, DPR = 2;
+      const cv = document.createElement('canvas');
+      cv.width = W * DPR; cv.height = H * DPR;
+      if (!cv.getContext) return null;
+      const g = cv.getContext('2d');
+      if (!g) return null;
+      g.scale(DPR, DPR);
+      const F = '"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif';
+      const rr = (x, y, w, h, r) => {
+        g.beginPath();
+        g.moveTo(x + r, y);
+        g.arcTo(x + w, y, x + w, y + h, r);
+        g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r);
+        g.arcTo(x, y, x + w, y, r);
+        g.closePath();
+      };
+      const txt = (s, x, y, font, color, align) => { g.font = font; g.fillStyle = color; g.textAlign = align || 'center'; g.fillText(s, x, y); };
+
+      const bg = g.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#0b1226'); bg.addColorStop(.55, '#0a1020'); bg.addColorStop(1, '#060a14');
+      g.fillStyle = bg; g.fillRect(0, 0, W, H);
+      const glow = (cx, cy, rad, col) => {
+        const rg = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = rg; g.fillRect(0, 0, W, H);
+      };
+      glow(375, 110, 430, 'rgba(255,176,32,.22)');
+      glow(110, 1180, 380, 'rgba(255,77,99,.14)');
+
+      g.strokeStyle = 'rgba(255,176,32,.34)'; g.lineWidth = 2;
+      rr(16, 16, W - 32, H - 32, 32); g.stroke();
+
+      txt('反 诈 提 醒', 375, 92, '600 17px ' + F, 'rgba(255,220,160,.66)');
+      txt('给 家 人 的 五 句 话', 375, 160, '900 46px ' + F, '#ffffff');
+      txt('字大一点，慢一点，记住这五句就够用了', 375, 206, '600 19px ' + F, 'rgba(190,204,232,.66)');
+
+      const items = [
+        ['🚫', '要你「先转钱」的，全是骗子', '兼职、中奖、贷款、退税都一样', '#ffb020'],
+        ['📞', '说你「犯事了、要保密」的', '直接挂掉，真警察不会电话办案', '#ff7a5c'],
+        ['🔗', '短信里的链接，一律不点', '要查询就自己打开官方 App', '#39d0ff'],
+        ['🔑', '验证码，谁要都不给', '给出去等于把钥匙交给对方', '#39d0ff'],
+        ['👤', '亲人借钱，先挂断再打回去', '用你自己存的号码，别回拨对方', '#2fd68a']
+      ];
+      const x0 = 52, w = W - x0 * 2, h = 140, gap = 18;
+      let y = 254;
+      items.forEach(it => {
+        rr(x0, y, w, h, 24);
+        g.fillStyle = 'rgba(255,255,255,.058)'; g.fill();
+        g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 1.5; g.stroke();
+        rr(x0, y, 7, h, 4); g.fillStyle = it[3]; g.fill();
+        txt(it[0], x0 + 46, y + 62, '36px ' + F, '#ffffff', 'left');
+        txt(it[1], x0 + 100, y + 60, '800 31px ' + F, '#ffffff', 'left');
+        txt(it[2], x0 + 100, y + 106, '600 21px ' + F, 'rgba(180,196,224,.74)', 'left');
+        y += h + gap;
+      });
+
+      const ey = y + 8;
+      rr(x0, ey, w, 168, 24);
+      g.fillStyle = 'rgba(255,77,99,.16)'; g.fill();
+      g.strokeStyle = 'rgba(255,77,99,.42)'; g.lineWidth = 2; g.stroke();
+      txt('真的被骗了，马上打电话', 375, ey + 46, '800 27px ' + F, '#ffd0d5');
+      txt('内地　110 报警　·　96110 反诈专线', 375, ey + 100, '800 27px ' + F, '#ffffff');
+      txt('澳门　993 司警局　·　8800 7777 防诈查询', 375, ey + 142, '800 27px ' + F, '#ffffff');
+
+      txt('存下这张图，转给家里人 · 反诈守门人', 375, H - 52, '600 19px ' + F, 'rgba(150,166,200,.66)');
+      return cv.toDataURL('image/png');
+    }catch(e){ return null; }
+  }
+
+  let famFrom = 'ovHome', famUrl = null;
+  function openFamTip(){
+    famFrom = $('ovOver').classList.contains('on') ? 'ovOver' : 'ovHome';
+    famUrl = makeFamily();
+    if (!famUrl){ alert('当前环境不支持生成图片，可以先用「生成我的反诈笔记」把要点发给家人。'); return; }
+    $('famImg').src = famUrl;
+    hideAll(); show('ovFam');
+    $('ovFam').scrollTop = 0;
+  }
+  function closeFam(){ hide('ovFam'); show(famFrom); }
+  function saveFam(){
+    if (!famUrl){ alert('图片还没生成好'); return; }
+    try{
+      const a = document.createElement('a');
+      a.href = famUrl; a.download = '给家人的反诈提醒.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }catch(e){ alert('请长按上方图片保存到相册'); }
+  }
+
+  /* ==================================================================
+     骗局速查表（全部样本 + 判据）
+     ================================================================== */
+  function openBook(){
+    const cats = {};
+    let total = 0;
+    LEVELS.forEach(l => POOLS[l.pool].scams.forEach(c => {
+      const k = catOf(c);
+      (cats[k] || (cats[k] = [])).push(c);
+    }));
+    const order = Object.keys(cats).sort((a, b) => cats[b].length - cats[a].length);
+    let h = '';
+    order.forEach(k => {
+      h += '<div class="bkcat"><h4>' + k + '<i>' + cats[k].length + ' 条</i></h4>';
+      cats[k].forEach(c => {
+        total++;
+        h += '<div class="bkitem"><b>✕ ' + c.who + '　<span class="bkam">¥' + c.amount + '</span></b>'
+          + '<span class="bkwho">「' + c.body + '」</span>'
+          + '<span>判据：' + (c.why || '') + '</span></div>';
+      });
+      h += '</div>';
+    });
+    $('bookBody').innerHTML = h;
+    const sub = $('bookSub');
+    if (sub) sub.textContent = '收录 ' + total + ' 条诈骗样本';
+    $('bkCount').innerHTML = '共 ' + total + ' 条诈骗样本 · ' + order.length + ' 个类别<br>按内容判据识别，而不是按「像不像官方」';
+    hideAll(); show('ovBook');
+    $('ovBook').scrollTop = 0;
+  }
+
+  /* ==================================================================
+     好友挑战码
+     ================================================================== */
+  let chalRef = null, chalDismissed = false;
+
+  function modeCode(){ return mode === 'hell' ? 3 : (mode === 'campaign' ? 2 : (mode === 'senior' ? 1 : 0)); }
+  function encChal(){
+    const n = v => Math.max(0, Math.round(v)).toString(36);
+    return ('FZ2-' + [score, blocked, lost, maxCombo].map(n).join('-') + '-' + modeCode()).toUpperCase();
+  }
+  function decChal(s){
+    const t = String(s || '').toUpperCase().replace(/\s+/g, '');
+    const m = t.match(/^FZ2-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-3])$/);
+    if (!m) return null;
+    const v = i => { const x = parseInt(m[i], 36); return isFinite(x) ? x : 0; };
+    return { score:v(1), blocked:v(2), lost:v(3), combo:v(4), mc:+m[5] };
+  }
+  function parseChalFromUrl(){
+    try{
+      const h = decodeURIComponent(String(location.hash || '').replace(/^#/, ''));
+      const m = h.match(/(?:^|&)c=([A-Za-z0-9-]+)/);
+      if (m) chalRef = decChal(m[1]);
+    }catch(e){ chalRef = null; }
+  }
+  function renderChalBar(){
+    const b = $('chalBar');
+    if (!b) return;
+    if (!chalRef || chalDismissed || !$('ovHome').classList.contains('on')){ b.classList.remove('on'); return; }
+    const names = ['单关练习', '长辈版', '连续闯关', '地狱模式'];
+    const nm = names[chalRef.mc] || '挑战';
+    $('chalText').innerHTML = '<b>有人向你发起挑战</b><br>对方在「' + nm + '」拿到 <b>'
+      + chalRef.score.toLocaleString('en-US') + '</b> 分，拦下 ' + chalRef.blocked + ' 个骗子，最高连击 '
+      + chalRef.combo + '。<b>点这里直接开打</b>，看他是不是真的比你强。';
+    b.classList.add('on');
+  }
+  function dismissChal(){ chalDismissed = true; renderChalBar(); }
+  function startChalMode(){
+    if (!chalRef) return;
+    if (chalRef.mc === 3) startRun('hell');
+    else if (chalRef.mc === 1) startRun('senior');
+    else startRun('campaign');
+  }
+  function openChal(){
+    const code = encChal();
+    $('chalCode').textContent = code;
+    $('chalWho').innerHTML = '你在「' + modeLabel() + '」的成绩：<b>' + score.toLocaleString('en-US') + '</b> 分';
+    hideAll(); show('ovChal');
+    $('ovChal').scrollTop = 0;
+  }
+  function closeChal(){ hide('ovChal'); show('ovOver'); }
+  function chalLink(){
+    try{
+      return String(location.href).split('#')[0] + '#c=' + encChal();
+    }catch(e){ return '#c=' + encChal(); }
+  }
+  function copyChal(btn, what){
+    const lbl = btn ? btn.textContent : '';
+    const t = what === 'code' ? encChal() : chalLink() + '\n\n打开后点首页顶部的挑战横幅，就能看到我的成绩，直接开同一局。';
+    const done = () => { if (btn){ btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = lbl, 2000); } };
+    if (navigator.clipboard && location.protocol !== 'file:'){
+      navigator.clipboard.writeText(t).then(done).catch(() => fb(t, done));
+    } else fb(t, done);
+  }
+
+  /* 结算页顶部插入挑战对比 */
+  function renderChalResult(){
+    const old = $('chalResult');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (!chalRef) return;
+    const rb = $('ovOver').querySelector('.rankbox');
+    if (!rb) return;
+    const beat = score > chalRef.score;
+    const el = document.createElement('div');
+    el.id = 'chalResult';
+    el.className = 'codebox';
+    el.innerHTML = '<span>' + (beat ? '🎉 挑战成功' : '😐 挑战未过') + '</span>'
+      + '<b class="cc" style="font-size:17px">' + score.toLocaleString('en-US') + ' : ' + chalRef.score.toLocaleString('en-US') + '</b>'
+      + '<span>你 ' + (beat ? '超过' : '落后') + '了对方 ' + Math.abs(score - chalRef.score).toLocaleString('en-US') + ' 分'
+      + (beat ? '，可以回去把成绩甩给他了' : '，再来一局试试') + '</span>';
+    rb.parentNode.insertBefore(el, rb);
+  }
+
+  /* 首页扩展信息 */
+  function refreshHomeExtras(){
+    const b = $('bookSub');
+    if (b) b.textContent = '收录 ' + totalScams() + ' 条诈骗样本';
+    refreshDailySub();
+    applyCb();
+    renderChalBar();
+  }
+
+  /* ==================================================================
+     插件系统
+     对外公开 FZ.use({...}) 注册接口与生命周期钩子，详见《插件开发指南》
+     ================================================================== */
+  const K_PLUG = 'fz2_plug';
+  const HOOK_NAMES = ['onCardShow', 'onJudge', 'onSettle', 'onTick', 'onTheme', 'onEnable', 'onDisable'];
+  let _plugInstalling = false;
+
+  function plugEsc(s){ return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function plugEnsureEl(id){
+    let el = $(id);
+    if (!el){ el = document.createElement('div'); el.id = id; document.body.appendChild(el); }
+    return el;
+  }
+  let _plugToastT = 0;
+  function plugToast(title, sub){
+    const el = plugEnsureEl('plugToast');
+    el.innerHTML = plugEsc(title) + (sub ? '<span>' + plugEsc(sub) + '</span>' : '');
+    el.classList.add('on');
+    clearTimeout(_plugToastT);
+    _plugToastT = setTimeout(() => el.classList.remove('on'), 2600);
+  }
+
+  const PLUG = {
+    defs: {}, order: [], tab: {},
+    state: { on: {}, custom: [] },
+    load(){
+      const s = lsGet(K_PLUG, null);
+      if (s && typeof s === 'object'){
+        this.state = {
+          on: (s.on && typeof s.on === 'object') ? s.on : {},
+          custom: Array.isArray(s.custom) ? s.custom.filter(c => c && c.id && typeof c.code === 'string') : []
+        };
+      }
+    },
+    save(){ lsSet(K_PLUG, this.state); },
+    isEnabled(id){ return !!this.state.on[id]; },
+    getDef(id){ return this.defs[id] ? this.defs[id].def : null; },
+    use(def){
+      if (!def || typeof def !== 'object' || !def.id) throw new Error('插件定义缺少 id 字段');
+      if (typeof def.name !== 'string' || !def.name) def.name = def.id;
+      if (this.defs[def.id]) throw new Error('插件 id 重复：' + def.id);
+      this.defs[def.id] = { def, builtin: !_plugInstalling };
+      this.order.push(def.id);
+      return def;
+    },
+    fire(name, arg){
+      const list = this.tab[name];
+      if (!list) return;
+      for (let i = 0; i < list.length; i++){
+        try { list[i].fn(arg); } catch(e){}
+      }
+    },
+    enable(id){
+      const rec = this.defs[id];
+      if (!rec || this.isEnabled(id)) return false;
+      this.state.on[id] = 1;
+      HOOK_NAMES.forEach(hn => {
+        const fn = rec.def[hn];
+        if (typeof fn === 'function') (this.tab[hn] || (this.tab[hn] = [])).push({ id, fn: fn.bind(rec.def) });
+      });
+      try { if (typeof rec.def.onEnable === 'function') rec.def.onEnable(); } catch(e){}
+      this.save();
+      return true;
+    },
+    disable(id){
+      const rec = this.defs[id];
+      if (!rec || !this.isEnabled(id)) return false;
+      delete this.state.on[id];
+      for (const hn in this.tab) this.tab[hn] = this.tab[hn].filter(x => x.id !== id);
+      try { if (typeof rec.def.onDisable === 'function') rec.def.onDisable(); } catch(e){}
+      this.save();
+      return true;
+    },
+    toggle(id){ if (this.isEnabled(id)) this.disable(id); else this.enable(id); },
+    uninstall(id){
+      this.disable(id);
+      const i = this.state.custom.findIndex(c => c.id === id);
+      if (i >= 0){ this.state.custom.splice(i, 1); this.save(); }
+      delete this.defs[id];
+      this.order = this.order.filter(x => x !== id);
+    },
+    boot(){
+      this.load();
+      this.state.custom.forEach(c => { try { plugRunCode(c.code); } catch(e){} });
+      Object.keys(this.state.on).forEach(id => { if (this.defs[id]) this.enable(id); });
+    }
+  };
+
+  let _plugLastDef = null;
+  function plugRunCode(code){
+    code = String(code || '').trim();
+    if (!code) throw new Error('插件代码为空');
+    _plugLastDef = null;
+    _plugInstalling = true;
+    try {
+      const FZ = {
+        use(def){ _plugLastDef = PLUG.use(def); return def; },
+        toast: plugToast,
+        storage: {
+          get(k, d){ return lsGet('fz2_plugst_' + k, d); },
+          set(k, v){ lsSet('fz2_plugst_' + k, v); }
+        },
+        fx: { setDensity: d => FX.setDensity(d) }
+      };
+      new Function('FZ', code)(FZ);
+    } finally { _plugInstalling = false; }
+    if (!_plugLastDef) throw new Error('代码没有调用 FZ.use(...)，没有注册任何插件');
+    return _plugLastDef;
+  }
+  function plugInstallFromText(code){
+    const def = plugRunCode(code);
+    const meta = { id: def.id, name: def.name, ver: def.ver || '1.0.0', desc: def.desc || '', icon: def.icon || '自', code: String(code).trim() };
+    const i = PLUG.state.custom.findIndex(c => c.id === meta.id);
+    if (i >= 0) PLUG.state.custom[i] = meta; else PLUG.state.custom.push(meta);
+    PLUG.save();
+    PLUG.enable(meta.id);
+    return meta;
+  }
+  function plugChips(pid, key, opts, cur){
+    return '<div class="pchiprow">' + opts.map(o =>
+      '<button class="pchip' + (o.v === cur ? ' on' : '') + '" onclick="Game.plugOpt(\'' + pid + '\',\'' + key + '\',\'' + o.v + '\')">' + o.t + '</button>').join('') + '</div>';
+  }
+  function plugSlider(pid, key, min, max, step, val, unit){
+    const d = PLUG.getDef(pid);
+    const shown = d && typeof d.fmtOpt === 'function' ? d.fmtOpt(key, val) : val;
+    return '<div class="pslider"><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val
+      + '" oninput="Game.plugRange(\'' + pid + '\',\'' + key + '\',this.value)">'
+      + '<b id="plugval_' + pid + '_' + key + '">' + plugEsc(shown) + '</b></div>';
+  }
+
+  /* ---- 内置插件 1：字体工坊 ---- */
+  PLUG.use({
+    id: 'fonts', name: '字体工坊', ver: '1.0.0', icon: '字',
+    desc: '5 套界面字体 + 卡片字号缩放，长消息也不费眼',
+    _st: null, opts: { font: 'sys', size: 100 },
+    _ensure(){ if (!this._st){ this._st = document.createElement('style'); this._st.id = 'plugFontStyle'; document.head.appendChild(this._st); } return this._st; },
+    _apply(){
+      const o = this.opts, css = [];
+      const fonts = {
+        sys: '', song: '"Songti SC","SimSun","NSimSun",serif',
+        kai: '"Kaiti SC","KaiTi","STKaiti",serif',
+        round: '"Yuanti SC","PingFang SC","Microsoft YaHei",sans-serif',
+        hei: '"DengXian","Source Han Sans SC","Noto Sans SC",sans-serif'
+      };
+      if (fonts[o.font]) css.push('body{font-family:' + fonts[o.font] + ' !important}');
+      const k = o.size / 100;
+      css.push('.card .cbody{font-size:' + (17 * k).toFixed(1) + 'px !important}');
+      css.push('.card .who b{font-size:' + (15 * k).toFixed(1) + 'px !important}');
+      css.push('.card .av{font-size:' + (19 * k).toFixed(1) + 'px !important}');
+      this._ensure().textContent = css.join('');
+    },
+    onEnable(){ this.opts = lsGet('fz2_plug_fonts', this.opts); this._apply(); },
+    onDisable(){ if (this._st) this._st.textContent = ''; },
+    setOpt(key, value){
+      this.opts[key] = key === 'size' ? Math.round(+value) : value;
+      lsSet('fz2_plug_fonts', this.opts); this._apply();
+    },
+    fmtOpt(key, v){ return key === 'size' ? Math.round(v) + '%' : ''; },
+    panel(){
+      const o = lsGet('fz2_plug_fonts', this.opts);
+      return plugChips('fonts', 'font', [
+        { v: 'sys', t: '系统默认' }, { v: 'song', t: '宋体 · 衬线' }, { v: 'kai', t: '楷体 · 手写' },
+        { v: 'round', t: '圆润' }, { v: 'hei', t: '现代黑体' }
+      ], o.font) + plugSlider('fonts', 'size', 90, 130, 5, o.size, '%');
+    }
+  });
+
+  /* ---- 内置插件 2：话术雷达 ---- */
+  PLUG.use({
+    id: 'radar', name: '话术雷达', ver: '1.0.0', icon: '雷',
+    desc: '自动把消息里的高危词标红：转账、验证码、安全账户……帮你练出关键词嗅觉',
+    KW: ['安全账户', '屏幕共享', '别告诉', '转账', '验证码', '退款', '刷单', '垫付', '征信', '涉案',
+         '洗钱', '注销', '逾期', '中奖', '手续费', '保证金', '解冻费', '押金', '公证', '封号',
+         '罚款', '保密', '稳赚', '双倍', '返利', '内推', '点赞', '下载 App', '点击链接', '点击填写', '索要'],
+    onCardShow(a){
+      if (!a || !a.el) return;
+      const b = a.el.querySelector('.cbody');
+      if (!b) return;
+      const kws = this.KW.slice().sort((x, y) => y.length - x.length);
+      let node = b.firstChild;
+      while (node){
+        const next = node.nextSibling;
+        if (node.nodeType === 3 && node.nodeValue && node.nodeValue.trim()){
+          const txt = node.nodeValue;
+          const esc = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          let hit = false, out = esc;
+          kws.forEach(kw => {
+            if (out.indexOf(kw) < 0) return;
+            hit = true;
+            out = out.split(kw).join('<mark class="mark-radar">' + kw + '</mark>');
+          });
+          if (hit){
+            const sp = document.createElement('span');
+            sp.innerHTML = out;
+            node.parentNode.replaceChild(sp, node);
+          }
+        }
+        node = next;
+      }
+    }
+  });
+
+  /* ---- 内置插件 3：计时增强 ---- */
+  PLUG.use({
+    id: 'timerx', name: '计时增强', ver: '1.0.0', icon: '钟',
+    desc: '屏幕顶部全局倒计时条：过半变琥珀、最后三成变红、临界闪烁',
+    _el: null,
+    _ensure(){ if (!this._el){ this._el = plugEnsureEl('plugTimer'); this._el.innerHTML = '<i></i>'; } return this._el; },
+    onCardShow(){
+      const e = this._ensure();
+      e.style.display = 'block'; e.classList.remove('low', 'crit');
+      if (e.firstChild) e.firstChild.style.width = '100%';
+    },
+    onTick(a){
+      const e = this._ensure(), f = e.firstChild;
+      if (!f) return;
+      f.style.width = (a.left * 100).toFixed(1) + '%';
+      e.classList.toggle('low', a.left < .3);
+      e.classList.toggle('crit', a.left < .16);
+    },
+    onJudge(){ if (this._el) this._el.classList.remove('crit'); },
+    onSettle(){ if (this._el) this._el.style.display = 'none'; },
+    onDisable(){ if (this._el && this._el.parentNode) this._el.parentNode.removeChild(this._el); this._el = null; }
+  });
+
+  /* ---- 内置插件 4：教练模式 ---- */
+  PLUG.use({
+    id: 'coach', name: '教练模式', ver: '1.0.0', icon: '教',
+    desc: '每次判定后自动弹出一句拆解讲解，适合课堂投屏演示',
+    _el: null, _t: 0,
+    _ensure(){ if (!this._el) this._el = plugEnsureEl('plugCoach'); return this._el; },
+    onJudge(a){
+      const c = a.card, el = this._ensure();
+      let title, body;
+      if (c.scam){
+        title = a.good ? '✓ 拦对了 · 套路拆解' : '✕ 放走了骗子 · 套路拆解';
+        body = c.why || '';
+      } else {
+        title = a.good ? '✓ 放行正确 · 这是真消息' : (a.dir === 'timeout' ? '⚠ 超时了 · 这其实是真消息' : '✕ 误拦 · 这是真消息');
+        body = '真消息的共性：不催你决定、不要你转账、不要验证码、不制造恐惧，来自你认识的服务或熟人。';
+      }
+      el.innerHTML = '<b>' + plugEsc(title) + '</b><span>' + plugEsc(body) + '</span>';
+      el.classList.add('on');
+      clearTimeout(this._t);
+      this._t = setTimeout(() => el.classList.remove('on'), 4800);
+    },
+    onSettle(){ if (this._el) this._el.classList.remove('on'); },
+    onDisable(){ if (this._el && this._el.parentNode) this._el.parentNode.removeChild(this._el); this._el = null; clearTimeout(this._t); }
+  });
+
+  /* ---- 内置插件 5：粒子调音台 ---- */
+  PLUG.use({
+    id: 'particles', name: '粒子调音台', ver: '1.0.0', icon: '粒',
+    desc: '调整特效粒子密度：0.2× 省电流畅，1.6× 狂欢模式',
+    opts: { d: 1 },
+    onEnable(){ this.opts = lsGet('fz2_plug_particles', this.opts); FX.setDensity(this.opts.d); },
+    onDisable(){ FX.setDensity(1); },
+    setOpt(key, value){ this.opts.d = +value; lsSet('fz2_plug_particles', this.opts); FX.setDensity(this.opts.d); },
+    fmtOpt(key, v){ return (+v).toFixed(1) + '×'; },
+    panel(){ return plugSlider('particles', 'd', 0.2, 1.6, 0.1, this.opts.d, '×'); }
+  });
+
+  /* ---- 内置插件 6：成就徽章 ---- */
+  PLUG.use({
+    id: 'achv', name: '成就徽章', ver: '1.0.0', icon: '🏅',
+    desc: '9 枚里程碑徽章：连击、零损失通关、地狱模式……解锁瞬间弹通知',
+    _st: null,
+    LIST: [
+      { id: 'first_block', ic: '🛡', name: '初次拦截', desc: '拦下第一条诈骗', check: e => e.type === 'judge' && e.card && e.card.scam && e.good },
+      { id: 'block10', ic: '🎯', name: '火眼金睛', desc: '累计拦下 10 条诈骗', check: (e, st) => e.type === 'judge' && (st.blocked || 0) >= 10 },
+      { id: 'block50', ic: '💎', name: '人形滤网', desc: '累计拦下 50 条诈骗', check: (e, st) => e.type === 'judge' && (st.blocked || 0) >= 50 },
+      { id: 'combo5', ic: '⚡', name: '五连击', desc: '单局连击达到 5', check: e => e.type === 'judge' && e.combo >= 5 },
+      { id: 'combo10', ic: '🔥', name: '十连击', desc: '单局连击达到 10', check: e => e.type === 'judge' && e.combo >= 10 },
+      { id: 'first_win', ic: '🏆', name: '首胜', desc: '第一次通关一局', check: e => e.type === 'settle' && e.win },
+      { id: 'perfect', ic: '✨', name: '零损失', desc: '一局里一分钱都没被骗走并通关', check: e => e.type === 'settle' && e.win && e.lost === 0 },
+      { id: 'campaign', ic: '👑', name: '守门大师', desc: '连续闯关模式四关全通', check: e => e.type === 'settle' && e.win && e.mode === 'campaign' },
+      { id: 'hell', ic: '😈', name: '地狱行者', desc: '地狱模式通关', check: e => e.type === 'settle' && e.win && e.mode === 'hell' }
+    ],
+    _ensure(){ if (!this._st) this._st = lsGet('fz2_plug_achv', { u: {}, blocked: 0 }); return this._st; },
+    _fire(ev){
+      const st = this._ensure();
+      const newly = [];
+      this.LIST.forEach(a => {
+        if (!st.u[a.id]){
+          let ok = false;
+          try { ok = !!a.check(ev, st); } catch(e){}
+          if (ok){ st.u[a.id] = Date.now(); newly.push(a); }
+        }
+      });
+      this._save2();
+      newly.forEach(a => plugToast('🏅 解锁成就：' + a.name, a.desc));
+    },
+    _save2(){ lsSet('fz2_plug_achv', this._st); },
+    onJudge(a){
+      const st = this._ensure();
+      if (a.card && a.card.scam && a.good) st.blocked = (st.blocked || 0) + 1;
+      this._fire({ type: 'judge', card: a.card, good: a.good, combo: a.combo });
+    },
+    onSettle(d){ this._fire({ type: 'settle', win: d.win, lost: d.lost, mode: d.mode }); },
+    panel(){
+      const st = this._ensure();
+      return '<div class="badgegrid">' + this.LIST.map(a =>
+        '<div class="badge' + (st.u[a.id] ? ' got' : '') + '"><div class="bic">' + a.ic + '</div><b>' + a.name + '</b><span>' + a.desc + '</span></div>').join('') + '</div>';
+    }
+  });
+
+  /* ---- 内置插件 7：色觉友好 ---- */
+  PLUG.use({
+    id: 'cb', name: '色觉友好', ver: '1.0.0', icon: '🎨',
+    desc: '对/错颜色改为蓝橙并强化符号区分，与首页设置项互通',
+    onEnable(){ if (!cbOn) toggleCb(); },
+    onDisable(){ if (cbOn) toggleCb(); }
+  });
+
+  PLUG.boot();
+
+  /* ------ 插件中心 UI ------ */
+  function renderPlugList(){
+    const box = $('plugList');
+    if (!box) return;
+    let h = '';
+    PLUG.order.forEach(id => {
+      const rec = PLUG.defs[id];
+      if (!rec) return;
+      const d = rec.def, on = PLUG.isEnabled(id);
+      const src = rec.builtin ? '官方 · v' + (d.ver || '1.0.0') : '自定义 · ' + (d.ver || '');
+      h += '<div class="prow"><div class="ptop">'
+        + '<div class="pico">' + plugEsc(d.icon || '片') + '</div>'
+        + '<div class="pmeta"><b>' + plugEsc(d.name) + '<i>' + src + '</i></b><span>' + plugEsc(d.desc || '') + '</span></div>'
+        + '<button class="ptoggle' + (on ? ' on' : '') + '" onclick="Game.plugToggle(\'' + id + '\')" aria-label="开关"></button></div>';
+      if (on && typeof d.panel === 'function'){
+        try { h += '<div class="ppanel">' + d.panel() + '</div>'; } catch(e){}
+      }
+      if (!rec.builtin){
+        h += '<div class="pinstrow">'
+          + '<button class="btn ghost" onclick="Game.plugExport(\'' + id + '\')">导出 .fzplugin</button>'
+          + '<button class="btn ghost" onclick="Game.plugUninstall(\'' + id + '\')">卸载</button></div>';
+      }
+      h += '</div>';
+    });
+    box.innerHTML = h;
+    const sub = $('plugSub');
+    if (sub){
+      const n = PLUG.order.filter(x => PLUG.isEnabled(x)).length;
+      sub.textContent = PLUG.order.length + ' 个插件 · 已开启 ' + n + ' 个';
+    }
+  }
+  function plugInstallView(on){
+    const b = $('plugInstallBox');
+    if (!b) return;
+    b.style.display = on ? 'block' : 'none';
+    if (on){
+      const ta = $('plugCodeArea');
+      if (ta){ ta.value = ''; try { ta.focus(); } catch(e){} }
+      try { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+    }
+  }
+  function plugExampleCode(){
+    return [
+      "FZ.use({",
+      "  id: 'combo-sound',",
+      "  name: '连击音效增强',",
+      "  ver: '1.0.0',",
+      "  icon: '⚡',",
+      "  desc: '示例插件：连击达到 3 / 5 时弹提示',",
+      "  onJudge(ev) {",
+      "    if (ev.combo === 3) FZ.toast('连击 x3！', '示例插件在这里被钩子触发');",
+      "    if (ev.combo === 5) FZ.toast('连击 x5，状态火热！', '示例插件');",
+      "  }",
+      "});"
+    ].join('\n');
+  }
+  function copyPlugExample(btn){
+    const code = plugExampleCode();
+    const done = () => {
+      const old = btn.textContent;
+      btn.textContent = '已复制 ✓ 去插件中心粘贴安装';
+      setTimeout(() => { btn.textContent = old; }, 2400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(done).catch(() => { fb(code, done); });
+    } else fb(code, done);
+  }
+  function openPlug(){
+    renderPlugList();
+    plugInstallView(false);
+    hideAll();
+    show('ovPlug');
+    $('ovPlug').scrollTop = 0;
+  }
+  function openPlugDoc(){ hideAll(); show('ovPlugDoc'); $('ovPlugDoc').scrollTop = 0; }
+  function closePlugDoc(){ hide('ovPlugDoc'); show('ovPlug'); }
+  function plugToggle(id){ PLUG.toggle(id); renderPlugList(); }
+  function plugOpt(pid, key, val){ const d = PLUG.getDef(pid); if (d && typeof d.setOpt === 'function'){ d.setOpt(key, val); renderPlugList(); } }
+  function plugRange(pid, key, val){
+    const d = PLUG.getDef(pid);
+    if (!d || typeof d.setOpt !== 'function') return;
+    d.setOpt(key, +val);
+    const b = $('plugval_' + pid + '_' + key);
+    if (b) b.textContent = d.fmtOpt ? d.fmtOpt(key, +val) : val;
+  }
+  function plugInstallSubmit(){
+    const ta = $('plugCodeArea');
+    if (!ta) return;
+    try {
+      const meta = plugInstallFromText(ta.value);
+      ta.value = '';
+      plugInstallView(false);
+      renderPlugList();
+      plugToast('已安装并开启：' + meta.name, '在列表里可以随时关闭或卸载');
+    } catch(err){
+      alert('安装失败：' + (err && err.message ? err.message : err));
+    }
+  }
+  function plugPickFile(){ const f = $('plugFile'); if (f) f.click(); }
+  function plugExport(id){
+    const d = PLUG.getDef(id);
+    if (!d) return;
+    const c = PLUG.state.custom.find(x => x.id === id);
+    const data = JSON.stringify({ fzplugin: 1, name: d.name, ver: d.ver || '1.0.0', desc: d.desc || '', icon: d.icon || '自', code: c ? c.code : null }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = id + '.fzplugin';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    plugToast('已导出 ' + id + '.fzplugin', c ? '文件里带着插件代码，可以直接分享' : '官方插件导出的是元信息');
+  }
+  function plugUninstall(id){
+    const d = PLUG.getDef(id);
+    if (!confirm('卸载插件「' + (d ? d.name : id) + '」？')) return;
+    PLUG.uninstall(id);
+    renderPlugList();
+  }
+
+  const OVS = ['ovHome', 'ovLevel', 'ovOver', 'ovPoster',
+               'ovDaily', 'ovScam', 'ovNote', 'ovFam', 'ovBook', 'ovChal',
+               'ovPlug', 'ovPlugDoc'];
+  function hideAll(){ OVS.forEach(id => hide(id)); }
+  function show(id){ $(id).classList.add('on'); }
+  function hide(id){ $(id).classList.remove('on'); }
+
+  /* ------ 输入 ------ */
+  document.addEventListener('keydown', e => {
+    if (over) return;
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); resolve('left'); }
+    if (e.key === 'ArrowRight'){ e.preventDefault(); resolve('right'); }
+  });
+  $('btnBlock').addEventListener('click', () => resolve('left'));
+  $('btnPass').addEventListener('click', () => resolve('right'));
+  document.addEventListener('pointerup', () => { if (activeEnd) activeEnd(); });
+  document.addEventListener('pointercancel', () => { if (activeEnd) activeEnd(); });
+  $('muteBtn').addEventListener('click', function(){
+    silent = !silent;
+    this.textContent = silent ? '🔇' : '🔊';
+    this.classList.toggle('on', !silent);
+    try{ localStorage.setItem(K_MUTE, silent ? '1' : '0'); }catch(e){}
+  });
+  $('posterSave').addEventListener('click', savePoster);
+  $('noteSave').addEventListener('click', saveNote);
+  $('noteCopy').addEventListener('click', function(){ copyNote(this); });
+  $('famSave').addEventListener('click', saveFam);
+  $('chalCopyLink').addEventListener('click', function(){ copyChal(this, 'link'); });
+  $('chalCopyCode').addEventListener('click', function(){ copyChal(this, 'code'); });
+  $('plugFile').addEventListener('change', function(){
+    const f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        let code = String(rd.result);
+        if (code.charCodeAt(0) === 0xFEFF) code = code.slice(1);
+        try {
+          const j = JSON.parse(code);
+          if (j && j.fzplugin && typeof j.code === 'string') code = j.code;
+        } catch(e2){}
+        const ta = $('plugCodeArea');
+        if (ta){
+          ta.value = code;
+          plugInstallView(true);
+          plugToast('已读取文件', '点「安装」完成装载');
+        }
+      } catch(err){ alert('读取失败：' + (err && err.message ? err.message : err)); }
+    };
+    rd.readAsText(f);
+  });
+  try{ if (localStorage.getItem(K_MUTE) === '1'){ silent = true; $('muteBtn').textContent = '🔇'; $('muteBtn').classList.remove('on'); } }catch(e){}
+
+  /* ------ 启动 ------ */
+  applyTheme(LEVELS[0]);
+  renderLevelList();
+  refreshTop();
+  parseChalFromUrl();
+  try{ cbOn = localStorage.getItem(K_CB) === 'true'; }catch(e){ cbOn = false; }
+  applyCb();
+  refreshHomeExtras();
+  $('btnBlock').disabled = true;
+  $('btnPass').disabled = true;
+  updateHUD(false);
+
+  return {
+    startCampaign: () => startRun('campaign'),
+    startPractice: i => startRun('practice', i),
+    startSenior: () => startRun('senior'),
+    startHell: () => { if (!isHellUnlocked()){ alert('先通过全部四关才能解锁地狱模式'); return; } startRun('hell'); },
+    hellLocked: () => alert('地狱模式需要先通关全部四个关卡。\n\n先点上面的关卡练练手吧。'),
+    beginLevel, showHome, closePoster, showPoster, copyText, replay,
+    openDaily, dailyAnswer, startScam, scamPick, scamNext,
+    openNote, closeNote, openFamTip, closeFam, openBook,
+    openChal, closeChal, dismissChal, startChalMode, toggleCb,
+    openPlug, openPlugDoc, closePlugDoc, plugToggle, plugOpt, plugRange,
+    plugInstallView, plugInstallSubmit, plugPickFile, plugExport, plugUninstall,
+    copyPlugExample,
+    _debug: {
+      resolve, makePoster, catOf, worstCat,
+      makeFamily, buildNote, encChal, decChal, dailyPick, totalScams,
+      plugRunCode, plugInstallFromText, plugExampleCode,
+      get plug(){ return { order: PLUG.order.slice(), on: Object.keys(PLUG.state.on), custom: PLUG.state.custom.length, hooks: Object.keys(PLUG.tab).reduce((o, k) => { o[k] = PLUG.tab[k].length; return o; }, {}) }; },
+      get plugEngine(){ return PLUG; },
+      get FXDensity(){ return FX.density; },
+      get daily(){ return dailyState(); },
+      get scam(){ return { idx: scamIdx, right: scamRight, n: scamDeck.length, picked: scamPicked, deck: scamDeck.slice() }; },
+      get cb(){ return cbOn; },
+      get chal(){ return chalRef; },
+      get catStat(){ return JSON.parse(JSON.stringify(catStat)); },
+      get hist(){ return getHist(); },
+      get cfg(){ return cfg; },
+      get cur(){ return cur; },
+      get queue(){ return queue; },
+      get mode(){ return mode; },
+      get state(){ return { mode, levelIdx, idx, played, totalCards, money, score, combo, maxCombo, blocked, falseAlarm, timeoutMiss, lost, over, resolving, mistakes: mistakes.slice() }; },
+      unlockHell, isHellUnlocked, makePosterNow: () => makePoster(true),
+      FX, get fx(){ return { rings: $('ringFx').children.length, slices: $('ringFx').querySelectorAll('.cslice').length, bars: $('fxScan').children.length, bad: $('fxBad').classList.contains('on'), good: $('fxGood').classList.contains('on'), warn: $('fxWarn').classList.contains('on'), sk: parseFloat(stage.style.getPropertyValue('--sk') || '1') }; }
+    }
+  };
+})();
+</script>
+</body>
+</html>

@@ -710,7 +710,18 @@ body.senior #combo{font-size:19px}
 .docbox th{color:#fff; background:rgba(255,255,255,.05)}
 /* ===== 工业指挥台首页：近黑底 + 琥珀强调 + 斜切封装 + 透视立体 ===== */
 #ovHome{background:radial-gradient(720px 520px at 50% -8%, rgba(215,185,39,.10), transparent 62%), rgba(5,4,3,.965)}
-.hub{position:relative; height:596px; margin:12px -6px 6px; perspective:1300px; perspective-origin:50% 46%}
+.hub{position:relative; height:600px; margin:12px -6px 6px; perspective:820px; perspective-origin:50% 34%; overflow:hidden}
+.hub-stage{position:absolute; inset:0; transform-style:preserve-3d;
+  transform:rotateX(var(--tiltx,15deg)) rotateY(var(--tilty,0deg));
+  transition:transform .28s cubic-bezier(.2,.8,.3,1)}
+.hub-floor{position:absolute; left:-14%; right:-14%; bottom:-6px; height:200px; z-index:1;
+  transform-origin:bottom center; transform:rotateX(76deg) translateZ(-50px);
+  background:
+    repeating-linear-gradient(90deg, rgba(215,185,39,.30) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(0deg, rgba(215,185,39,.22) 0 1px, transparent 1px 34px),
+    linear-gradient(180deg, rgba(215,185,39,.10), rgba(6,5,2,0) 78%);
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.9), transparent 88%);
+  mask-image:linear-gradient(180deg, rgba(0,0,0,.9), transparent 88%); opacity:.85}
 #ovHome .bestrow{gap:6px; margin:14px 0 0}
 #ovHome .bestrow div{background:linear-gradient(150deg, rgba(215,185,39,.10), rgba(10,8,6,.9));
   border:1px solid rgba(215,185,39,.2);
@@ -743,10 +754,12 @@ body.senior #combo{font-size:19px}
 .wtle.r{right:32px}
 
 .hub-l,.hub-r{position:absolute; top:40px; bottom:104px; width:104px; display:flex; flex-direction:column;
-  justify-content:center; gap:7px; z-index:4; transform-style:preserve-3d; padding:0 4px}
-.hub-l{left:6px; transform:rotateY(18deg)}
-.hub-r{right:6px; transform:rotateY(-18deg)}
-.hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:4;
+  justify-content:center; gap:8px; z-index:4; transform-style:preserve-3d; padding:0 4px;
+  filter:brightness(.9)}
+.hub-l{left:2px; transform:translateZ(-92px) rotateY(30deg) scale(.97)}
+.hub-r{right:2px; transform:translateZ(-92px) rotateY(-30deg) scale(.97)}
+.hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:6;
+  transform:translateZ(40px); transform-style:preserve-3d;
   display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-family:inherit;
   font-size:15px; font-weight:900; letter-spacing:.6px; color:#1A1204;
   clip-path:polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
@@ -762,8 +775,15 @@ body.senior #combo{font-size:19px}
   border:1px solid rgba(215,185,39,.22);
   clip-path:polygon(0 0, calc(100% - 17px) 0, 100% 17px, 100% 100%, 17px 100%, 0 calc(100% - 17px));
   background:linear-gradient(148deg, rgba(215,185,39,.10), rgba(12,9,6,.92) 58%);
-  box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 10px 22px rgba(0,0,0,.5);
+  box-shadow:inset 0 0 14px rgba(0,0,0,.6), 5px 7px 0 -1px rgba(0,0,0,.62), 12px 16px 26px rgba(0,0,0,.6);
+  transform-style:preserve-3d;
   transition:transform .16s, box-shadow .16s, border-color .16s}
+.wlv::before,.wchip::before{content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; z-index:2; pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(255,240,190,.16), transparent);
+  animation:psweep 5.4s ease-in-out infinite}
+.wlv:nth-child(2n)::before,.wchip:nth-child(2n)::before{animation-delay:1.4s}
+.wlv:nth-child(3n)::before,.wchip:nth-child(3n)::before{animation-delay:2.6s}
+@keyframes psweep{0%{left:-40%}55%,100%{left:120%}}
 .wlv{border-left:3px solid var(--laccent)}
 .wlv:hover,.wchip:hover{transform:translateY(-2px); border-color:rgba(215,185,39,.45);
   box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 16px 28px rgba(0,0,0,.6), 0 0 0 1px rgba(215,185,39,.14)}
@@ -785,8 +805,12 @@ body.senior #combo{font-size:19px}
 .wchip .wc b{display:block; font-size:11.5px; color:#EDE6DC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .wchip .wc i{display:block; font-style:normal; font-size:8px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-.hub-core{position:absolute; left:50%; top:150px; transform:translateX(-50%); width:208px; text-align:center; z-index:3; pointer-events:none}
+.hub-core{position:absolute; left:50%; top:142px; width:208px; text-align:center; z-index:5; pointer-events:none;
+  transform:translateX(-50%) translateZ(104px); transform-style:preserve-3d; animation:hfloat 6.5s ease-in-out infinite}
+@keyframes hfloat{0%,100%{transform:translateX(-50%) translateZ(104px)}50%{transform:translateX(-50%) translateZ(122px)}}
 .hcore{position:relative; width:208px; height:208px; margin:0 auto; transform-style:preserve-3d}
+.hcore::before{content:""; position:absolute; inset:36px; border-radius:50%; background:#0A0705;
+  transform:translateZ(-34px); box-shadow:0 0 0 1px rgba(215,185,39,.14), 0 30px 46px rgba(0,0,0,.7)}
 .hring{position:absolute; border-radius:50%}
 .hring.r1{inset:0; border:1px dashed rgba(215,185,39,.5); animation:hspin 34s linear infinite}
 .hring.tick{inset:13px; animation:hspin 44s linear infinite reverse;
@@ -797,7 +821,8 @@ body.senior #combo{font-size:19px}
   border-bottom-color:rgba(215,185,39,.6); animation:hspin 15s linear infinite}
 .hdisc{position:absolute; inset:40px; border-radius:50%; display:grid; place-items:center; overflow:hidden;
   background:radial-gradient(circle at 34% 26%, #2A2015, #0A0806 68%);
-  box-shadow:inset 0 0 0 1px rgba(215,185,39,.26), inset 0 -18px 28px rgba(0,0,0,.75), 0 24px 44px rgba(0,0,0,.62)}
+  box-shadow:inset 0 0 0 1px rgba(215,185,39,.26), inset 0 -18px 28px rgba(0,0,0,.75),
+             0 10px 0 -3px rgba(0,0,0,.55), 0 26px 46px rgba(0,0,0,.68)}
 .hdisc::before{content:""; position:absolute; inset:0;
   background:conic-gradient(from 200deg, rgba(215,185,39,.30), transparent 22%, transparent 74%, rgba(215,185,39,.20));
   mix-blend-mode:screen; animation:hspin 11s linear infinite}
@@ -914,6 +939,8 @@ body.senior #combo{font-size:19px}
       <i class="hbrk a"></i><i class="hbrk b"></i><i class="hbrk c"></i><i class="hbrk d"></i>
       <b class="wtle l">SECTORS / 关卡</b>
       <b class="wtle r">MODULES / 模式</b>
+      <div class="hub-floor"></div>
+      <div class="hub-stage" id="hubStage">
       <div class="hub-l" id="levelList"></div>
       <div class="hstrut l"></div>
       <div class="hstrut r"></div>
@@ -959,6 +986,7 @@ body.senior #combo{font-size:19px}
           <span class="fi">👨‍👩‍👧</span><span class="wc"><b>家人提醒图</b><i>可保存分享</i></span></button>
       </div>
       <button class="hub-cta" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
+      </div>
     </div>
     <p class="tagline" style="margin-bottom:10px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
     <p class="minirule" style="margin-bottom:16px">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
@@ -3807,6 +3835,26 @@ const Game = (function(){
     rd.readAsText(f);
   });
   try{ if (localStorage.getItem(K_MUTE) === '1'){ silent = true; $('muteBtn').textContent = '🔇'; $('muteBtn').classList.remove('on'); } }catch(e){}
+
+  /* ------ 指挥台鼠标视差（桌面端）：让 3D 舞台跟手倾斜 ------ */
+  (function(){
+    const stage = $('hubStage');
+    if (!stage) return;
+    let tx = 15, ty = 0, raf = 0;
+    const apply = () => { stage.style.setProperty('--tiltx', tx.toFixed(2) + 'deg'); stage.style.setProperty('--tilty', ty.toFixed(2) + 'deg'); };
+    if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;   // 触屏设备不做
+    document.addEventListener('pointermove', e => {
+      if (!$('ovHome') || !$('ovHome').classList.contains('on')) return;
+      const W = window.innerWidth || 1, H = window.innerHeight || 1;
+      ty = ((e.clientX / W) - .5) * 15;
+      tx = 15 - ((e.clientY / H) - .5) * 11;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; apply(); });
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => {
+      tx = 15; ty = 0;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; apply(); });
+    });
+  })();
 
   /* ------ 启动 ------ */
   applyTheme(LEVELS[0]);

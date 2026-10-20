@@ -708,71 +708,117 @@ body.senior #combo{font-size:19px}
 .docbox table{width:100%; border-collapse:collapse; font-size:12px; color:#c6d2e8}
 .docbox th,.docbox td{border:1px solid var(--line); padding:7px 9px; text-align:left; line-height:1.6}
 .docbox th{color:#fff; background:rgba(255,255,255,.05)}
-/* ===== 指挥台式首页：中央盾徽全息台 + 左翼关卡 + 右翼模式 ===== */
-.hub{position:relative; height:352px; margin:12px 0 2px}
-.hub::before{content:""; position:absolute; left:50%; top:56%; transform:translate(-50%,-50%);
-  width:300px; height:230px; border-radius:50%;
-  background:radial-gradient(ellipse at center, rgba(91,140,255,.16), rgba(37,230,196,.05) 55%, transparent 74%); pointer-events:none}
-.hub-l,.hub-r{position:absolute; top:48px; bottom:6px; width:112px; display:flex; flex-direction:column; justify-content:center; gap:8px; z-index:2}
-.hub-l{left:0}
-.hub-r{right:0}
+/* ===== 工业指挥台首页：近黑底 + 琥珀强调 + 斜切封装 + 透视立体 ===== */
+#ovHome{background:radial-gradient(720px 520px at 50% -8%, rgba(215,185,39,.10), transparent 62%), rgba(5,4,3,.965)}
+.hub{position:relative; height:536px; margin:12px 0 4px; perspective:1300px; perspective-origin:50% 42%}
+#ovHome .bestrow{gap:6px; margin:14px 0 0}
+#ovHome .bestrow div{background:linear-gradient(150deg, rgba(215,185,39,.10), rgba(10,8,6,.9));
+  border:1px solid rgba(215,185,39,.2);
+  clip-path:polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px))}
+#ovHome .bestrow b{color:#F5D451; font-family:Consolas,Menlo,monospace; font-size:17px}
+#ovHome .bestrow span{color:#8A8073; font-size:8.5px; letter-spacing:.6px}
+#ovHome .tagline,#ovHome .minirule{color:#8A8073}
+#ovHome .tagline{font-size:12px; max-width:300px}
+#ovHome .legalnote{color:#5C544A}
+.hub-bg{position:absolute; inset:0; z-index:0; overflow:hidden;
+  border:1px solid rgba(215,185,39,.18);
+  clip-path:polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  background:
+    repeating-linear-gradient(0deg, rgba(215,185,39,.05) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, rgba(215,185,39,.042) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.34) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 74% at 50% 40%, rgba(215,185,39,.10), rgba(9,7,4,.92) 58%, #060502 100%);}
+.hub-bg::after{content:""; position:absolute; left:0; right:0; top:0; height:120px;
+  background:repeating-linear-gradient(90deg, rgba(215,185,39,.16) 0 1px, transparent 1px 14px);
+  opacity:.5; animation:hubscan 7s linear infinite}
+@keyframes hubscan{0%{transform:translateY(-120px)}100%{transform:translateY(536px)}}
+.hbrk{position:absolute; width:16px; height:16px; border:1.5px solid rgba(215,185,39,.55); z-index:1}
+.hbrk.a{left:4px; top:4px; border-right:0; border-bottom:0}
+.hbrk.b{right:24px; top:4px; border-left:0; border-bottom:0}
+.hbrk.c{left:4px; bottom:4px; border-right:0; border-top:0}
+.hbrk.d{right:24px; bottom:4px; border-left:0; border-top:0}
+.wtle{position:absolute; top:14px; font-size:8px; letter-spacing:1.6px; color:rgba(215,185,39,.62);
+  font-weight:700; z-index:3; pointer-events:none}
+.wtle.l{left:12px}
+.wtle.r{right:32px}
 
-.lv.wlv{display:flex; align-items:center; gap:7px; width:100%; padding:9px 8px 9px 11px; cursor:pointer;
-  clip-path:polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
-  background:linear-gradient(168deg, rgba(255,255,255,.105), rgba(255,255,255,.035) 46%, rgba(0,0,0,.30));
-  border:0; border-top:1px solid rgba(255,255,255,.14);
-  box-shadow:0 10px 20px rgba(0,0,0,.42), inset 0 -9px 18px rgba(0,0,0,.30);
-  transition:transform .16s, box-shadow .16s; font-family:inherit; text-align:left}
-.lv.wlv:hover{transform:translateY(-1.5px); box-shadow:0 14px 26px rgba(0,0,0,.5), inset 0 -9px 18px rgba(0,0,0,.30)}
-.lv.wlv:active{transform:translateY(1.5px) scale(.985); box-shadow:0 4px 10px rgba(0,0,0,.4)}
-.lv.wlv .num{width:26px; height:26px; border-radius:8px; font-size:12.5px; flex:none; display:grid; place-items:center;
-  background:var(--laccentbg); color:var(--laccent); font-weight:800;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 3px 8px rgba(0,0,0,.3)}
-.lv.wlv .txt{flex:1; min-width:0; position:relative}
-.lv.wlv .txt b{font-size:12.5px; display:block; letter-spacing:-.2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.lv.wlv .txt span{font-size:9px; color:var(--muted); display:block; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.lv.wlv .wmeta{flex:none; font-size:10.5px; font-weight:800; color:var(--laccent); font-variant-numeric:tabular-nums; position:relative}
-.lv.wlv.locked{opacity:.45}
+.hub-l,.hub-r{position:absolute; top:44px; bottom:44px; width:108px; display:flex; flex-direction:column;
+  justify-content:center; gap:8px; z-index:2; transform-style:preserve-3d}
+.hub-l{left:6px; transform:rotateY(16deg)}
+.hub-r{right:6px; transform:rotateY(-16deg)}
 
-.fbtn.wchip{display:flex; align-items:center; gap:8px; width:100%; padding:9px 10px 9px 12px; cursor:pointer; text-align:left;
-  clip-path:polygon(10px 0, 100% 0, 100% 100%, 0 100%);
-  background:linear-gradient(192deg, rgba(255,255,255,.105), rgba(255,255,255,.035) 46%, rgba(0,0,0,.30));
-  border:0; border-top:1px solid rgba(255,255,255,.14);
-  box-shadow:0 10px 20px rgba(0,0,0,.42), inset 0 -9px 18px rgba(0,0,0,.30);
-  transition:transform .16s, box-shadow .16s; font-family:inherit}
-.fbtn.wchip:hover{transform:translateY(-1.5px)}
-.fbtn.wchip:active{transform:translateY(1.5px) scale(.985); box-shadow:0 4px 10px rgba(0,0,0,.4)}
-.fbtn.wchip .fi{font-size:16px; margin:0; flex:none; position:relative; z-index:1}
-.wchip .wc{flex:1; min-width:0; text-align:left; position:relative; z-index:1}
-.wchip .wc b{display:block; font-size:12px; letter-spacing:-.2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.wchip .wc i{display:block; font-style:normal; font-size:8.5px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wlv,.wchip{position:relative; display:flex; align-items:center; gap:7px; width:100%; padding:9px 9px 9px 11px;
+  cursor:pointer; text-align:left; font-family:inherit; color:#CFC7BD; overflow:hidden;
+  border:1px solid rgba(215,185,39,.22);
+  clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  background:linear-gradient(148deg, rgba(215,185,39,.10), rgba(12,9,6,.92) 58%);
+  box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 10px 22px rgba(0,0,0,.5);
+  transition:transform .16s, box-shadow .16s, border-color .16s}
+.wlv{border-left:3px solid var(--laccent)}
+.wlv:hover,.wchip:hover{transform:translateY(-2px); border-color:rgba(215,185,39,.45);
+  box-shadow:inset 0 0 14px rgba(0,0,0,.6), 0 16px 28px rgba(0,0,0,.6), 0 0 0 1px rgba(215,185,39,.14)}
+.wlv:active,.wchip:active{transform:translateY(1px) scale(.98)}
+.wlv::after,.wchip::after{content:""; position:absolute; right:0; top:0; width:22px; height:22px; pointer-events:none;
+  background:linear-gradient(225deg, rgba(215,185,39,.42) 0 1px, transparent 1px)}
+.wcode{position:absolute; right:9px; bottom:6px; font-size:7.5px; letter-spacing:1.2px;
+  color:rgba(215,185,39,.5); font-family:Consolas,Menlo,monospace; font-style:normal}
 
-.hub-core{position:absolute; left:50%; top:118px; transform:translateX(-50%); width:152px; text-align:center; z-index:3; pointer-events:none}
-.hcore{position:relative; width:152px; height:152px; margin:0 auto}
+.wlv .num{width:26px; height:26px; flex:none; display:grid; place-items:center; font-size:12px; font-weight:800;
+  background:var(--laccentbg); color:var(--laccent); box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.wlv .txt{flex:1; min-width:0}
+.wlv .txt b{display:block; font-size:12.5px; color:#EDE6DC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wlv .txt span{display:block; font-size:8.5px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wlv .wmeta{flex:none; font-size:10px; font-weight:800; color:var(--laccent); font-family:Consolas,Menlo,monospace}
+.wlv.locked{opacity:.5}
+.wchip .fi{font-size:15px; flex:none; filter:saturate(.75)}
+.wchip .wc{flex:1; min-width:0}
+.wchip .wc b{display:block; font-size:11.5px; color:#EDE6DC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wchip .wc i{display:block; font-style:normal; font-size:8px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+.hub-core{position:absolute; left:50%; top:126px; transform:translateX(-50%); width:176px; text-align:center; z-index:3; pointer-events:none}
+.hcore{position:relative; width:176px; height:176px; margin:0 auto; transform-style:preserve-3d}
 .hring{position:absolute; border-radius:50%}
-.hring.r1{inset:0; border:1.5px dashed rgba(120,160,255,.38); animation:hspin 30s linear infinite}
-.hring.r2{inset:10px; border:1px solid rgba(120,160,255,.2); border-top-color:rgba(120,160,255,.6); animation:hspin 12s linear infinite reverse}
-.hring.r3{inset:20px; display:grid; place-items:center;
-  background:radial-gradient(circle at 32% 24%, rgba(120,160,255,.30), rgba(13,19,34,.97) 62%);
-  box-shadow:0 16px 36px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -14px 26px rgba(0,0,0,.5)}
-.hring.r3::after{content:""; position:absolute; inset:0; border-radius:50%;
-  background:conic-gradient(from 210deg, rgba(37,230,196,.26), transparent 24%, transparent 76%, rgba(91,140,255,.22));
-  mix-blend-mode:screen; animation:hspin 9s linear infinite}
-.hring.r3 svg{width:62px; height:70px; position:relative; z-index:1; filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
+.hring.r1{inset:0; border:1px dashed rgba(215,185,39,.5); animation:hspin 34s linear infinite}
+.hring.tick{inset:9px; animation:hspin 44s linear infinite reverse;
+  background:repeating-conic-gradient(from 0deg, rgba(215,185,39,.6) 0deg .8deg, transparent .8deg 9deg);
+  -webkit-mask:radial-gradient(circle at 50% 50%, transparent 0 43%, #000 43% 50%);
+  mask:radial-gradient(circle at 50% 50%, transparent 0 43%, #000 43% 50%)}
+.hring.r2{inset:24px; border:1px solid rgba(215,185,39,.28); border-top-color:rgba(215,185,39,.8);
+  border-bottom-color:rgba(215,185,39,.6); animation:hspin 15s linear infinite}
+.hdisc{position:absolute; inset:32px; border-radius:50%; display:grid; place-items:center; overflow:hidden;
+  background:radial-gradient(circle at 34% 26%, #2A2015, #0A0806 68%);
+  box-shadow:inset 0 0 0 1px rgba(215,185,39,.26), inset 0 -18px 28px rgba(0,0,0,.75), 0 24px 44px rgba(0,0,0,.62)}
+.hdisc::before{content:""; position:absolute; inset:0;
+  background:conic-gradient(from 200deg, rgba(215,185,39,.30), transparent 22%, transparent 74%, rgba(215,185,39,.20));
+  mix-blend-mode:screen; animation:hspin 11s linear infinite}
+.hdisc::after{content:""; position:absolute; left:0; right:0; height:38%; top:-38%;
+  background:linear-gradient(180deg, transparent, rgba(215,185,39,.16), transparent);
+  animation:hscanline 3.4s linear infinite}
+@keyframes hscanline{0%{top:-40%}100%{top:100%}}
 @keyframes hspin{to{transform:rotate(360deg)}}
-.hbase{width:118px; height:15px; margin:5px auto 0; border-radius:50%;
-  background:radial-gradient(ellipse at center, rgba(91,140,255,.42), rgba(37,230,196,.12) 55%, transparent 72%); filter:blur(.5px)}
-.htitle{font-size:24px; margin:7px 0 0; letter-spacing:-.5px}
+.hcore svg{width:76px; height:86px; position:relative; z-index:1; filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
+.hstrut{position:absolute; top:50%; height:1px; z-index:1;
+  background:linear-gradient(90deg, transparent, rgba(215,185,39,.42), transparent)}
+.hstrut.l{left:110px; width:34px}
+.hstrut.r{right:110px; width:34px}
+.hplate{width:150px; height:20px; margin:8px auto 0; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(215,185,39,.45), rgba(215,185,39,.10) 55%, transparent 72%); filter:blur(1px)}
+.htitle{font-size:25px; margin:8px 0 0; letter-spacing:-.6px; color:#EDE6DC}
+.htitle em{background:linear-gradient(96deg,#F5D451,#C08A1A); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hsub{font-size:8px; letter-spacing:2.4px; color:rgba(215,185,39,.6); margin-top:2px; font-family:Consolas,Menlo,monospace}
 
 @media (max-width:389px){
-  .hub{height:330px}
-  .hub-l,.hub-r{width:100px}
-  .hub-core{width:136px; top:128px}
-  .hcore{width:136px; height:136px}
-  .hring.r2{inset:9px}
-  .hring.r3{inset:18px}
-  .hring.r3 svg{width:54px; height:62px}
-  .htitle{font-size:20px}
+  .hub{height:500px}
+  .hub-l,.hub-r{width:98px}
+  .hub-core{width:156px; top:140px}
+  .hcore{width:156px; height:156px}
+  .hring.tick{inset:8px}
+  .hring.r2{inset:21px}
+  .hdisc{inset:28px}
+  .hcore svg{width:64px; height:74px}
+  .hstrut.l{left:98px; width:22px}
+  .hstrut.r{right:98px; width:22px}
+  .htitle{font-size:21px}
 }
 </style>
 </head>
@@ -830,28 +876,37 @@ body.senior #combo{font-size:19px}
       <div><b id="hellStateTop">未解锁</b><span>地狱模式</span></div>
     </div>
     <div class="hub">
+      <div class="hub-bg"></div>
+      <i class="hbrk a"></i><i class="hbrk b"></i><i class="hbrk c"></i><i class="hbrk d"></i>
+      <b class="wtle l">SECTORS / 关卡</b>
+      <b class="wtle r">MODULES / 模式</b>
       <div class="hub-l" id="levelList"></div>
+      <div class="hstrut l"></div>
+      <div class="hstrut r"></div>
       <div class="hub-core">
         <div class="hcore">
           <i class="hring r1"></i>
+          <i class="hring tick"></i>
           <i class="hring r2"></i>
-          <div class="hring r3">
+          <div class="hdisc">
             <svg viewBox="0 0 96 108" aria-hidden="true">
               <defs>
                 <linearGradient id="hsg" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#7fb1ff"/>
-                  <stop offset="1" stop-color="#25e6c4"/>
+                  <stop offset="0" stop-color="#F7DC63"/>
+                  <stop offset="1" stop-color="#B98418"/>
                 </linearGradient>
               </defs>
               <path d="M48 4 L88 18 V56 C88 82 70 98 48 104 C26 98 8 82 8 56 V18 Z"
-                fill="#101b30" stroke="url(#hsg)" stroke-width="3.5"/>
+                fill="#0B0806" stroke="url(#hsg)" stroke-width="3.5"/>
+              <path d="M48 10 L82 22 V56 C82 79 66 93 48 99 Z" fill="rgba(215,185,39,.07)"/>
               <path d="M30 55 L44 69 L67 39" fill="none" stroke="url(#hsg)" stroke-width="7"
                 stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
         </div>
-        <div class="hbase"></div>
+        <div class="hplate"></div>
         <h1 class="htitle">反诈<em>守门人</em></h1>
+        <div class="hsub">ANTI-SCAM GUARDIAN · V2</div>
       </div>
       <div class="hub-r">
         <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">
@@ -2472,13 +2527,15 @@ const Game = (function(){
       h += '<button class="lv wlv" style="' + sty(l) + '" onclick="Game.startPractice(' + i + ')">'
         + '<span class="num">' + (i + 1) + '</span>'
         + '<span class="txt"><b>' + l.name + '</b><span>' + l.sub + '</span></span>'
-        + '<span class="wmeta">' + (l.perCard / 1000).toFixed(1) + 's</span></button>';
+        + '<span class="wmeta">' + (l.perCard / 1000).toFixed(1) + 's</span>'
+        + '<em class="wcode">S-' + ('0' + (i + 1)).slice(-2) + '</em></button>';
     });
     h += '<button class="lv wlv' + (hellOpen ? '' : ' locked') + '" style="' + sty(HELL) + '" '
       + (hellOpen ? 'onclick="Game.startHell()"' : 'onclick="Game.hellLocked()"') + '>'
       + '<span class="num">' + (hellOpen ? '🔥' : '🔒') + '</span>'
       + '<span class="txt"><b>地狱模式</b><span>' + (hellOpen ? '线索隐藏 · 骗术更难' : '通关四关后解锁') + '</span></span>'
-      + '<span class="wmeta">' + (hellOpen ? '2.4s' : '—') + '</span></button>';
+      + '<span class="wmeta">' + (hellOpen ? '2.4s' : '—') + '</span>'
+      + '<em class="wcode">S-XX</em></button>';
     $('levelList').innerHTML = h;
   }
 

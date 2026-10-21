@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#070b16">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="反诈守门人">
 <title>反诈守门人 · 三关闯关 + 地狱模式</title>
 <style>
 :root{
@@ -4383,6 +4389,16 @@ const Game = (function(){
     }
   };
 })();
+</script>
+<script>
+/* PWA：支持添加到主屏幕，离线也能玩。file:// 打开时自动跳过。 */
+try{
+  if (navigator.serviceWorker && /^https?:$/.test(location.protocol)){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+}catch(e){}
 </script>
 </body>
 </html>

@@ -835,44 +835,64 @@ body.fh-on .ov.on .ovin{padding-top:40px}
     rotateZ(var(--prz))
     rotateY(var(--pry))
     scale(var(--psc));
-  transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .2s, border-color .2s, filter .2s}
+  transition:transform .2s cubic-bezier(.2,.9,.3,1), box-shadow .2s, border-color .2s, filter .2s,
+             background .2s, opacity .2s}
+/* 悬停：向观察者弹出 + 放大 + 整条点亮成它自己的强调色 + 彩色描边与双层外发光 */
 .wlv:hover,.wchip:hover,.wlv:focus-visible,.wchip:focus-visible{
   transform:
-    translateX(calc(var(--px) + var(--sgn,0) * -9px))
-    translateZ(calc(var(--pz) + 52px))
-    rotateZ(var(--prz))
-    rotateY(calc(var(--pry) * .25))
-    scale(calc(var(--psc) * 1.07));
-  border-color:var(--hc); filter:brightness(1.16);
-  box-shadow:inset 0 0 20px rgba(0,0,0,.45), 0 0 0 1px var(--hc),
-             0 18px 34px rgba(0,0,0,.62), 0 0 32px -6px var(--hc)}
+    translateX(calc(var(--px) + var(--sgn,0) * -13px))
+    translateZ(calc(var(--pz) + 68px))
+    rotateZ(calc(var(--prz) * .26))
+    rotateY(calc(var(--pry) * .16))
+    scale(calc(var(--psc) * 1.1));
+  border-color:var(--hc); filter:brightness(1.26) saturate(1.1);
+  background:linear-gradient(148deg, var(--hcbg, rgba(215,185,39,.26)), rgba(12,9,6,.9) 66%);
+  box-shadow:inset 0 0 0 1px var(--hc), inset 0 0 20px rgba(0,0,0,.4),
+             0 24px 42px rgba(0,0,0,.68), 0 0 30px -1px var(--hc), 0 0 76px -12px var(--hc)}
 .wlv:active,.wchip:active{
   transform:
     translateX(calc(var(--px) + var(--sgn,0) * -5px))
-    translateZ(calc(var(--pz) + 20px))
-    rotateZ(var(--prz))
+    translateZ(calc(var(--pz) + 22px))
+    rotateZ(calc(var(--prz) * .26))
     rotateY(calc(var(--pry) * .4))
-    scale(calc(var(--psc) * 1.01));
-  filter:brightness(.86)}
-.wlv:hover::before,.wchip:hover::before,.wlv:focus-visible::before,.wchip:focus-visible::before{animation-duration:1.05s}
-.wlv:hover .num,.wchip:hover .fi{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px -3px var(--hc)}
+    scale(calc(var(--psc) * 1.02));
+  filter:brightness(.9)}
+/* 选中感的关键：同翼其余条目主动后退变暗，被选的那条才跳出来 */
+.hub-stage:has(.wlv:hover) .wlv:not(:hover),
+.hub-stage:has(.wchip:hover) .wchip:not(:hover),
+.hub-stage:has(.wlv:focus-visible) .wlv:not(:focus-visible),
+.hub-stage:has(.wchip:focus-visible) .wchip:not(:focus-visible){
+  filter:brightness(.46) saturate(.5);
+  transform:
+    translateX(var(--px))
+    translateZ(calc(var(--pz) - 30px))
+    rotateZ(var(--prz))
+    rotateY(var(--pry))
+    scale(calc(var(--psc) * .955))}
+.wlv:hover::before,.wchip:hover::before,.wlv:focus-visible::before,.wchip:focus-visible::before{animation-duration:.62s}
+.wlv:hover .num,.wchip:hover .fi{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 20px -2px var(--hc); transform:scale(1.1)}
 .wlv:hover .txt b,.wchip:hover .wc b{color:#fff}
 .wlv:hover .wmeta,.wchip:hover .wc i{color:var(--hc)}
-.wlv:hover .wmeta{transform:scale(1.1)}
+.wlv:hover .wmeta{transform:scale(1.16)}
 .wlv:hover,.wchip:hover{border-left-width:5px}
-.wchip:hover{box-shadow:inset 6px 0 0 -1px var(--hc), inset 0 0 20px rgba(0,0,0,.45),
-             0 0 0 1px var(--hc), 0 18px 34px rgba(0,0,0,.62), 0 0 32px -6px var(--hc)}
+.wchip:hover{box-shadow:inset 6px 0 0 -1px var(--hc), inset 0 0 20px rgba(0,0,0,.4),
+             0 0 0 1px var(--hc), 0 24px 42px rgba(0,0,0,.68), 0 0 30px -1px var(--hc), 0 0 76px -12px var(--hc)}
+/* 选中标记：悬停时从左侧填充区里"长"出的一枚小箭头（避开边界与序号，不压内容） */
+.wsel{position:absolute; left:5px; top:50%; width:0; height:11px; margin-top:-5.5px; z-index:3; pointer-events:none;
+  opacity:0; background:var(--hc); transition:width .2s cubic-bezier(.2,.9,.3,1), opacity .2s ease;
+  clip-path:polygon(0 0, 100% 50%, 0 100%); filter:drop-shadow(0 0 7px var(--hc))}
+.wlv:hover .wsel,.wchip:hover .wsel,.wlv:focus-visible .wsel,.wchip:focus-visible .wsel{width:7px; opacity:1}
 /* 锁定角标：悬停时四角收拢并亮起（只画左上/右下，避开斜切掉的那两个角） */
-.wlock{position:absolute; inset:8px; z-index:3; pointer-events:none; opacity:0;
-  transition:opacity .2s ease, inset .22s cubic-bezier(.2,.9,.3,1);
-  filter:drop-shadow(0 0 6px var(--hc));
+.wlock{position:absolute; inset:9px; z-index:3; pointer-events:none; opacity:0;
+  transition:opacity .16s ease, inset .2s cubic-bezier(.2,1.5,.4,1);
+  filter:drop-shadow(0 0 10px var(--hc)) drop-shadow(0 0 3px var(--hc));
   background:
-    linear-gradient(var(--hc),var(--hc)) left top/13px 2px no-repeat,
-    linear-gradient(var(--hc),var(--hc)) left top/2px 13px no-repeat,
-    linear-gradient(var(--hc),var(--hc)) right bottom/13px 2px no-repeat,
-    linear-gradient(var(--hc),var(--hc)) right bottom/2px 13px no-repeat}
+    linear-gradient(var(--hc),var(--hc)) left top/18px 2.5px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) left top/2.5px 18px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) right bottom/18px 2.5px no-repeat,
+    linear-gradient(var(--hc),var(--hc)) right bottom/2.5px 18px no-repeat}
 .wlv:hover .wlock,.wchip:hover .wlock,
-.wlv:focus-visible .wlock,.wchip:focus-visible .wlock{opacity:1; inset:4px}
+.wlv:focus-visible .wlock,.wchip:focus-visible .wlock{opacity:1; inset:2px}
 .wlv::after,.wchip::after{content:""; position:absolute; right:0; top:0; width:22px; height:22px; pointer-events:none;
   background:linear-gradient(225deg, rgba(215,185,39,.42) 0 1px, transparent 1px)}
 .wcode{position:absolute; right:9px; bottom:6px; font-size:7.5px; letter-spacing:1.2px;
@@ -891,29 +911,42 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wchip .wc i{display:block; font-style:normal; font-size:8px; color:#8A8073; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
 /* 光束：从中央圆盘射向正在悬停的那一条（--by 由 JS 按实际位置换算） */
-.hbeam{position:absolute; top:50%; width:var(--blen); height:2px; z-index:4; pointer-events:none;
+.hbeam{position:absolute; top:50%; width:var(--blen); height:3px; z-index:4; pointer-events:none;
   opacity:0; transform:translateZ(-40px); transition:opacity .2s ease;
   margin-top:calc(var(--by, 0px) - 1px);
-  filter:drop-shadow(0 0 9px var(--bc, #D7B927))}
+  filter:drop-shadow(0 0 10px var(--bc, #D7B927)) drop-shadow(0 0 24px var(--bc, #D7B927))}
 .hbeam.l{right:50%; margin-right:var(--bgap);
-  background:linear-gradient(270deg, var(--bc, #D7B927), rgba(215,185,39,0) 94%)}
+  background:linear-gradient(270deg, var(--bc, #D7B927), rgba(215,185,39,.5) 97%)}
 .hbeam.r{left:50%; margin-left:var(--bgap);
-  background:linear-gradient(90deg, var(--bc, #D7B927), rgba(215,185,39,0) 94%)}
+  background:linear-gradient(90deg, var(--bc, #D7B927), rgba(215,185,39,.5) 97%)}
 .hbeam.on{opacity:1; animation:beamFlow 1.15s ease-in-out infinite}
-@keyframes beamFlow{0%,100%{opacity:.42}50%{opacity:1}}
-.hbeam::before{content:""; position:absolute; top:50%; width:6px; height:6px; margin-top:-3px;
-  border-radius:50%; background:var(--bc, #D7B927); box-shadow:0 0 12px var(--bc, #D7B927)}
-.hbeam.l::before{right:-3px}
-.hbeam.r::before{left:-3px}
+@keyframes beamFlow{0%,100%{opacity:.5}50%{opacity:1}}
+/* 起点：贴在圆盘边上的发射点 */
+.hbeam::before{content:""; position:absolute; top:50%; width:8px; height:8px; margin-top:-4px;
+  border-radius:50%; background:var(--bc, #D7B927); box-shadow:0 0 14px var(--bc, #D7B927)}
+.hbeam.l::before{right:-4px}
+.hbeam.r::before{left:-4px}
+/* 落点：打在被悬停那一条上的命中点，随呼吸脉冲 */
+.hbeam::after{content:""; position:absolute; top:50%; width:9px; height:9px; margin-top:-4.5px;
+  border-radius:50%; background:var(--bc, #D7B927); box-shadow:0 0 16px 3px var(--bc, #D7B927);
+  animation:beampop 1.15s ease-in-out infinite}
+.hbeam.l::after{left:-4px}
+.hbeam.r::after{right:-4px}
+@keyframes beampop{0%,100%{transform:scale(.72); opacity:.8}50%{transform:scale(1.4); opacity:1}}
 /* 圆盘被"点亮"：换成当前条目的强调色，刻度环提速，外圈呼吸 */
 .hcore{transition:transform .26s cubic-bezier(.2,.9,.3,1)}
-.hcore.linked{transform:scale(1.035)}
-.hcore.linked .hdisc{box-shadow:inset 0 0 0 1px var(--lk, #D7B927), inset 0 -18px 28px rgba(0,0,0,.75),
-  0 10px 0 -3px rgba(0,0,0,.55), 0 26px 46px rgba(0,0,0,.68), 0 0 40px -6px var(--lk, #D7B927)}
+.hcore.linked{transform:scale(1.055)}
+.hcore.linked .hdisc{box-shadow:inset 0 0 0 2px var(--lk, #D7B927), inset 0 -18px 28px rgba(0,0,0,.75),
+  0 10px 0 -3px rgba(0,0,0,.55), 0 26px 46px rgba(0,0,0,.68),
+  0 0 44px -2px var(--lk, #D7B927), 0 0 92px -8px var(--lk, #D7B927)}
+.hcore.linked::before{box-shadow:0 0 0 1px var(--lk, #D7B927), 0 30px 46px rgba(0,0,0,.7),
+  0 0 66px -10px var(--lk, #D7B927)}
+.hcore.linked .hring.r1{border-color:var(--lk, #D7B927); animation-duration:11s}
 .hcore.linked .hring.r2{border-color:var(--lk, #D7B927); border-top-color:var(--lk, #D7B927);
-  border-bottom-color:var(--lk, #D7B927)}
-.hcore.linked .hring.tick{animation-duration:13s}
-.hcore.linked .hring.r1{border-color:var(--lk, #D7B927)}
+  border-bottom-color:var(--lk, #D7B927); animation-duration:5.5s}
+.hcore.linked .hring.tick{animation-duration:6.5s;
+  background:repeating-conic-gradient(from 0deg, var(--lk, #D7B927) 0deg .8deg, transparent .8deg 9deg)}
+.hcore.linked svg{filter:drop-shadow(0 12px 20px rgba(0,0,0,.78)) drop-shadow(0 0 28px var(--lk, #D7B927))}
 
 .hub-core{position:absolute; left:50%; top:142px; width:208px; text-align:center; z-index:5; pointer-events:none;
   transform:translateX(-50%) translateZ(104px); transform-style:preserve-3d; animation:hfloat 6.5s ease-in-out infinite}
@@ -2830,6 +2863,9 @@ const Game = (function(){
     hideAll();
     show('ovHome');
     refreshHomeExtras();
+    /* ovHome 可见之后才有真实布局：把 renderLevelList 里那次尺寸全为 0 的重算补回来 */
+    if (window.requestAnimationFrame) requestAnimationFrame(layoutWings);
+    else setTimeout(layoutWings, 0);
   }
 
   function renderLevelList(){
@@ -2895,6 +2931,11 @@ const Game = (function(){
   function layoutWings(){
     const stage = $('hubStage');
     const core = document.querySelector('.hcore');
+    if (!stage || !core) return false;
+    /* 面板隐藏（display:none）时所有布局尺寸都是 0 —— 这时算出来的弧度全是 0，
+       会把整条翼打回直线、互动基线丢失。直接跳过，等可见后由 ResizeObserver 补算 */
+    if (!(stage.offsetHeight || stage.clientHeight) || !(core.offsetWidth || core.offsetHeight)) return false;
+    watchWings();
     /* 圆盘中心（舞台坐标）—— 它就是整条弧的圆心 */
     let cx = 0, cy = 0;
     if (core && stage){
@@ -2927,6 +2968,15 @@ const Game = (function(){
         el.style.setProperty('--prz', a.rz.toFixed(2) + 'deg');
         el.style.setProperty('--pry', a.ry.toFixed(2) + 'deg');
         el.style.setProperty('--psc', a.sc.toFixed(3));
+        /* 悬停时的底色：用条目自己的强调色做 26% 透明填充（JS 换算，避开 color-mix 兼容问题） */
+        const acc = ((el.style.getPropertyValue('--laccent') || el.style.getPropertyValue('--faccent')) || '').trim();
+        if (acc) { try{ el.style.setProperty('--hcbg', hexA(acc, .26)); }catch(e){} }
+        /* 选中箭头（悬停时从左侧滑入）—— 与锁定角标一样只需插入一次 */
+        if (!el.querySelector('.wsel')){
+          const ar = document.createElement('i');
+          ar.className = 'wsel';
+          el.appendChild(ar);
+        }
         if (!el.querySelector('.wlock')){
           const lk = document.createElement('i');
           lk.className = 'wlock';
@@ -2934,6 +2984,21 @@ const Game = (function(){
         }
       });
     });
+    return true;
+  }
+
+  /* 任何时候布局尺寸发生变化（面板由隐藏变可见、旋屏、改窗口）都重算一次。
+     ResizeObserver 在 display:none → block 时会从 0 变到真实尺寸并触发，正好补算 */
+  let wingRO = 0;
+  function watchWings(){
+    if (wingRO || typeof ResizeObserver === 'undefined') return;
+    const boxes = [document.querySelector('.hub-l'), document.querySelector('.hub-r')];
+    if (!boxes[0] && !boxes[1]) return;
+    wingRO = 1;
+    try{
+      wingRO = new ResizeObserver(() => { layoutWings(); });
+      boxes.forEach(b => { if (b) wingRO.observe(b); });
+    }catch(e){ wingRO = 0; }
   }
 
   /* 悬停某一条时：圆盘转成它的强调色，并射一道光束接到那条上 */
@@ -2956,34 +3021,35 @@ const Game = (function(){
     if (beam){
       beam.style.setProperty('--bc', col);
       if (stage){
-        /* 用「未变换的布局坐标」累加到舞台中线，而不是用屏幕投影坐标 ——
-           舞台整体有 rotateX + 透视，投影值会被压缩约 10%，那样光束对不准按钮 */
+        /* 同上用布局坐标；再补上整条翼的 --wshift —— 它是 CSS 变换，不在 offsetTop 里，
+           不补的话光束会偏离按钮几十像素，看起来"没接上" */
         try{
           let y = 0, node = b;
           while (node && node !== stage){ y += node.offsetTop || 0; node = node.offsetParent; }
+          const box = b.parentElement;
+          const shift = box ? (parseFloat(box.style.getPropertyValue('--wshift')) || 0) : 0;
           const mid = (stage.offsetHeight || stage.clientHeight || 0) / 2;
-          beam.style.setProperty('--by', (y + (b.offsetHeight || 0) / 2 - mid).toFixed(1) + 'px');
+          beam.style.setProperty('--by', (y + (b.offsetHeight || 0) / 2 + shift - mid).toFixed(1) + 'px');
         }catch(e){ beam.style.setProperty('--by', '0px'); }
       }
       beam.classList.add('on');
     }
   }
 
+  /* 事件挂在舞台上做委托：两翼内容会被 innerHTML 重建，挂在舞台上永不失效 */
   function bindWingLink(){
-    ['.hub-l', '.hub-r'].forEach(sel => {
-      const box = document.querySelector(sel);
-      if (!box || box.__wingBound) return;
-      box.__wingBound = 1;
-      const hit = e => (e.target && e.target.closest) ? e.target.closest('.wlv,.wchip') : null;
-      box.addEventListener('pointerover', e => { const b = hit(e); if (b) setWingLink(b); });
-      box.addEventListener('pointerout', e => {
-        const b = hit(e);
-        if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) setWingLink(null);
-      });
-      box.addEventListener('focusin', e => { const b = hit(e); if (b) setWingLink(b); });
-      box.addEventListener('focusout', () => setWingLink(null));
-      box.addEventListener('pointerleave', () => setWingLink(null));
+    const stage = $('hubStage');
+    if (!stage || stage.__wingBound) return;
+    stage.__wingBound = 1;
+    const hit = e => (e.target && e.target.closest) ? e.target.closest('.wlv,.wchip') : null;
+    stage.addEventListener('pointerover', e => { const b = hit(e); if (b) setWingLink(b); });
+    stage.addEventListener('pointerout', e => {
+      const b = hit(e);
+      if (b && !(e.relatedTarget && b.contains(e.relatedTarget))) setWingLink(null);
     });
+    stage.addEventListener('focusin', e => { const b = hit(e); if (b) setWingLink(b); });
+    stage.addEventListener('focusout', () => setWingLink(null));
+    stage.addEventListener('pointerleave', () => setWingLink(null));
   }
 
   function refreshTop(){
@@ -4267,8 +4333,9 @@ const Game = (function(){
   $('btnBlock').disabled = true;
   $('btnPass').disabled = true;
   updateHUD(false);
-  layoutWings();          // 两翼沿圆弧环抱圆盘 + 锁定角标
-  bindWingLink();         // 两翼与中央圆盘的光束联动
+  watchWings();            // 尺寸一变（含 Home 由隐藏变可见）就自动重算弧线
+  layoutWings();           // 两翼沿圆弧环抱圆盘 + 锁定角标
+  bindWingLink();          // 两翼与中央圆盘的光束联动（舞台级事件委托）
   /* 弧半径取自实际布局，横竖屏切换 / 改窗口后必须重算 */
   let wingRz = 0;
   window.addEventListener('resize', () => {

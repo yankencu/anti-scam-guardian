@@ -1,5 +1,5 @@
 /* 反诈守门人 Service Worker：离线可玩 */
-const CACHE = 'fz2-v10';
+const CACHE = 'fz2-v11';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function(e){

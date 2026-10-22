@@ -754,7 +754,10 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 /* ===== 工业指挥台首页：近黑底 + 琥珀强调 + 斜切封装 + 透视立体 ===== */
 #ovHome{background:radial-gradient(720px 520px at 50% -8%, rgba(215,185,39,.10), transparent 62%), rgba(5,4,3,.965)}
 .hub{position:relative; height:600px; margin:12px -6px 6px; perspective:820px; perspective-origin:50% 34%; overflow:hidden}
-.hub-stage{position:absolute; inset:0; transform-style:preserve-3d;
+.hub-stage{position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none;
+  /* 关键：舞台平面在 rotateX 倾斜后位于 Z=0，而两翼按钮 translateZ(-30~-92px) 在它后面。
+     若舞台可命中，浏览器的 3D 命中测试会让它挡住后面所有按钮 —— 悬停/点击全部失效。
+     所以舞台自身不吃事件，只让真正的交互元素重新开启（见下方 .wlv/.wchip/.hub-cta）。 */
   transform:rotateX(var(--tiltx,15deg)) rotateY(var(--tilty,0deg));
   transition:transform .28s cubic-bezier(.2,.8,.3,1);
   --bgap:60px; --blen:66px}
@@ -798,12 +801,15 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 .wtle.r{right:32px}
 
 .hub-l,.hub-r{position:absolute; top:40px; bottom:104px; width:104px; display:flex; flex-direction:column;
-  justify-content:center; gap:12px; z-index:4; transform-style:preserve-3d; padding:0 4px}
+  justify-content:center; gap:12px; z-index:4; transform-style:preserve-3d; padding:0 4px; pointer-events:none}
 /* 注意：这里不能用 filter/opacity/clip-path —— 它们会强制 preserve-3d 退化成 flat，
    两翼里单条的 translateZ 景深就没了 */
 /* --wshift 由 JS 给出：整条翼上下平移到与圆盘同心，弧才不会歪 */
 .hub-l{left:2px; --sgn:-1; transform:translateY(var(--wshift,0px)) translateZ(-92px) rotateY(30deg) scale(.97)}
 .hub-r{right:2px; --sgn:1; transform:translateY(var(--wshift,0px)) translateZ(-92px) rotateY(-30deg) scale(.97)}
+/* 真正的交互元素重新开启命中：祖先平面全部 pe:none 后，事件按各元素自身的
+   3D 位置命中，直接落在按钮上；事件仍会沿祖先冒泡，舞台上的委托监听不受影响 */
+.hub-l .wlv,.hub-r .wchip,.hub-cta{pointer-events:auto}
 .hub-cta{position:absolute; left:14px; right:14px; bottom:30px; height:54px; z-index:6;
   transform:translateZ(40px); transform-style:preserve-3d;
   display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-family:inherit;
@@ -1194,7 +1200,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
         </div>
         <div class="hplate"></div>
         <h1 class="htitle">反诈<em>守门人</em></h1>
-        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B13</div>
+        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B14</div>
       </div>
       <div class="hub-r">
         <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">

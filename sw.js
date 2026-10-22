@@ -1,5 +1,5 @@
 /* 反诈守门人 Service Worker：离线可玩 */
-const CACHE = 'fz2-v13';
+const CACHE = 'fz2-v14';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 /* 逐个缓存：addAll 是原子的，任意一个资源失败（网络抖动 / 某个文件 404）

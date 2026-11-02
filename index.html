@@ -1039,6 +1039,130 @@ body.fh-on .ov.on .ovin{padding-top:40px}
   .hub-cta{left:44px; right:44px; bottom:20px; height:62px; font-size:17px}
   #ovHome .bestrow div{padding:12px 8px}
 }
+
+/* ==================================================================
+   好友对战（同题 PK）
+   ================================================================== */
+/* 主按钮行：开始闯关 + 对战，并排，不再各自绝对定位 */
+.hub-actions{position:absolute; left:14px; right:14px; bottom:30px; z-index:6;
+  display:flex; gap:10px; pointer-events:none}
+.hub-actions .hub-cta{position:relative; left:auto; right:auto; bottom:auto;
+  flex:1; min-width:0; pointer-events:auto}
+.hub-pk{flex:none; width:112px; height:54px; border-radius:16px; cursor:pointer;
+  font-family:inherit; font-size:13.5px; font-weight:900; letter-spacing:.5px; color:#2a1a02;
+  border:1px solid rgba(255,238,180,.75); pointer-events:auto;
+  background:linear-gradient(150deg,#ffe9a8,#ffcc55 38%,#e0a32a 78%,#b97f14);
+  box-shadow:0 10px 24px rgba(255,176,32,.3), inset 0 1px 0 rgba(255,255,255,.7),
+             inset 0 -2px 4px rgba(120,70,0,.32);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  transition:transform .16s cubic-bezier(.2,.8,.3,1), box-shadow .2s, filter .2s}
+.hub-pk .pk1{font-size:15px; line-height:1}
+.hub-pk .pk2{font-size:9.5px; font-weight:800; letter-spacing:.6px; opacity:.72}
+.hub-pk:hover{transform:translateY(-2px) scale(1.03);
+  box-shadow:0 14px 30px rgba(255,176,32,.42), inset 0 1px 0 rgba(255,255,255,.8),
+             inset 0 -2px 4px rgba(120,70,0,.32)}
+.hub-pk:active{transform:translateY(1px) scale(.99); filter:brightness(.95)}
+
+/* 局内幽灵条 */
+#pkHud{display:none; align-items:center; gap:9px; margin:6px 4px 2px; padding:6px 11px;
+  border-radius:12px; position:relative; z-index:5;
+  background:linear-gradient(100deg,rgba(255,204,85,.15),rgba(255,77,99,.06));
+  border:1px solid rgba(255,204,85,.32)}
+#pkHud.on{display:flex}
+#pkHud .gh{font-size:14px; flex:none; filter:drop-shadow(0 0 6px rgba(255,204,85,.65))}
+#pkHud .gl{font-size:11px; color:#ffe6b8; font-weight:800; flex:none; letter-spacing:.3px;
+  font-variant-numeric:tabular-nums}
+#pkHud .gbar{flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.13); overflow:hidden}
+#pkHud .gbar b{display:block; height:100%; width:0%; border-radius:99px;
+  background:linear-gradient(90deg,#ffcc55,#ff7a45); transition:width .28s linear;
+  box-shadow:0 0 8px rgba(255,176,32,.7)}
+#pkHud .gk{font-size:10.5px; color:var(--muted); flex:none; font-variant-numeric:tabular-nums}
+
+/* 幽灵播报 */
+#pkToast{position:fixed; right:12px; top:92px; z-index:190; display:flex; flex-direction:column;
+  gap:7px; pointer-events:none; max-width:250px}
+#pkToast div{padding:7px 12px; border-radius:11px; font-size:12px; line-height:1.4; color:#fff;
+  font-weight:800; background:linear-gradient(120deg,rgba(255,150,32,.96),rgba(255,77,99,.92));
+  box-shadow:0 10px 24px rgba(0,0,0,.5); animation:pktIn .3s cubic-bezier(.2,.9,.3,1) both}
+#pkToast div.ok{background:linear-gradient(120deg,rgba(34,214,138,.94),rgba(37,230,196,.9))}
+@keyframes pktIn{from{opacity:0; transform:translateX(22px) scale(.94)}to{opacity:1; transform:none}}
+
+/* 对战面板 */
+.pkpick{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:10px 0 18px}
+.pkpick button{position:relative; text-align:left; padding:12px 13px; border-radius:15px;
+  font-family:inherit; cursor:pointer; color:var(--text);
+  background:linear-gradient(150deg,rgba(255,255,255,.075),rgba(255,255,255,.028));
+  border:1px solid var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .15s, border-color .2s, background .2s}
+.pkpick button:hover{transform:translateY(-2px); border-color:rgba(255,204,85,.55);
+  background:linear-gradient(150deg,rgba(255,204,85,.16),rgba(255,255,255,.03))}
+.pkpick button:active{transform:translateY(0) scale(.985)}
+.pkpick b{display:block; font-size:14px; font-weight:900; margin-bottom:3px}
+.pkpick span{font-size:10.5px; color:var(--muted)}
+.pkpick em{position:absolute; right:11px; top:11px; font-size:9.5px; font-style:normal;
+  color:#ffcc55; font-weight:800; letter-spacing:.5px}
+.pkinput{display:flex; gap:8px; margin-bottom:8px}
+.pkinput input{flex:1; min-width:0; padding:12px 13px; border-radius:13px; font-family:inherit;
+  font-size:12.5px; color:var(--text); background:rgba(255,255,255,.06);
+  border:1px solid var(--line2); outline:none; letter-spacing:.4px}
+.pkinput input:focus{border-color:rgba(255,204,85,.6); background:rgba(255,204,85,.08)}
+.pkinput .btn{flex:none; width:auto; padding:0 18px; margin:0; height:auto}
+.pknote{font-size:11px; color:var(--dim); line-height:1.7; margin:0 0 16px}
+
+/* VS 结算 */
+.vsbox{margin:0 0 18px; padding:15px 15px 13px; border-radius:20px; position:relative; overflow:hidden;
+  background:linear-gradient(155deg,rgba(255,204,85,.17),rgba(91,140,255,.08));
+  border:1px solid rgba(255,204,85,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 14px 34px rgba(0,0,0,.28)}
+.vsbox::after{content:""; position:absolute; inset:-40% -10% auto; height:70%;
+  background:radial-gradient(60% 60% at 50% 0,rgba(255,204,85,.22),transparent 70%); pointer-events:none}
+.vstop{display:flex; align-items:center; justify-content:space-between; gap:10px; position:relative; z-index:1}
+.vstop .vt{font-size:12px; font-weight:900; letter-spacing:1.2px; color:#ffe6b8}
+.vstop .vw{font-size:11.5px; font-weight:900; padding:4px 11px; border-radius:99px;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22)}
+.vstop .vw.win{color:#0b2418; background:linear-gradient(120deg,#5cf0b0,#22d68a); border-color:transparent}
+.vstop .vw.lose{color:#fff; background:linear-gradient(120deg,rgba(255,77,99,.9),rgba(190,30,60,.9)); border-color:transparent}
+.vstop .vw.draw{color:#2a1a02; background:linear-gradient(120deg,#ffe9a8,#ffcc55); border-color:transparent}
+.vsscore{display:flex; align-items:flex-end; justify-content:center; gap:14px; margin:14px 0 12px;
+  position:relative; z-index:1}
+.vsscore .vsn{text-align:center; flex:1; min-width:0}
+.vsscore .vsn span{display:block; font-size:10.5px; color:var(--muted); margin-bottom:3px; letter-spacing:.6px}
+.vsscore .vsn b{font-size:27px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-1px}
+.vsscore .vsn.me b{background:linear-gradient(92deg,#fff,#ffd88a); -webkit-background-clip:text;
+  background-clip:text; color:transparent}
+.vsscore .vsn.foe b{color:#9fb2d6}
+.vsscore .vsmid{flex:none; font-size:12px; font-weight:900; color:rgba(255,255,255,.42);
+  padding-bottom:5px; letter-spacing:1px}
+.vsgrid{display:flex; gap:4px; margin:2px 0 9px; position:relative; z-index:1}
+.vsgrid i{flex:1; height:24px; border-radius:6px; background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.1); position:relative; overflow:hidden}
+.vsgrid i::after{content:""; position:absolute; left:0; right:0; bottom:0; height:50%;
+  background:rgba(0,0,0,.28)}
+.vsgrid i.both{background:linear-gradient(180deg,#4ff0b8,#12a870); border-color:rgba(255,255,255,.24)}
+.vsgrid i.me{background:linear-gradient(180deg,#ffd88a,#d9a020); border-color:rgba(255,255,255,.24)}
+.vsgrid i.foe{background:linear-gradient(180deg,#ff7d8c,#b8283c); border-color:rgba(255,255,255,.24)}
+.vsgrid i.none{background:rgba(255,255,255,.07); border-style:dashed; opacity:.6}
+.vsgrid i.none::after{display:none}
+.vslegend{display:flex; gap:11px; justify-content:center; font-size:10px; color:var(--muted);
+  margin-bottom:12px; position:relative; z-index:1}
+.vslegend em{font-style:normal; display:inline-flex; align-items:center; gap:4px}
+.vslegend em::before{content:""; width:8px; height:8px; border-radius:2px; background:currentColor}
+.vslegend .l1{color:#4ff0b8} .vslegend .l2{color:#ffd88a} .vslegend .l3{color:#ff7d8c}
+.vsfoot{display:flex; gap:8px; position:relative; z-index:1}
+.vsfoot .btn{flex:1; margin:0; font-size:12.5px; padding:11px 6px}
+
+@media (max-width:389px){
+  .hub-actions{left:8px; right:8px; bottom:16px; gap:8px}
+  .hub-pk{width:92px; font-size:12px}
+  .hub-pk .pk2{font-size:8.5px}
+}
+@media (min-width:720px){
+  .hub-actions{left:44px; right:44px; bottom:20px; gap:14px}
+  .hub-actions .hub-cta{height:62px; font-size:17px}
+  .hub-pk{width:150px; height:62px; font-size:15px}
+  .hub-pk .pk1{font-size:18px}
+  .hub-pk .pk2{font-size:10.5px}
+}
 </style>
 </head>
 <body>
@@ -1057,6 +1181,12 @@ body.fh-on .ov.on .ovin{padding-top:40px}
     </div>
     <button id="muteBtn" class="on" title="音效 / 震动开关">🔊</button>
     <button id="pauseBtn" class="dim" title="暂停 / 继续（Esc）">⏸</button>
+  </div>
+  <div id="pkHud">
+    <span class="gh">👻</span>
+    <span class="gl" id="pkGhostLbl">对手 0/12</span>
+    <i class="gbar"><b id="pkGhostBar"></b></i>
+    <span class="gk" id="pkGhostK">—</span>
   </div>
   <div id="dots"></div>
   <div id="arena">
@@ -1095,10 +1225,10 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 <!-- ============ 首页 ============ -->
 <div class="ov on" id="ovHome">
   <div class="ovin">
-    <div id="chalBar">
+    <div id="chalBar" onclick="Game.chalTap()" style="cursor:pointer">
       <span class="ci">🎯</span>
       <span class="ct" id="chalText"></span>
-      <button class="cx" onclick="Game.dismissChal()">✕</button>
+      <button class="cx" onclick="event.stopPropagation();Game.dismissChal()">✕</button>
     </div>
     <div class="bestrow" style="margin-top:14px">
       <div><b id="bestScoreTop">0</b><span>历史最高分</span></div>
@@ -1200,7 +1330,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
         </div>
         <div class="hplate"></div>
         <h1 class="htitle">反诈<em>守门人</em></h1>
-        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B14</div>
+        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B15</div>
       </div>
       <div class="hub-r">
         <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">
@@ -1218,7 +1348,13 @@ body.fh-on .ov.on .ovin{padding-top:40px}
         <button class="fbtn wchip" id="setFam" style="--faccent:#8A8073" onclick="Game.openFamTip()">
           <span class="fi">👨‍👩‍👧</span><span class="wc"><b>家人提醒图</b><i>可保存分享</i></span></button>
       </div>
-      <button class="hub-cta" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
+      <div class="hub-actions">
+        <button class="hub-cta" onclick="Game.startCampaign()">开始闯关（四关连打）</button>
+        <button class="hub-pk" onclick="Game.openPK()" title="和好友同题对战">
+          <span class="pk1">⚔️ 对战</span>
+          <span class="pk2">发链接 PK</span>
+        </button>
+      </div>
       </div>
     </div>
     <p class="tagline" style="margin-bottom:10px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
@@ -1267,6 +1403,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
 <!-- ============ 结算 ============ -->
 <div class="ov" id="ovOver">
   <div class="ovin">
+    <div id="pkVsWrap"></div>
     <div class="rankbox">
       <span class="em" id="ovEm">🛡️</span>
       <h2 id="ovTitle">守住了</h2>
@@ -1452,6 +1589,25 @@ body.fh-on .ov.on .ovin{padding-top:40px}
     </div>
   </div>
 </div>
+
+<!-- ============ 好友对战（同题 PK） ============ -->
+<div class="ov" id="ovPK">
+  <div class="ovin">
+    <div class="big" style="font-size:46px">⚔️</div>
+    <h1 style="font-size:27px">好友<em>对战</em></h1>
+    <p class="tagline">同一套题、同样的时限，分数才比得出高下。<br>你先打完把链接发过去，他开打时还能看到你的进度在跑。</p>
+    <div class="sect">发起对战 · 选一关开打</div>
+    <div class="pkpick" id="pkPick"></div>
+    <div class="sect">应战 · 粘贴对方的对战码</div>
+    <div class="pkinput">
+      <input id="pkCodeIn" placeholder="FZ2PK1-… 粘贴到这里" autocomplete="off" spellcheck="false">
+      <button class="btn" onclick="Game.pkAcceptInput()">应战</button>
+    </div>
+    <p class="pknote">链接被折叠或打不开时，让对方复制「对战码」发过来，粘贴到这里一样能打，离线也能打。</p>
+  </div>
+</div>
+
+<div id="pkToast"></div>
 
 <!-- ============ 插件中心 ============ -->
 <div class="ov" id="ovPlug">
@@ -1907,12 +2063,39 @@ const Game = (function(){
   let paused = false, timerOff = 0;
   let silent = false;
 
+  /* ------ 好友对战（PK）状态 ------
+     pkSeed  非 0 表示本局属于某场对战，题目由 seed 决定（双方同题）
+     pkRef   对手的战绩 + 逐题记录（已解码的对战码）
+     pkInvite 本局打完是要「发起对战」→ 生成码，而不是做对比
+     pkPending 从链接或输入框收到、还没开打的对手数据
+     runLog  本局逐题 {ok, ms}，用来生成对战码和逐题对照条 */
+  let pkSeed = 0, pkRef = null, pkInvite = false, pkPending = null;
+  let runLog = [];
+  let ghost = null, ghostTimer = 0;
+
   const $ = id => document.getElementById(id);
   const moneyEl = $('moneyEl'), scoreEl = $('scoreEl'), progEl = $('progEl'), levelEl = $('levelEl');
   const wbarFill = $('wbarFill'), walletBox = $('walletBox'), comboEl = $('combo');
   const deck = $('deck'), stage = $('stage'), dots = $('dots');
 
-  const shuffle = a => { const b = a.slice(); for (let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; };
+  /* 可复现随机数：同一个 seed 必然洗出同一套牌，这是「对战公平」的地基。
+     mulberry32 是 32 位整数状态的快速 PRNG，足够用且无需依赖 */
+  function mulberry32(a){
+    let t = a >>> 0;
+    return function(){
+      t = (t + 0x6D2B79F5) >>> 0;
+      let x = Math.imul(t ^ (t >>> 15), 1 | t);
+      x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const shuffle = (a, rnd) => {
+    const r = rnd || Math.random;
+    const b = a.slice();
+    for (let i=b.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; }
+    return b;
+  };
 
   function declump(arr){
     const pool = arr.slice(), out = [];
@@ -1928,11 +2111,11 @@ const Game = (function(){
     return out;
   }
 
-  function buildQueue(c){
+  function buildQueue(c, rnd){
     const p = POOLS[c.pool];
-    const sc = shuffle(p.scams).slice(0, c.scams).map(o => Object.assign({}, o, {scam:true}));
-    const re = shuffle(p.reals).slice(0, c.reals).map(o => Object.assign({}, o, {scam:false}));
-    return declump(shuffle(sc.concat(re)));
+    const sc = shuffle(p.scams, rnd).slice(0, c.scams).map(o => Object.assign({}, o, {scam:true}));
+    const re = shuffle(p.reals, rnd).slice(0, c.reals).map(o => Object.assign({}, o, {scam:false}));
+    return declump(shuffle(sc.concat(re), rnd));
   }
 
   const mult = () => Math.min(5, 1 + Math.floor(combo / 3));
@@ -2443,6 +2626,8 @@ const Game = (function(){
     cancelAnimationFrame(raf);
 
     const c = cur;
+    /* 这张牌实际用掉的时间（含暂停前已消耗的部分）——对战回放要用 */
+    const usedMs = Math.min(cardDur || cfg.perCard, timerOff + (cardStart ? performance.now() - cardStart : 0));
     const sm = cfg.scoreMul || 1;
     let good = false, delta = 0, label = '', cls = '';
 
@@ -2477,6 +2662,8 @@ const Game = (function(){
     }
 
     if (combo > maxCombo) maxCombo = combo;
+    /* 逐题存档：只在有意义的模式下记（长辈版节奏特殊，但仍可对战） */
+    runLog.push({ ok: good ? 1 : 0, ms: Math.round(usedMs) });
     const before = money;
     money += delta;
     if (money < 0) money = 0;
@@ -2521,10 +2708,22 @@ const Game = (function(){
   }
 
   /* ------ 关卡流程 ------ */
-  function startRun(m, pIdx){
+  /* seed 传入即为对战局：双方用同一个 seed 洗出同一套牌。
+     campaign 会跨四关，所以每一关用 seed 派生一个子种子（seed + 关卡号·7919），
+     保证「同一场对战里每一关的题序也一致」 */
+  function queueRng(){
+    if (!pkSeed) return null;
+    return mulberry32((pkSeed + levelIdx * 7919) >>> 0);
+  }
+
+  function startRun(m, pIdx, seed){
     mode = m || 'campaign';
     practiceIdx = pIdx || 0;
     levelIdx = mode === 'campaign' ? 0 : (mode === 'practice' ? practiceIdx : 0);
+    pkSeed = (seed >>> 0) || 0;
+    runLog = [];
+    if (!pkSeed) pkInvite = false;
+    ghostStop();
     money = START_MONEY; score = 0; combo = 0; maxCombo = 0;
     blocked = 0; falseAlarm = 0; timeoutMiss = 0; lost = 0;
     mistakes = []; played = 0; runStart = Date.now(); catStat = {};
@@ -2565,7 +2764,7 @@ const Game = (function(){
   function beginLevel(){
     over = false; resolving = false;
     idx = 0;
-    queue = buildQueue(cfg);
+    queue = buildQueue(cfg, queueRng());
     cur = queue[0];
     const wmEl = $('wm'); if (wmEl) wmEl.textContent = cfg.name;
     $('btnBlock').disabled = false;
@@ -2595,10 +2794,11 @@ const Game = (function(){
   }
 
   function replay(){
-    if (mode === 'hell') startRun('hell');
-    else if (mode === 'senior') startRun('senior');
-    else if (mode === 'practice') startRun('practice', practiceIdx);
-    else startRun('campaign');
+    const s = pkSeed;                      // 对战局重玩必须沿用同一个 seed，否则题就变了
+    if (mode === 'hell') startRun('hell', 0, s);
+    else if (mode === 'senior') startRun('senior', 0, s);
+    else if (mode === 'practice') startRun('practice', practiceIdx, s);
+    else startRun('campaign', 0, s);
   }
 
   /* ------ 骗局分类（用于反诈画像） ------ */
@@ -2797,6 +2997,7 @@ const Game = (function(){
   function finishRun(win){
     over = true;
     lastWin = win;
+    ghostStop();
     cancelAnimationFrame(raf);
     $('btnBlock').disabled = true;
     $('btnPass').disabled = true;
@@ -2846,6 +3047,7 @@ const Game = (function(){
     } else $('ovFalseWrap').style.display = 'none';
 
     /* 三块渲染互相隔离：任何一块出错都不该让整个结算页打不开 */
+    try { renderPkResult(); }catch(e){}
     try { renderChalResult(); }catch(e){}
     try { renderWeak(); }catch(e){}
     try { renderTrend(); }catch(e){}
@@ -2864,6 +3066,7 @@ const Game = (function(){
   /* ------ 首页 ------ */
   function showHome(){
     over = true;
+    ghostStop();
     pauseResetUI();
     cancelAnimationFrame(raf);
     $('btnBlock').disabled = true;
@@ -3745,7 +3948,18 @@ const Game = (function(){
   function renderChalBar(){
     const b = $('chalBar');
     if (!b) return;
-    if (!chalRef || chalDismissed || !$('ovHome').classList.contains('on')){ b.classList.remove('on'); return; }
+    if (!$('ovHome').classList.contains('on')){ b.classList.remove('on'); return; }
+    /* 对战邀请优先：它是「同一套题」的正式预约，比单纯晒分数更值得被点开 */
+    if (pkPending){
+      const nm = pkCfgOf(pkPending.mc).name;
+      $('chalText').innerHTML = '<b>⚔️ 有人向你发起对战</b><br>「' + nm + '」同一套题、同一时限，对方拿到 <b>'
+        + pkPending.score.toLocaleString('en-US') + '</b> 分。点这里应战——边打边看他的进度条。';
+      b.classList.add('on');
+      b.setAttribute('data-pk', '1');
+      return;
+    }
+    b.removeAttribute('data-pk');
+    if (!chalRef || chalDismissed){ b.classList.remove('on'); return; }
     const names = ['单关练习', '长辈版', '连续闯关', '地狱模式'];
     const nm = names[chalRef.mc] || '挑战';
     $('chalText').innerHTML = '<b>有人向你发起挑战</b><br>对方在「' + nm + '」拿到 <b>'
@@ -3754,6 +3968,8 @@ const Game = (function(){
     b.classList.add('on');
   }
   function dismissChal(){ chalDismissed = true; renderChalBar(); }
+  /* 横幅点击：对战邀请 → 应战；旧挑战 → 按原模式开打 */
+  function chalTap(){ if (pkPending) pkAcceptPending(); else startChalMode(); }
   function startChalMode(){
     if (!chalRef) return;
     if (chalRef.mc === 3) startRun('hell');
@@ -3782,7 +3998,323 @@ const Game = (function(){
     } else fb(t, done);
   }
 
-  /* 结算页顶部插入挑战对比 */
+  /* ==================================================================
+     好友对战：同题 PK
+     --------------------------------------------------------------
+     一局对战 = 一个 seed。发起方用 seed 开局，打完把「seed + 成绩 +
+     逐题记录」编成一段码发出去；应战方用同一个 seed 开局，拿到的是
+     一模一样的 12 张牌、一模一样的时限。因为逐题记录里带着每题用时，
+     应战方这边还能把对手的进程按时间轴「回放」成一条幽灵进度条。
+     全程不依赖服务器，微信发链接、或者直接贴码都能玩，离线也行。
+     ================================================================== */
+  const PK_TAG = 'FZ2PK1';
+
+  function pkCfgOf(mc){ return mc === 4 ? HELL : (LEVELS[mc] || LEVELS[0]); }
+  function pkModeOf(){ return mode === 'hell' ? 4 : (mode === 'practice' ? levelIdx : -1); }
+  function b36(v){ return Math.max(0, Math.round(v || 0)).toString(36); }
+
+  /* 逐题记录 → 定长字符串。每个字符 = 对错(高位) + 用时档位(低位)：
+     0-17 是「错 + 用时档」，18-35 是「对 + 用时档」。
+     一字符同时表达两件事，12 题只占 12 个字符，链接不会长到被折叠 */
+  function pkLogStr(log, mc){
+    const per = pkCfgOf(mc).perCard || 4000;
+    return (log || []).slice(0, 24).map(e => {
+      let t = Math.round((e && e.ms ? e.ms : 0) / per * 18);
+      t = Math.max(0, Math.min(17, t));
+      return (e && e.ok ? 18 + t : t).toString(36);
+    }).join('');
+  }
+  function pkLogParse(s, mc){
+    const per = pkCfgOf(mc).perCard || 4000;
+    const out = [];
+    String(s || '').split('').forEach(ch => {
+      const v = parseInt(ch, 36);
+      if (!isFinite(v) || v < 0 || v > 35) return;
+      const ok = v >= 18 ? 1 : 0;
+      const t = v >= 18 ? v - 18 : v;
+      out.push({ ok, ms: Math.round((t + .5) / 18 * per) });
+    });
+    return out;
+  }
+
+  /* FNV-1a 校验位：防止码被随手改一个数字还看不出异常（不是密码学防护）
+     大小写先归一：码最终会整体转大写，校验必须在同一套字符上算 */
+  function pkChk(s){
+    const src = String(s || '').toUpperCase();
+    let h = 0x811c9dc5;
+    for (let i = 0; i < src.length; i++){
+      h ^= src.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return (h % 1679616).toString(36).padStart(4, '0');
+  }
+
+  function pkEnc(d){
+    const mc = d.mc | 0;
+    const log = pkLogStr(d.log, mc);
+    const body = [PK_TAG, b36(d.seed), b36(mc), b36(d.score), b36(d.blocked), b36(d.lost), b36(d.combo), log].join('-');
+    return (body + '-' + pkChk(body)).toUpperCase();
+  }
+
+  function pkDec(str){
+    if (!str) return null;
+    let t = String(str).toUpperCase();
+    /* 允许整段粘贴（前面带了说明文字、链接、空格、全角空格） */
+    const at = t.indexOf(PK_TAG + '-');
+    if (at < 0) return null;
+    t = t.slice(at).replace(/[^0-9A-Z-]/g, '');
+    const m = t.match(/^FZ2PK1-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]+)-([0-9A-Z]*)-([0-9A-Z]{1,6})$/);
+    if (!m) return null;
+    const v = i => { const x = parseInt(m[i], 36); return isFinite(x) ? x : 0; };
+    const mc = v(2);
+    if (mc > 4) return null;
+    const seed = v(1);
+    if (!seed) return null;
+    const body = t.slice(0, t.lastIndexOf('-'));
+    return {
+      seed: seed, mc: mc, score: v(3), blocked: v(4), lost: v(5), combo: v(6),
+      log: pkLogParse(m[7], mc),
+      chkOk: pkChk(body) === m[8].toLowerCase()
+    };
+  }
+
+  /* ------ 面板 ------ */
+  function renderPkPick(){
+    const box = $('pkPick');
+    if (!box) return;
+    let h = '';
+    /* 链接带进来的那场对战，放在最上面，点一下就能开打 */
+    if (pkPending){
+      h += '<button onclick="Game.pkAcceptPending()" style="grid-column:1/-1;'
+        + 'border-color:rgba(255,204,85,.62);background:linear-gradient(150deg,rgba(255,204,85,.2),rgba(255,77,99,.08))">'
+        + '<em>待应战</em><b>⚔️ 接受「' + pkCfgOf(pkPending.mc).name + '」对战</b>'
+        + '<span>对方 ' + pkPending.score.toLocaleString('en-US') + ' 分 · 同一套题、同一时限</span></button>';
+    }
+    LEVELS.forEach((l, i) => {
+      h += '<button onclick="Game.pkStart(' + i + ')">'
+        + '<em>' + (l.perCard / 1000).toFixed(1) + 's</em>'
+        + '<b>' + l.name + '</b><span>' + l.sub + '</span></button>';
+    });
+    const open = isHellUnlocked();
+    h += '<button onclick="Game.pkStart(4)"' + (open ? '' : ' data-locked="1"') + '>'
+      + '<em>' + (open ? '2.4s' : '🔒') + '</em>'
+      + '<b>🔥 地狱模式</b><span>' + (open ? '线索隐藏 · 22 条消息' : '通关四关后解锁') + '</span></button>';
+    box.innerHTML = h;
+  }
+  function openPK(){
+    renderPkPick();
+    hideAll(); show('ovPK');
+    $('ovPK').scrollTop = 0;
+  }
+
+  /* 发起：随机一个 seed，用它开一局；打完结算页会给出对战码 */
+  function pkStart(mc){
+    mc = mc | 0;
+    if (mc === 4 && !isHellUnlocked()){ alert('先通过全部四关才能解锁地狱模式'); return; }
+    pkRef = null; pkPending = null; pkInvite = true;
+    const seed = 1 + Math.floor(Math.random() * 1679614);
+    if (mc === 4) startRun('hell', 0, seed);
+    else startRun('practice', mc, seed);
+  }
+
+  /* 应战：用对手的 seed 开同一局，并把他的进程交给幽灵回放 */
+  function pkAccept(ref){
+    if (!ref) return;
+    if (ref.mc === 4 && !isHellUnlocked()){ /* 别人挑战你，地狱也放行 */ }
+    pkRef = ref; pkInvite = false; pkPending = null;
+    if (ref.mc === 4) startRun('hell', 0, ref.seed);
+    else startRun('practice', ref.mc, ref.seed);
+    ghostBegin(ref);
+  }
+  function pkAcceptInput(){
+    const el = $('pkCodeIn');
+    const r = pkDec(el ? el.value : '');
+    if (!r){ pkToast('这段码看不懂，检查有没有少字符', false); return; }
+    pkAccept(r);
+  }
+  function pkAcceptPending(){
+    if (pkPending) pkAccept(pkPending);
+    else startChalMode();
+  }
+
+  /* ------ 编码本局 → 分享 ------ */
+  function pkMyCode(){
+    return pkEnc({ seed: pkSeed, mc: pkModeOf(), score, blocked, lost, combo: maxCombo, log: runLog });
+  }
+  function pkMyLink(){
+    try{ return String(location.href).split('#')[0] + '#pk=' + pkMyCode(); }
+    catch(e){ return '#pk=' + pkMyCode(); }
+  }
+  function pkCopy(txt, btn){
+    const lb = btn ? btn.textContent : '';
+    const done = () => { if (btn){ btn.textContent = '✓ 已复制'; setTimeout(() => { btn.textContent = lb; }, 1800); } };
+    if (navigator.clipboard && location.protocol !== 'file:'){
+      navigator.clipboard.writeText(txt).then(done).catch(() => fb(txt, done));
+    } else fb(txt, done);
+  }
+  function pkCopyCode(btn){ pkCopy(pkMyCode(), btn); }
+  function pkCopyLink(btn){
+    /* 微信里直接点链接最省事，所以把码塞进 hash，对方打开就能看到横幅 */
+    pkCopy('我在《反诈守门人》摆了场对战，同一套题，来试试：\n' + pkMyLink(), btn);
+  }
+  /* 同题再来一局：seed 不变，题不变；有对手就重新放一遍幽灵 */
+  function pkAgain(){
+    if (!pkSeed) return;
+    const s = pkSeed, mc = pkModeOf(), ref = pkRef;
+    if (mc < 0) return;
+    if (mc === 4) startRun('hell', 0, s);
+    else startRun('practice', mc, s);
+    if (ref) ghostBegin(ref);
+  }
+
+  /* ------ 幽灵回放：把对手的进度按他的时间轴在你屏幕上跑一遍 ------ */
+  function ghostBegin(ref){
+    ghostStop();
+    if (!ref || !ref.log || !ref.log.length) return;
+    const cum = [];
+    let s = 0;
+    ref.log.forEach(e => { s += Math.max(240, e.ms || 0); cum.push(s); });
+    ghost = { ref: ref, cum: cum, n: ref.log.length, i: 0, t0: performance.now(), acc: 0 };
+    const h = $('pkHud');
+    if (h) h.classList.add('on');
+    ghostPaint(0);
+    ghostTimer = setInterval(ghostTick, 170);
+  }
+  function ghostPaint(i){
+    if (!ghost) return;
+    const lbl = $('pkGhostLbl'), bar = $('pkGhostBar'), k = $('pkGhostK');
+    if (lbl) lbl.textContent = '对手 ' + i + '/' + ghost.n;
+    if (bar) bar.style.width = (ghost.n ? i / ghost.n * 100 : 0) + '%';
+    if (k){
+      const mine = Math.min(played, ghost.n);
+      const d = i - mine;
+      k.textContent = d > 0 ? ('快你 ' + d + ' 题') : (d < 0 ? ('你领先 ' + (-d)) : '咬得很紧');
+    }
+  }
+  function ghostTick(){
+    if (!ghost) return;
+    /* 暂停时不推进，把起点跟着挪，等于给幽灵也按了暂停 */
+    if (paused || over){ ghost.t0 = performance.now(); return; }
+    const el = ghost.acc + (performance.now() - ghost.t0);
+    let i = 0;
+    while (i < ghost.cum.length && ghost.cum[i] <= el) i++;
+    if (i > ghost.i){
+      for (let k = ghost.i; k < i; k++){
+        const e = ghost.ref.log[k];
+        if (!e) continue;
+        if (!e.ok) pkToast('对手第 ' + (k + 1) + ' 题翻车了', false);
+        else if (k === ghost.n - 1) pkToast('对手已经全部答完', true);
+      }
+      ghost.i = i;
+      ghostPaint(i);
+    }
+  }
+  function ghostStop(){
+    if (ghostTimer){ clearInterval(ghostTimer); ghostTimer = 0; }
+    ghost = null;
+    const h = $('pkHud');
+    if (h) h.classList.remove('on');
+  }
+  function pkToast(msg, ok){
+    const box = $('pkToast');
+    if (!box) return;
+    const d = document.createElement('div');
+    if (ok) d.className = 'ok';
+    d.textContent = msg;
+    box.appendChild(d);
+    setTimeout(() => { d.style.transition = 'opacity .32s, transform .32s'; d.style.opacity = '0'; d.style.transform = 'translateX(18px)'; }, 2100);
+    setTimeout(() => { if (d.parentNode) d.parentNode.removeChild(d); }, 2550);
+  }
+
+  /* ------ VS 结算 ------ */
+  function renderPkResult(){
+    const old = $('pkVsWrap');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (!pkSeed) return;
+    const mc = pkModeOf();
+    if (mc < 0) return;
+    const rb = $('ovOver').querySelector('.rankbox');
+    if (!rb) return;
+    const el = document.createElement('div');
+    el.id = 'pkVsWrap';
+    const wrap = document.createElement('div');
+    wrap.className = 'vsbox';
+    const cfgPk = pkCfgOf(mc);
+    const mine = pkSeed ? pkMyCode() : '';
+
+    if (pkRef && pkRef.seed === pkSeed){
+      /* 已有对手 → 出胜负 */
+      const foe = pkRef;
+      const n = Math.min(runLog.length, foe.log.length);
+      let cells = '';
+      for (let i = 0; i < n; i++){
+        const a = runLog[i].ok, b = foe.log[i].ok;
+        cells += '<i class="' + (a && b ? 'both' : a ? 'me' : b ? 'foe' : 'none') + '" title="第 ' + (i + 1) + ' 题"></i>';
+      }
+      let res = 'draw', txt = '平局';
+      if (score > foe.score){ res = 'win'; txt = '你赢了'; }
+      else if (score < foe.score){ res = 'lose'; txt = '你输了'; }
+      const gap = Math.abs(score - foe.score).toLocaleString('en-US');
+      wrap.innerHTML =
+          '<div class="vstop"><span class="vt">⚔️ 对战结果 · ' + cfgPk.name + '</span>'
+        + '<span class="vw ' + res + '">' + txt + '</span></div>'
+        + '<div class="vsscore">'
+        +   '<div class="vsn me"><span>你</span><b>' + score.toLocaleString('en-US') + '</b></div>'
+        +   '<div class="vsmid">VS</div>'
+        +   '<div class="vsn foe"><span>对手</span><b>' + foe.score.toLocaleString('en-US') + '</b></div>'
+        + '</div>'
+        + '<div class="vsgrid">' + cells + '</div>'
+        + '<div class="vslegend"><em class="l1">两人都拦对</em><em class="l2">只有你对</em><em class="l3">只有他对</em></div>'
+        + '<div class="vsfoot">'
+        +   '<button class="btn" onclick="Game.pkCopyCode(this)">📋 复制我的码回敬</button>'
+        +   '<button class="btn ghost" onclick="Game.pkAgain()">↻ 再来一局</button>'
+        + '</div>';
+      el.appendChild(wrap);
+      /* 差额补一句，别让人自己算 */
+      const sub = document.createElement('p');
+      sub.className = 'pknote';
+      sub.style.cssText = 'text-align:center;margin:-8px 0 16px';
+      sub.innerHTML = res === 'draw'
+        ? '分数打平了。拦下 ' + blocked + ' 个，对手 ' + foe.blocked + ' 个。'
+        : ('你' + (res === 'win' ? '领先' : '落后') + ' <b style="color:#ffd88a">' + gap + '</b> 分。逐题条从左到右是第 1 到第 ' + n + ' 题。');
+      el.appendChild(sub);
+    } else if (pkInvite){
+      /* 刚发起 → 出码，等对方来打 */
+      wrap.innerHTML =
+          '<div class="vstop"><span class="vt">⚔️ 对战已就绪 · ' + cfgPk.name + '</span>'
+        + '<span class="vw draw">待应战</span></div>'
+        + '<div class="vsscore">'
+        +   '<div class="vsn me"><span>你的成绩</span><b>' + score.toLocaleString('en-US') + '</b></div>'
+        + '</div>'
+        + '<p class="pknote" style="margin:2px 0 12px;color:#cbd6ee">把这个发给他，他打开就是同一套题。<br>'
+        + '链接打不开就直接发下面那段码，他在「对战」里粘贴就能应战。</p>'
+        + '<div class="vsgrid" style="display:block;font-family:Consolas,Menlo,monospace;font-size:11.5px;'
+        + 'background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.14);border-radius:11px;'
+        + 'padding:11px 12px;color:#ffe6b8;word-break:break-all;line-height:1.7">' + mine + '</div>'
+        + '<div class="vsfoot" style="margin-top:11px">'
+        +   '<button class="btn" onclick="Game.pkCopyLink(this)">🔗 复制对战链接</button>'
+        +   '<button class="btn ghost" onclick="Game.pkCopyCode(this)">📋 复制对战码</button>'
+        + '</div>';
+      el.appendChild(wrap);
+    } else {
+      return;
+    }
+    rb.parentNode.insertBefore(el, rb);
+  }
+
+  /* ------ 从链接接收 ------ */
+  function parsePkFromUrl(){
+    try{
+      const h = decodeURIComponent(String(location.hash || '').replace(/^#/, ''));
+      const m = h.match(/(?:^|&)pk=([A-Za-z0-9-]+)/);
+      if (!m) return;
+      const r = pkDec(m[1]);
+      if (r){ pkPending = r; renderChalBar(); }
+    }catch(e){}
+  }
+
+
+  /* 结算页顶部插入挑战对比（旧的「分享成绩」模式，保留兼容） */
   function renderChalResult(){
     const old = $('chalResult');
     if (old && old.parentNode) old.parentNode.removeChild(old);
@@ -4246,7 +4778,7 @@ const Game = (function(){
   }
 
   const OVS = ['ovHome', 'ovLevel', 'ovOver', 'ovPoster',
-               'ovDaily', 'ovScam', 'ovNote', 'ovFam', 'ovBook', 'ovChal',
+               'ovDaily', 'ovScam', 'ovNote', 'ovFam', 'ovBook', 'ovChal', 'ovPK',
                'ovPlug', 'ovPlugDoc', 'ovPause'];
   function hideAll(){ OVS.forEach(id => hide(id)); }
   function show(id){ $(id).classList.add('on'); syncFloatHome(); }
@@ -4339,6 +4871,7 @@ const Game = (function(){
   renderLevelList();
   refreshTop();
   parseChalFromUrl();
+  parsePkFromUrl();
   try{ cbOn = localStorage.getItem(K_CB) === 'true'; }catch(e){ cbOn = false; }
   applyCb();
   refreshHomeExtras();
@@ -4367,7 +4900,9 @@ const Game = (function(){
     pause: togglePause, resume: resumeGame, restartLevel, quitRun,
     openDaily, dailyAnswer, startScam, scamPick, scamNext,
     openNote, closeNote, openFamTip, closeFam, openBook,
-    openChal, closeChal, dismissChal, startChalMode, toggleCb,
+    openChal, closeChal, dismissChal, startChalMode, chalTap, toggleCb,
+    openPK, pkStart, pkAccept, pkAcceptInput, pkAcceptPending,
+    pkCopyCode, pkCopyLink, pkAgain,
     openPlug, openPlugDoc, closePlugDoc, plugToggle, plugOpt, plugRange,
     plugInstallView, plugInstallSubmit, plugPickFile, plugExport, plugUninstall,
     copyPlugExample,
@@ -4383,6 +4918,13 @@ const Game = (function(){
       get scam(){ return { idx: scamIdx, right: scamRight, n: scamDeck.length, picked: scamPicked, deck: scamDeck.slice() }; },
       get cb(){ return cbOn; },
       get chal(){ return chalRef; },
+      pkEnc, pkDec, pkLogStr, pkLogParse, pkCfgOf, mulberry32, queueRng,
+      get pkSeed(){ return pkSeed; },
+      get runLog(){ return runLog.slice(); },
+      get ghostState(){ return ghost ? { i: ghost.i, n: ghost.n } : null; },
+      get pkPending(){ return pkPending; },
+      get pkRef(){ return pkRef; },
+      get pkInvite(){ return pkInvite; },
       get catStat(){ return JSON.parse(JSON.stringify(catStat)); },
       get hist(){ return getHist(); },
       get cfg(){ return cfg; },

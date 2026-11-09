@@ -1163,6 +1163,76 @@ body.fh-on .ov.on .ovin{padding-top:40px}
   .hub-pk .pk1{font-size:18px}
   .hub-pk .pk2{font-size:10.5px}
 }
+
+/* ==================================================================
+   互动层：上滑举报 / 分段到达 / 错误复盘 / 连击道具
+   ================================================================== */
+
+/* 上滑时浮出的第三枚印章：金色，位置偏上，与左右两枚区分开 */
+.stamp.u{
+  top:24%; font-size:23px; letter-spacing:3px; padding:8px 17px; border-radius:13px;
+  border:4px solid var(--gold); color:var(--gold);
+  transform:translate(-50%,-50%) rotate(-3deg);
+  text-shadow:0 0 24px rgba(255,204,85,.72);
+}
+
+/* 分段到达：第二段延迟浮现 + 打字指示 */
+.cbody .seg{display:block; opacity:0; transform:translateY(9px); animation:segIn .3s cubic-bezier(.2,.85,.3,1) forwards}
+@keyframes segIn{to{opacity:1; transform:none}}
+.typing{display:inline-flex; gap:5px; align-items:center; height:18px; margin-top:2px}
+.typing i{width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.42); animation:ty 1.05s infinite}
+.typing i:nth-child(2){animation-delay:.16s}
+.typing i:nth-child(3){animation-delay:.32s}
+@keyframes ty{0%,62%,100%{opacity:.22; transform:translateY(0)}30%{opacity:1; transform:translateY(-3px)}}
+
+/* 答错后的复盘卡：压在卡片底部，卡片本身停住不走 */
+.rev{
+  position:relative; z-index:12; margin-top:-6px;
+  padding:14px 21px 17px;
+  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(8,12,24,.55) 46%, rgba(8,12,24,.9));
+  border-top:1px solid rgba(255,255,255,.12);
+  animation:revIn .32s cubic-bezier(.2,.85,.3,1) both;
+}
+@keyframes revIn{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+.rev b{display:block; font-size:14px; letter-spacing:.2px; margin-bottom:7px}
+.rev b.bad{color:#ff8a99}
+.rev b.warn{color:var(--amber)}
+.rev p{margin:0; font-size:12.5px; line-height:1.72; color:#c9d5ef}
+.rev .rv-go{margin-top:9px; font-size:10.5px; color:var(--dim); letter-spacing:.4px}
+.card.reviewing{cursor:pointer}
+
+/* 连击奖励：冻结 / 透视 */
+#charges{flex:none; display:none; gap:9px; padding:0 0 9px}
+#charges.on{display:flex}
+.chg{
+  flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:9px 8px; border-radius:13px; font-family:inherit;
+  font-size:12px; font-weight:800; letter-spacing:.3px; color:#e6eeff; cursor:pointer;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
+  transition:transform .13s, background .2s;
+}
+.chg:active{transform:scale(.96)}
+.chg b{font-size:10.5px; min-width:17px; padding:1px 5px; border-radius:99px; text-align:center;
+  background:rgba(255,255,255,.16); color:#fff; font-variant-numeric:tabular-nums}
+.chg.frz{border-color:rgba(110,190,255,.4); background:rgba(80,160,255,.14); color:#cfe8ff}
+.chg.frz b{background:rgba(110,190,255,.28)}
+.chg.xry{border-color:rgba(255,204,85,.42); background:rgba(255,204,85,.14); color:#ffe6b8}
+.chg.xry b{background:rgba(255,204,85,.3); color:#3a2a00}
+
+/* 透视标记：正确的那个键亮金边 */
+.cbtn.xray{
+  box-shadow:0 0 0 2px rgba(255,204,85,.95), 0 0 30px 7px rgba(255,204,85,.45);
+  animation:xy .9s ease-in-out infinite alternate;
+}
+@keyframes xy{from{filter:brightness(1)}to{filter:brightness(1.22)}}
+
+/* PK 幽灵：比分落后时变警告色，进入赛点时整条高亮 */
+#pkHud .gk.behind{color:#ff9aa8}
+#pkHud.hot{border-color:rgba(255,204,85,.62); box-shadow:0 0 22px rgba(255,176,32,.24)}
+
+body.senior .rev p{font-size:15px; line-height:1.8}
+body.senior .rev b{font-size:16.5px}
+body.senior #charges .chg{font-size:14px}
 </style>
 </head>
 <body>
@@ -1194,7 +1264,8 @@ body.fh-on .ov.on .ovin{padding-top:40px}
     <div id="combo"></div>
     <div id="deck"></div>
   </div>
-  <div id="tipbar">← 左滑拦截　·　右滑放行 →</div>
+  <div id="tipbar">← 拦截　·　放行 →　·　↑ 上滑举报（报错更贵）</div>
+  <div id="charges"></div>
   <div id="controls">
     <button class="cbtn block" id="btnBlock">🚫 拦截</button>
     <button class="cbtn pass" id="btnPass">✅ 放行</button>
@@ -1330,7 +1401,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
         </div>
         <div class="hplate"></div>
         <h1 class="htitle">反诈<em>守门人</em></h1>
-        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B15</div>
+        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B16</div>
       </div>
       <div class="hub-r">
         <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">
@@ -1357,7 +1428,7 @@ body.fh-on .ov.on .ovin{padding-top:40px}
       </div>
       </div>
     </div>
-    <p class="tagline" style="margin-bottom:10px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行——守住你的钱包。</p>
+    <p class="tagline" style="margin-bottom:10px">骗子就在你的手机里，每一条消息都是一次判断。<br>左滑拦截，右滑放行，上滑举报——守住你的钱包。</p>
     <p class="minirule" style="margin-bottom:16px">钱包 ¥10,000 起　·　放行诈骗按金额扣钱<br>误拦真消息 <b>−¥2,000</b>（乱拦一样守不住门）</p>
     <p class="legalnote">点左侧任意关卡可单独练习 · 内容均为虚构改编<br>澳门遇骗：司警局报案 993 · 防诈查询热线 8800 7777<br>内地遇骗：110 · 国家反诈专线 96110</p>
   </div>
@@ -2063,6 +2134,17 @@ const Game = (function(){
   let paused = false, timerOff = 0;
   let silent = false;
 
+  /* ------ 互动层状态 ------
+     charges   连击奖励攒下来的道具次数（冻结 / 透视）
+     timeDebt  上滑举报的代价：下一张牌的倒计时要扣掉这么多毫秒
+     segT      分段到达的定时器；segExtra 是它给本张牌补的时长（保证不吃亏）
+     reviewT   复盘卡自动继续的定时器；reviewSkip 让玩家点一下就能提前走 */
+  let charges = { freeze: 0, xray: 0 }, charged3 = false, charged5 = false;
+  let xrayOn = false, timeDebt = 0;
+  let segT = 0, segExtra = 0;
+  let reviewing = false, reviewT = 0, reviewSkip = null;
+  let reported = 0;
+
   /* ------ 好友对战（PK）状态 ------
      pkSeed  非 0 表示本局属于某场对战，题目由 seed 决定（双方同题）
      pkRef   对手的战绩 + 逐题记录（已解码的对战码）
@@ -2175,12 +2257,57 @@ const Game = (function(){
       if (c.url && !cfg.hideUrl) inner += '<span class="url">🔗 ' + c.url + '</span>';
       inner += '</div>';
     }
-    inner += '<div class="stamp l">拦 截</div><div class="stamp r">放 行</div>';
+    inner += '<div class="stamp l">拦 截</div><div class="stamp r">放 行</div>'
+      + '<div class="stamp u">举 报</div>';
     el.innerHTML = inner;
     return el;
   }
 
+  /* 长消息拆两段：先露一半，隔 0.8 秒补上后半句。
+     诈骗话术的杀伤力几乎都在后半句，先给前半句才有「先正常、后露馅」的悬念，
+     玩家也才会经历一次「我本来差点放行」的心理过程 */
+  function cardSegs(c){
+    if (!c || c.t === 'call') return null;
+    const b = String(c.body || '');
+    if (b.length < 46) return null;
+    const m = b.match(/^([\s\S]{6,}?[。！？])([\s\S]{6,})$/);
+    if (!m) return null;
+    const a = m[1].trim(), rest = m[2].trim();
+    if (a.length < 10 || rest.length < 10) return null;
+    return [a, rest];
+  }
+
+  /* 返回给这张牌补的毫秒数：分段期间不该占用玩家的答题时间 */
+  function splitSegments(c, el){
+    const segs = cardSegs(c);
+    if (!segs || !el) return 0;
+    const body = el.querySelector('.cbody');
+    if (!body) return 0;
+    const showUrl = !!(c.url && !cfg.hideUrl);
+    body.innerHTML = '<span class="seg">' + segs[0] + '</span>'
+      + '<span class="typing"><i></i><i></i><i></i></span>';
+    const delay = 820;
+    segT = setTimeout(() => {
+      segT = 0;
+      const tp = body.querySelector('.typing');
+      if (tp && tp.parentNode) tp.parentNode.removeChild(tp);
+      const s2 = document.createElement('span');
+      s2.className = 'seg';
+      s2.textContent = segs[1];
+      body.appendChild(s2);
+      if (showUrl){
+        const u = document.createElement('span');
+        u.className = 'url';
+        u.textContent = '🔗 ' + c.url;
+        body.appendChild(u);
+      }
+      beep(520, .06, 'sine', .03);
+    }, delay);
+    return delay;
+  }
+
   function renderDeck(){
+    if (segT){ clearTimeout(segT); segT = 0; }
     deck.innerHTML = '';
     for (let k = 2; k >= 0; k--){
       const c = queue[idx + k];
@@ -2188,7 +2315,9 @@ const Game = (function(){
       deck.appendChild(makeCard(c, k));
     }
     topEl = deck.querySelector('.card[data-k="0"]');
-    if (topEl) bindDrag(topEl);
+    if (!topEl) return 0;
+    bindDrag(topEl);
+    return splitSegments(queue[idx], topEl);
   }
 
   function renderDots(){
@@ -2218,6 +2347,50 @@ const Game = (function(){
       comboEl.classList.add('on');
       comboEl.classList.remove('pop'); void comboEl.offsetWidth; comboEl.classList.add('pop');
     } else comboEl.classList.remove('on');
+
+    /* 连击不再只是乘数：到 3 送一次冻结，到 5 送一次透视。
+       每局各一次，攒着不用也不会过期 */
+    if (combo === 3 && !charged3){
+      charged3 = true; charges.freeze++;
+      float('❄ 冻结 +1', 'warn'); sfxUp();
+    }
+    if (combo === 5 && !charged5){
+      charged5 = true; charges.xray++;
+      float('👁 透视 +1', 'warn'); sfxUp();
+    }
+    syncCharges();
+  }
+
+  function syncCharges(){
+    const box = $('charges');
+    if (!box) return;
+    const n = (charges.freeze || 0) + (charges.xray || 0);
+    box.classList.toggle('on', n > 0);
+    if (!n){ box.innerHTML = ''; return; }
+    let h = '';
+    if (charges.freeze > 0){
+      h += '<button class="chg frz" onclick="Game.useFreeze()">❄ 冻结 3 秒<b>' + charges.freeze + '</b></button>';
+    }
+    if (charges.xray > 0){
+      h += '<button class="chg xry" onclick="Game.useXray()">👁 透视本题<b>' + charges.xray + '</b></button>';
+    }
+    box.innerHTML = h;
+  }
+  function useFreeze(){
+    if (!charges.freeze || over || resolving || paused) return;
+    charges.freeze--;
+    cardDur += 3000;                       // 直接续在本题上，进度条会明显变慢
+    float('❄ +3 秒', 'warn');
+    sfxUp(); syncCharges();
+  }
+  function useXray(){
+    if (!charges.xray || over || resolving || paused || !cur) return;
+    charges.xray--;
+    xrayOn = true;
+    const btn = cur.scam ? $('btnBlock') : $('btnPass');
+    if (btn) btn.classList.add('xray');
+    float('👁 本题得分减半', 'warn');
+    sfxUp(); syncCharges();
   }
 
   function float(text, cls){
@@ -2512,13 +2685,20 @@ const Game = (function(){
   })();
 
   /* ------ 计时 ------ */
-  function startTimer(offMs){
+  function startTimer(offMs, extra){
     cardStart = 0;
     timerOff = offMs || 0;
     cancelAnimationFrame(raf);
     const bar = topEl ? topEl.querySelector('.timer i') : null;
     const soften = Math.floor(idx / 4) * 260;                   // 同一关内缓慢提速
     cardDur = Math.max(mode === 'hell' ? 1900 : 2300, cfg.perCard - soften);
+    /* 分段到达补时长：先给后半句的时间，再开始倒计时，玩家不吃亏 */
+    if (extra) cardDur += extra;
+    /* 上滑举报的代价：下一张牌少这么多时间，但不至于直接判死 */
+    if (timeDebt){
+      cardDur = Math.max(1600, cardDur - timeDebt);
+      timeDebt = 0;
+    }
     if (bar) bar.style.background = 'var(--accent)';
     const loop = t => {
       if (over || resolving || paused || !topEl) return;
@@ -2584,23 +2764,36 @@ const Game = (function(){
   function quitRun(){ pauseResetUI(); showHome(); }          // 暂停面板「返回首页」
   function restartLevel(){ pauseResetUI(); beginLevel(); }   // 暂停面板「重玩本关」
 
-  /* ------ 拖拽 ------ */
+  /* ------ 拖拽 ------
+     三个方向，三种动作：左=拦截，右=放行，上=举报。
+     以「主方向」判定，避免斜着划时左右和上下两个分支抢同一个手势 */
   function bindDrag(el){
-    let sx = 0, dx = 0, dragging = false;
+    let sx = 0, sy = 0, dx = 0, dy = 0, dragging = false;
     const sL = el.querySelector('.stamp.l'), sR = el.querySelector('.stamp.r');
+    const sU = el.querySelector('.stamp.u');
     el.addEventListener('pointerdown', e => {
       if (over || resolving || paused) return;
-      dragging = true; sx = e.clientX; dx = 0;
+      dragging = true; sx = e.clientX; sy = e.clientY; dx = 0; dy = 0;
       el.classList.add('grabbing');
       try{ el.setPointerCapture(e.pointerId); }catch(err){}
     });
     el.addEventListener('pointermove', e => {
       if (!dragging || over || resolving || paused) return;
       dx = e.clientX - sx;
+      dy = e.clientY - sy;
+      const vertical = dy < 0 && Math.abs(dy) > Math.abs(dx) * 1.15;
       el.style.transition = 'none';
-      el.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx * .045) + 'deg)';
-      if (sL) sL.style.opacity = dx < -18 ? Math.min(1, -dx / 100) : 0;
-      if (sR) sR.style.opacity = dx > 18 ? Math.min(1, dx / 100) : 0;
+      if (vertical){
+        el.style.transform = 'translateY(' + dy + 'px)';
+        if (sU) sU.style.opacity = Math.min(1, -dy / 90);
+        if (sL) sL.style.opacity = 0;
+        if (sR) sR.style.opacity = 0;
+      } else {
+        el.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx * .045) + 'deg)';
+        if (sU) sU.style.opacity = 0;
+        if (sL) sL.style.opacity = dx < -18 ? Math.min(1, -dx / 100) : 0;
+        if (sR) sR.style.opacity = dx > 18 ? Math.min(1, dx / 100) : 0;
+      }
     });
     const end = () => {
       if (!dragging) return;
@@ -2608,7 +2801,10 @@ const Game = (function(){
       el.classList.remove('grabbing');
       if (sL) sL.style.opacity = 0;
       if (sR) sR.style.opacity = 0;
-      if (Math.abs(dx) > 78) resolve(dx < 0 ? 'left' : 'right');
+      if (sU) sU.style.opacity = 0;
+      const vertical = dy < 0 && Math.abs(dy) > Math.abs(dx) * 1.15;
+      if (vertical && dy < -92) resolve('up');
+      else if (!vertical && Math.abs(dx) > 78) resolve(dx < 0 ? 'left' : 'right');
       else {
         el.style.transition = 'transform .26s cubic-bezier(.3,1.4,.5,1)';
         el.style.transform = 'translateX(0) rotate(0)';
@@ -2629,6 +2825,8 @@ const Game = (function(){
     /* 这张牌实际用掉的时间（含暂停前已消耗的部分）——对战回放要用 */
     const usedMs = Math.min(cardDur || cfg.perCard, timerOff + (cardStart ? performance.now() - cardStart : 0));
     const sm = cfg.scoreMul || 1;
+    /* 透视过的题得分减半：给了你确定性，就要收走你的成绩 */
+    const pen = xrayOn ? .5 : 1;
     let good = false, delta = 0, label = '', cls = '';
 
     if (dir === 'timeout'){
@@ -2637,19 +2835,37 @@ const Game = (function(){
       combo = 0;
     } else if (dir === 'left'){
       if (c.scam){
-        good = true; blocked++; combo++; score += 100 * mult() * sm;
-        label = '+' + (100 * mult() * sm) + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
+        good = true; blocked++; combo++;
+        const g = Math.round(100 * mult() * sm * pen);
+        score += g;
+        label = '+' + g + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
       } else {
         delta = -MIS_BLOCK; falseAlarm++; mistakes.push(c); combo = 0;
         label = '误拦真消息 −' + MIS_BLOCK; cls = 'bad';
+      }
+    } else if (dir === 'up'){
+      /* 举报是「正式指控」：对了比拦截多拿，错了比误拦赔得更狠。
+         另外整理证据要花时间，下一张牌的倒计时扣 1.5 秒。 */
+      timeDebt = 1500;
+      reported++;
+      if (c.scam){
+        good = true; blocked++; combo++;
+        const g = Math.round(150 * mult() * sm * pen);
+        score += g;
+        label = '举报命中 +' + g + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
+      } else {
+        delta = -3000; falseAlarm++; mistakes.push(c); combo = 0;
+        label = '诬告真消息 −3000'; cls = 'bad';
       }
     } else {
       if (c.scam){
         delta = -c.amount; mistakes.push(c); combo = 0;
         label = '被骗 ¥' + c.amount; cls = 'bad';
       } else {
-        good = true; combo++; score += 60 * mult() * sm;
-        label = '+' + (60 * mult() * sm) + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
+        good = true; combo++;
+        const g = Math.round(60 * mult() * sm * pen);
+        score += g;
+        label = '+' + g + (mult() > 1 ? ' ×' + mult() : ''); cls = 'good';
       }
     }
 
@@ -2681,7 +2897,10 @@ const Game = (function(){
     const btn = dir === 'left' ? $('btnBlock') : (dir === 'right' ? $('btnPass') : null);
     if (btn) FX.bump(btn, good ? 'hitok' : 'hitno', 540);
 
-    if (topEl){
+    clearTimeout(segT); segT = 0;
+
+    const wrong = !good;
+    if (!wrong && topEl){
       const tx = dir === 'left' ? -460 : (dir === 'right' ? 460 : 0);
       topEl.style.transition = 'transform .3s ease-in, opacity .3s ease-in';
       topEl.style.transform = 'translateX(' + tx + 'px) rotate(' + (tx * .05) + 'deg)';
@@ -2689,20 +2908,80 @@ const Game = (function(){
     }
     PLUG.fire('onJudge', { card: c, good, dir, cls, delta, label, combo, mult: mult() });
 
-    setTimeout(() => {
+    /* 答错不急着翻篇：卡片就地停住，把破绽摆出来，点一下才继续 */
+    let advanced = false;
+    const advance = () => {
+      if (advanced) return;
+      /* 玩家中途点了「首页」：这局的后续卡牌不该再被这个定时器拉起来 */
+      if (over){
+        clearTimeout(reviewT); reviewT = 0;
+        reviewSkip = null; reviewing = false;
+        return;
+      }
+      advanced = true;
+      clearTimeout(reviewT); reviewT = 0;
+      reviewSkip = null; reviewing = false;
+      if (topEl) topEl.classList.remove('reviewing');
       idx++; played++;
       resolving = false;
       if (money <= 0){ return finishRun(false); }
       if (idx >= queue.length){ return clearLevel(); }
       next();
-    }, 310);
+    };
+    if (wrong){
+      showReview(c, dir, advance);
+      reviewT = setTimeout(advance, 3000);
+    } else {
+      reviewT = setTimeout(advance, 310);
+    }
+  }
+
+  /* 就地复盘：不再只丢一行红字，而是把这条消息最不该忽略的一处讲清楚。
+     玩家自己点走的，比自动翻页记得牢 */
+  function showReview(c, dir, go){
+    if (!topEl) return;
+    reviewing = true;
+    reviewSkip = go;
+    if (topEl.style.transform){
+      topEl.style.transition = 'transform .28s cubic-bezier(.3,1.3,.5,1)';
+      topEl.style.transform = 'translateX(0) rotate(0)';
+    }
+    const REAL = '真实通知不会催你转账、不会让你点陌生链接、不会索要验证码，也不会拿「影响征信」「马上冻结」来吓你。';
+    let t, cl, d;
+    if (c.scam){
+      cl = 'bad';
+      t = dir === 'timeout' ? '⏰ 还没读完，钱就走了' : '❌ 这条是骗子，你放它过去了';
+      d = String(c.why || '').replace(/<[^>]+>/g, '');
+    } else {
+      cl = 'warn';
+      t = dir === 'up' ? '⚠️ 这是真消息，你把它举报了'
+        : (dir === 'left' ? '⚠️ 这是真消息，你把它拦了' : '⏰ 真消息，你却没敢放行');
+      d = REAL;
+    }
+    const box = document.createElement('div');
+    box.className = 'rev';
+    box.innerHTML = '<b class="' + cl + '">' + t + '</b><p>' + d + '</p>'
+      + '<div class="rv-go">轻触卡片继续 →</div>';
+    topEl.appendChild(box);
+    topEl.classList.add('reviewing');
+    topEl.addEventListener('click', reviewClick, { once: true });
+  }
+  function reviewClick(e){
+    if (!reviewing || !reviewSkip) return;
+    if (e) e.stopPropagation();
+    reviewSkip();
   }
 
   function next(){
     cur = queue[idx];
-    renderDeck();
+    /* 透视只在本题有效：换牌就撤掉高亮 */
+    xrayOn = false;
+    const bb = $('btnBlock'), bp = $('btnPass');
+    if (bb) bb.classList.remove('xray');
+    if (bp) bp.classList.remove('xray');
+    segExtra = renderDeck();
     progEl.textContent = Math.min(played, totalCards) + '/' + totalCards;
-    startTimer();
+    startTimer(0, segExtra);
     syncPauseBtn();
     PLUG.fire('onCardShow', { card: cur, el: topEl });
   }
@@ -2727,6 +3006,12 @@ const Game = (function(){
     money = START_MONEY; score = 0; combo = 0; maxCombo = 0;
     blocked = 0; falseAlarm = 0; timeoutMiss = 0; lost = 0;
     mistakes = []; played = 0; runStart = Date.now(); catStat = {};
+    charges = { freeze: 0, xray: 0 }; charged3 = false; charged5 = false;
+    timeDebt = 0; reported = 0; xrayOn = false;
+    reviewing = false; reviewSkip = null;
+    if (reviewT){ clearTimeout(reviewT); reviewT = 0; }
+    if (segT){ clearTimeout(segT); segT = 0; }
+    syncCharges();
     cfg = mode === 'hell' ? HELL : (mode === 'senior' ? SENIOR : LEVELS[levelIdx]);
     document.body.classList.toggle('senior', mode === 'senior');
     totalCards = mode === 'hell' ? (HELL.scams + HELL.reals)
@@ -3069,6 +3354,9 @@ const Game = (function(){
     ghostStop();
     pauseResetUI();
     cancelAnimationFrame(raf);
+    if (reviewT){ clearTimeout(reviewT); reviewT = 0; }
+    if (segT){ clearTimeout(segT); segT = 0; }
+    reviewing = false; reviewSkip = null;
     $('btnBlock').disabled = true;
     $('btnPass').disabled = true;
     document.body.classList.remove('senior');
@@ -4174,21 +4462,41 @@ const Game = (function(){
     const cum = [];
     let s = 0;
     ref.log.forEach(e => { s += Math.max(240, e.ms || 0); cum.push(s); });
-    ghost = { ref: ref, cum: cum, n: ref.log.length, i: 0, t0: performance.now(), acc: 0 };
+    ghost = { ref: ref, cum: cum, n: ref.log.length, i: 0, t0: performance.now(), acc: 0,
+              lead: null, hot: false };
     const h = $('pkHud');
     if (h) h.classList.add('on');
     ghostPaint(0);
     ghostTimer = setInterval(ghostTick, 170);
   }
+
+  /* 按逐题记录推算分数：和本局同一套算法（拦截 100、放行 60、连击倍率），
+     所以进度条走到最后时，这里算出来的数会和他的结算分完全一致 */
+  function scoreFromLog(log, i){
+    let s = 0, c = 0;
+    for (let k = 0; k < i; k++){
+      const e = log && log[k];
+      if (!e) continue;
+      if (e.ok){ c++; s += 100 * Math.min(5, 1 + Math.floor(c / 3)); }
+      else c = 0;
+    }
+    return s;
+  }
+  function ghostScore(i){
+    if (!ghost) return 0;
+    const s = scoreFromLog(ghost.ref.log, i);
+    return i >= ghost.n ? (ghost.ref.score || s) : s;
+  }
+
   function ghostPaint(i){
     if (!ghost) return;
     const lbl = $('pkGhostLbl'), bar = $('pkGhostBar'), k = $('pkGhostK');
     if (lbl) lbl.textContent = '对手 ' + i + '/' + ghost.n;
     if (bar) bar.style.width = (ghost.n ? i / ghost.n * 100 : 0) + '%';
     if (k){
-      const mine = Math.min(played, ghost.n);
-      const d = i - mine;
-      k.textContent = d > 0 ? ('快你 ' + d + ' 题') : (d < 0 ? ('你领先 ' + (-d)) : '咬得很紧');
+      const gs = ghostScore(i);
+      k.textContent = '你 ' + score + ' : ' + gs;
+      k.classList.toggle('behind', gs > score);
     }
   }
   function ghostTick(){
@@ -4205,6 +4513,18 @@ const Game = (function(){
         if (!e.ok) pkToast('对手第 ' + (k + 1) + ' 题翻车了', false);
         else if (k === ghost.n - 1) pkToast('对手已经全部答完', true);
       }
+      /* 反超只说一次：领先/落后翻转时才播报，否则每 170ms 一句会刷屏 */
+      const nowAhead = score >= ghostScore(i);
+      if (ghost.lead !== null && nowAhead !== ghost.lead && i >= 2){
+        pkToast(nowAhead ? '你反超了' : '被对手反超了', nowAhead);
+      }
+      ghost.lead = nowAhead;
+      /* 赛点：对手只剩三题，整条变金 */
+      if (!ghost.hot && i >= ghost.n - 3 && i < ghost.n){
+        ghost.hot = true;
+        const h = $('pkHud'); if (h) h.classList.add('hot');
+        pkToast('赛点 · 对手只剩 3 题', true);
+      }
       ghost.i = i;
       ghostPaint(i);
     }
@@ -4213,7 +4533,7 @@ const Game = (function(){
     if (ghostTimer){ clearInterval(ghostTimer); ghostTimer = 0; }
     ghost = null;
     const h = $('pkHud');
-    if (h) h.classList.remove('on');
+    if (h){ h.classList.remove('on'); h.classList.remove('hot'); }
   }
   function pkToast(msg, ok){
     const box = $('pkToast');
@@ -4903,12 +5223,14 @@ const Game = (function(){
     openChal, closeChal, dismissChal, startChalMode, chalTap, toggleCb,
     openPK, pkStart, pkAccept, pkAcceptInput, pkAcceptPending,
     pkCopyCode, pkCopyLink, pkAgain,
+    useFreeze, useXray,
     openPlug, openPlugDoc, closePlugDoc, plugToggle, plugOpt, plugRange,
     plugInstallView, plugInstallSubmit, plugPickFile, plugExport, plugUninstall,
     copyPlugExample,
     _debug: {
       wingArc, layoutWings,
       resolve, makePoster, catOf, worstCat,
+      cardSegs, scoreFromLog,
       makeFamily, buildNote, encChal, decChal, dailyPick, totalScams,
       plugRunCode, plugInstallFromText, plugExampleCode,
       get plug(){ return { order: PLUG.order.slice(), on: Object.keys(PLUG.state.on), custom: PLUG.state.custom.length, hooks: Object.keys(PLUG.tab).reduce((o, k) => { o[k] = PLUG.tab[k].length; return o; }, {}) }; },
@@ -4931,7 +5253,8 @@ const Game = (function(){
       get cur(){ return cur; },
       get queue(){ return queue; },
       get mode(){ return mode; },
-      get state(){ return { mode, levelIdx, idx, played, totalCards, money, score, combo, maxCombo, blocked, falseAlarm, timeoutMiss, lost, over, resolving, paused, timerOff, mistakes: mistakes.slice() }; },
+      get state(){ return { mode, levelIdx, idx, played, totalCards, money, score, combo, maxCombo, blocked, falseAlarm, timeoutMiss, lost, over, resolving, paused, timerOff, mistakes: mistakes.slice(),
+        cur, queue, charges: { freeze: charges.freeze, xray: charges.xray }, timeDebt, cardDur, perCard: cfg.perCard, reviewing, xrayOn, reported }; },
       unlockHell, isHellUnlocked, makePosterNow: () => makePoster(true),
       FX, get fx(){ return { rings: $('ringFx').children.length, slices: $('ringFx').querySelectorAll('.cslice').length, bars: $('fxScan').children.length, bad: $('fxBad').classList.contains('on'), good: $('fxGood').classList.contains('on'), warn: $('fxWarn').classList.contains('on'), sk: parseFloat(stage.style.getPropertyValue('--sk') || '1') }; }
     }

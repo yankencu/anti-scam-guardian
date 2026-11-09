@@ -1077,6 +1077,13 @@ body.fh-on .ov.on .ovin{padding-top:40px}
   background:linear-gradient(90deg,#ffcc55,#ff7a45); transition:width .28s linear;
   box-shadow:0 0 8px rgba(255,176,32,.7)}
 #pkHud .gk{font-size:10.5px; color:var(--muted); flex:none; font-variant-numeric:tabular-nums}
+/* 影子模式：换成冷色，一眼就能分清「真人对手」和「自己的录像」 */
+#pkHud.shadow{background:linear-gradient(100deg,rgba(120,190,255,.14),rgba(120,190,255,.04));
+  border-color:rgba(140,200,255,.3)}
+#pkHud.shadow .gh{filter:drop-shadow(0 0 6px rgba(130,195,255,.7))}
+#pkHud.shadow .gl{color:#cfe8ff}
+#pkHud.shadow .gbar b{background:linear-gradient(90deg,#6fb6ff,#9fd8ff);
+  box-shadow:0 0 8px rgba(110,180,255,.7)}
 
 /* 幽灵播报 */
 #pkToast{position:fixed; right:12px; top:92px; z-index:190; display:flex; flex-direction:column;
@@ -1401,7 +1408,7 @@ body.senior #charges .chg{font-size:14px}
         </div>
         <div class="hplate"></div>
         <h1 class="htitle">反诈<em>守门人</em></h1>
-        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B16</div>
+        <div class="hsub">ANTI-SCAM GUARDIAN · V2 · B17</div>
       </div>
       <div class="hub-r">
         <button class="fbtn wchip" style="--faccent:#ffb020" onclick="Game.openDaily()">
@@ -2118,6 +2125,7 @@ const Game = (function(){
   const MIS_BLOCK = 2000;     // 误拦真消息（乱拦一样守不住门）
   const MIS_TIMEOUT = 1000;   // 漏看真消息
   const K_SCORE = 'fz2_best', K_HELL = 'fz2_hell', K_MUTE = 'fz2_mute', K_HIST = 'fz2_hist';
+  const K_SHADOW = 'fz2_shadow', K_SHADOW_TIP = 'fz2_shadow_tip';
 
   /* ------ 运行状态 ------ */
   let mode = 'campaign';           // campaign | practice | hell
@@ -2153,6 +2161,7 @@ const Game = (function(){
      runLog  本局逐题 {ok, ms}，用来生成对战码和逐题对照条 */
   let pkSeed = 0, pkRef = null, pkInvite = false, pkPending = null;
   let runLog = [];
+  let shadowFrom = 0;              // 本关在 runLog 里的起点（多关连打时用切片存档）
   let ghost = null, ghostTimer = 0;
 
   const $ = id => document.getElementById(id);
@@ -3049,6 +3058,7 @@ const Game = (function(){
   function beginLevel(){
     over = false; resolving = false;
     idx = 0;
+    shadowFrom = runLog.length;          // 多关连打时，本关的记录从这儿开始切片
     queue = buildQueue(cfg, queueRng());
     cur = queue[0];
     const wmEl = $('wm'); if (wmEl) wmEl.textContent = cfg.name;
@@ -3059,6 +3069,7 @@ const Game = (function(){
     updateHUD(false);
     comboEl.classList.remove('on');
     next();
+    shadowBegin();
   }
 
   function clearLevel(){
@@ -3073,6 +3084,7 @@ const Game = (function(){
       return finishRun(true);
     }
     FX.clear();
+    shadowCommit();                      // 先把本关这一局存成影子，再进下一关
     money += LEVEL_REWARD;
     levelIdx++;
     showLevelIntro(true);
@@ -3283,6 +3295,7 @@ const Game = (function(){
     over = true;
     lastWin = win;
     ghostStop();
+    shadowCommit();                      // 这一局若比历史更好，就把逐题记录了留给下一局的影子
     cancelAnimationFrame(raf);
     $('btnBlock').disabled = true;
     $('btnPass').disabled = true;
@@ -4455,17 +4468,18 @@ const Game = (function(){
     if (ref) ghostBegin(ref);
   }
 
-  /* ------ 幽灵回放：把对手的进度按他的时间轴在你屏幕上跑一遍 ------ */
-  function ghostBegin(ref){
+  /* ------ 幽灵回放：把对手的进度按他的时间轴在你屏幕上跑一遍 ------
+     isShadow=true 表示这不是真人对手，而是「你上一次这一关的录像」或标准配速线 */
+  function ghostBegin(ref, isShadow){
     ghostStop();
     if (!ref || !ref.log || !ref.log.length) return;
     const cum = [];
     let s = 0;
     ref.log.forEach(e => { s += Math.max(240, e.ms || 0); cum.push(s); });
     ghost = { ref: ref, cum: cum, n: ref.log.length, i: 0, t0: performance.now(), acc: 0,
-              lead: null, hot: false };
+              lead: null, hot: false, shadow: !!isShadow };
     const h = $('pkHud');
-    if (h) h.classList.add('on');
+    if (h){ h.classList.add('on'); h.classList.toggle('shadow', !!isShadow); }
     ghostPaint(0);
     ghostTimer = setInterval(ghostTick, 170);
   }
@@ -4484,6 +4498,9 @@ const Game = (function(){
   }
   function ghostScore(i){
     if (!ghost) return 0;
+    /* 合成配速线没有真实的逐题得分，按总分线性摊开，
+       否则中途按「全是拦截」估算会虚高，跑到终点再掉下来 */
+    if (ghost.ref.pad) return Math.round((ghost.ref.score || 0) * i / Math.max(1, ghost.n));
     const s = scoreFromLog(ghost.ref.log, i);
     return i >= ghost.n ? (ghost.ref.score || s) : s;
   }
@@ -4491,7 +4508,8 @@ const Game = (function(){
   function ghostPaint(i){
     if (!ghost) return;
     const lbl = $('pkGhostLbl'), bar = $('pkGhostBar'), k = $('pkGhostK');
-    if (lbl) lbl.textContent = '对手 ' + i + '/' + ghost.n;
+    const nm = ghost.shadow ? '影子' : '对手';
+    if (lbl) lbl.textContent = nm + ' ' + i + '/' + ghost.n;
     if (bar) bar.style.width = (ghost.n ? i / ghost.n * 100 : 0) + '%';
     if (k){
       const gs = ghostScore(i);
@@ -4507,23 +4525,24 @@ const Game = (function(){
     let i = 0;
     while (i < ghost.cum.length && ghost.cum[i] <= el) i++;
     if (i > ghost.i){
+      const nm = ghost.shadow ? '影子' : '对手';
       for (let k = ghost.i; k < i; k++){
         const e = ghost.ref.log[k];
         if (!e) continue;
-        if (!e.ok) pkToast('对手第 ' + (k + 1) + ' 题翻车了', false);
-        else if (k === ghost.n - 1) pkToast('对手已经全部答完', true);
+        if (!e.ok) pkToast(nm + '第 ' + (k + 1) + ' 题翻车了', false);
+        else if (k === ghost.n - 1) pkToast(nm + '已经全部答完', true);
       }
       /* 反超只说一次：领先/落后翻转时才播报，否则每 170ms 一句会刷屏 */
       const nowAhead = score >= ghostScore(i);
       if (ghost.lead !== null && nowAhead !== ghost.lead && i >= 2){
-        pkToast(nowAhead ? '你反超了' : '被对手反超了', nowAhead);
+        pkToast(nowAhead ? '你反超了' : ('被' + nm + '反超了'), nowAhead);
       }
       ghost.lead = nowAhead;
       /* 赛点：对手只剩三题，整条变金 */
       if (!ghost.hot && i >= ghost.n - 3 && i < ghost.n){
         ghost.hot = true;
         const h = $('pkHud'); if (h) h.classList.add('hot');
-        pkToast('赛点 · 对手只剩 3 题', true);
+        pkToast('赛点 · ' + nm + '只剩 3 题', true);
       }
       ghost.i = i;
       ghostPaint(i);
@@ -4533,7 +4552,67 @@ const Game = (function(){
     if (ghostTimer){ clearInterval(ghostTimer); ghostTimer = 0; }
     ghost = null;
     const h = $('pkHud');
-    if (h){ h.classList.remove('on'); h.classList.remove('hot'); }
+    if (h){ h.classList.remove('on'); h.classList.remove('hot'); h.classList.remove('shadow'); }
+  }
+
+  /* ------ 影子对手 ------
+     幽灵条原来只在「应战别人的码」时才出现，自己发起对战时对手还没打，
+     于是一局玩下来什么都没有。这里把幽灵常驻：数据源是本关历史最好的一局
+     （真实逐题记录），没有记录就合成一条标准配速线，保证第一局就有参照物 */
+  function shadowKey(){
+    const p = mode === 'campaign' ? 'c' : (mode === 'practice' ? 'p' : (mode === 'hell' ? 'h' : 's'));
+    return p + levelIdx;
+  }
+  function shadowAll(){
+    try{
+      const v = JSON.parse(localStorage.getItem(K_SHADOW) || '{}');
+      return (v && typeof v === 'object') ? v : {};
+    }catch(e){ return {}; }
+  }
+  /* 只留分数更高的那一局：影子得是「你自己的最好水平」，
+     否则跑赢一次之后它就永远追不上，参照意义就没了 */
+  function shadowSave(seg, sc){
+    if (!seg || !seg.length) return;
+    const all = shadowAll();
+    const k = shadowKey();
+    if (all[k] && all[k].score >= sc) return;
+    all[k] = { score: sc, log: seg.slice(0, 80) };
+    try{ localStorage.setItem(K_SHADOW, JSON.stringify(all)); }catch(e){}
+  }
+  function shadowCommit(){
+    const seg = runLog.slice(shadowFrom);
+    if (seg.length) shadowSave(seg, scoreFromLog(seg, seg.length));
+  }
+  /* 标准配速线：每题 0.72 倍限时、四题错一题。
+     算分走真实规则（拦截 100 / 放行 60 + 连击倍率），大致相当于中等玩家 */
+  function shadowPad(n){
+    const step = Math.max(900, Math.round((cfg.perCard || 6000) * .72));
+    const log = [];
+    let c = 0, s = 0;
+    for (let i = 0; i < n; i++){
+      const ok = (i % 4) !== 3;
+      log.push({ ok: ok ? 1 : 0, ms: step });
+      if (ok){ c++; s += (i % 2 ? 60 : 100) * Math.min(5, 1 + Math.floor(c / 3)); }
+      else c = 0;
+    }
+    return { score: s, log: log, pad: true };
+  }
+  function shadowBegin(){
+    /* 真对手优先：应战局由 pkAccept 放真人的录像 */
+    if (pkRef && pkRef.seed === pkSeed && pkRef.log && pkRef.log.length) return;
+    const n = (cfg.scams || 6) + (cfg.reals || 6);
+    const rec = shadowAll()[shadowKey()];
+    const live = !!(rec && rec.log && rec.log.length);
+    ghostBegin(live ? rec : shadowPad(n), true);
+    /* 第一次见到幽灵条，解释一次它是什么（延后一点弹，避免开局就压住幽灵条） */
+    try{
+      if (!localStorage.getItem(K_SHADOW_TIP)){
+        localStorage.setItem(K_SHADOW_TIP, '1');
+        setTimeout(() => {
+          pkToast(live ? '👻 影子 = 你上次这一关的录像，跑赢它' : '👻 影子对手在陪你跑，试试超过它', true);
+        }, 1400);
+      }
+    }catch(e){}
   }
   function pkToast(msg, ok){
     const box = $('pkToast');
@@ -5241,6 +5320,8 @@ const Game = (function(){
       get cb(){ return cbOn; },
       get chal(){ return chalRef; },
       pkEnc, pkDec, pkLogStr, pkLogParse, pkCfgOf, mulberry32, queueRng,
+      shadowBegin, shadowCommit, shadowPad, shadowKey, shadowAll, shadowSave,
+      get shadowState(){ return ghost ? { i: ghost.i, n: ghost.n, shadow: !!ghost.shadow } : null; },
       get pkSeed(){ return pkSeed; },
       get runLog(){ return runLog.slice(); },
       get ghostState(){ return ghost ? { i: ghost.i, n: ghost.n } : null; },
